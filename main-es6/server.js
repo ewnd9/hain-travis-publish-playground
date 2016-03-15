@@ -1,52 +1,59 @@
 'use strict';
 
 const _ = require('lodash');
-const co = require('co');
 const electron = require('electron');
 const ipc = electron.ipcMain;
 
 const window = require('./window');
-const plugins = require('./plugins');
 const rpc = require('./rpc-server');
 
 const logger = require('./logger').create('server');
 
-ipc.on('search', (evt, params) => {
-  const { ticket, query } = params;
-  const sender = evt.sender;
-  plugins.searchAll(query, (ret) => {
-    sender.send('on-result', { ticket, ret });
-  }).then((ret) => {
-  }).catch((err) => {
-    logger.log(err);
-  });
-});
+module.exports = () => {
+  let _plugins = null;
+  let _delayedSearch = 0;
 
-rpc.define('execute', function* (params) {
-  const { pluginId, id, payload } = params;
-  const ret = yield plugins.execute(pluginId, id, payload);
-  if (ret === undefined || ret === null) {
-    window.hideAndRefreshWindow();
+  function searchAll(sender, ticket, query) {
+    _plugins.searchAll(query, (ret) => {
+      sender.send('on-result', { ticket, ret });
+    });
   }
-  return ret;
-});
 
-rpc.define('close', function* () {
-  window.hideAndRefreshWindow();
-});
+  ipc.on('search', (evt, params) => {
+    const { ticket, query } = params;
+    const sender = evt.sender;
 
-let ready = false;
-function* start() {
-  yield plugins.start();
-  ready = true;
-  logger.log('ready');
-}
+    clearInterval(_delayedSearch);
+    if (_plugins === null) {
+      // wait
+      _delayedSearch = setInterval(() => {
+        logger.log('waiting plugins...');
+        if (_plugins !== null) {
+          searchAll(sender, ticket, query);
+          clearInterval(_delayedSearch);
+        }
+      }, 500);
+      return;
+    }
+    searchAll(sender, ticket, query);
+  });
 
-function isLoading() {
-  return !ready;
-}
+  rpc.define('execute', function* (params) {
+    const { pluginId, id, payload } = params;
+    const ret = yield _plugins.execute(pluginId, id, payload);
+    if (ret === undefined || ret === null) {
+      window.hideAndRefreshWindow();
+    }
+    return ret;
+  });
 
-module.exports = {
-  start: co.wrap(start),
-  isLoading: isLoading
+  rpc.define('close', function* () {
+    window.hideAndRefreshWindow();
+  });
+
+  function injectPlugins(plugins) {
+    _plugins = plugins;
+  }
+
+  return { injectPlugins };
 };

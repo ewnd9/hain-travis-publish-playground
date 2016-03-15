@@ -1,16 +1,14 @@
 {
-  "name": "hain",
+  "name": "hain-commands",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
   "hain": {
     "prefix": null,
-    "usage": "to restart app, type /restart",
+    "usage": "/about, /restart, /quit",
     "icon": "../../../images/hain.png"
   }
 }

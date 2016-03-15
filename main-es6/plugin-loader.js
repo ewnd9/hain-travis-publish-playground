@@ -21,11 +21,6 @@ function ensureLocalStorageDir() {
 }
 ensureLocalStorageDir();
 
-const matcher = require('./services/matcher');
-const toast = require('./services/toast');
-
-const PLUGIN_ARGS = { matcher, toast };
-
 function parseIconUrl(baseDir, url) {
   if (url === undefined || url.length === 0)
     return '#fa fa-heart';
@@ -36,7 +31,7 @@ function parseIconUrl(baseDir, url) {
   return `file:///${path.join(baseDir, url)}`;
 }
 
-function loadPlugins() {
+function loadPlugins(context) {
   let files = [];
   for (const repo of pluginRepos) {
     try {
@@ -84,12 +79,12 @@ function loadPlugins() {
     const _logger = Logger.create(pluginId);
     const _localStorage = new LocalStorage(`${LOCAL_STORAGE_DIR}/${pluginId}`);
 
-    const context = _.assign(PLUGIN_ARGS, {
+    const finalContext = _.assign(context, {
       logger: _logger,
       localStorage: _localStorage
     });
 
-    const pluginInstance = PluginModule(context);
+    const pluginInstance = PluginModule(finalContext);
     plugins[pluginId] = pluginInstance;
     pluginConfigs[pluginId] = pluginConfig;
     logger.log(`${pluginId} loaded`);

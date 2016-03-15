@@ -174,15 +174,20 @@ class AppContainer extends React.Component {
   }
 
   execute(item) {
-    if (item === undefined) {
+    if (item === undefined)
+      return;
+    if (item.setinput) {
+      const newInput = item.setinput;
+      this.setState({ input: newInput, selectionIndex: 0 });
+      this.search(newInput);
       return;
     }
+
     const args = {
       pluginId: item.pluginId,
       id: item.id,
       payload: item.payload
     };
-
     rpc.call('execute', args).then((ret) => {
       if (_.isString(ret) === false) {
         return;

@@ -6,9 +6,8 @@ const got = require('got');
 
 const pm = new Packman('./plugins', './_temp');
 
-const TITLE = 'hain package manager';
-
 const COMMANDS_RE = / (install|remove|list)(\s+([^\s]+))?/i;
+const NAME = 'hain-package-manager';
 const PREFIX = '/hpm';
 
 const COMMANDS = [`${PREFIX} install`, `${PREFIX} remove`, `${PREFIX} list`];
@@ -39,7 +38,7 @@ module.exports = (context) => {
       reply([{
         id: '**',
         title: currentStatus,
-        desc: TITLE,
+        desc: NAME,
         icon: '#fa fa-spinner fa-spin'
       }]);
       progressTimer = setInterval(() => {
@@ -77,7 +76,7 @@ module.exports = (context) => {
             id: x.elem.name,
             payload: 'install',
             title: `install ${m}</b> ${x.elem.version}`,
-            desc: TITLE
+            desc: NAME
           };
         });
       }
@@ -86,7 +85,7 @@ module.exports = (context) => {
           id: x.name,
           payload: 'install',
           title: `install <b>${x.name}</b> ${x.version}`,
-          desc: TITLE
+          desc: NAME
         };
       });
     }
@@ -97,7 +96,7 @@ module.exports = (context) => {
           id: x,
           payload: 'remove',
           title: `remove <b>${x}</b>`,
-          desc: TITLE
+          desc: NAME
         };
       });
     }
@@ -105,7 +104,7 @@ module.exports = (context) => {
     if (command === 'list') {
       const packages = yield* pm.listPackages();
       return packages.map((x) => {
-        return { id: x, title: `<b>${x}</b>`, desc: TITLE };
+        return { id: x, title: `<b>${x}</b>`, desc: NAME };
       });
     }
     return _makeCommandsHelp(query);
@@ -114,10 +113,9 @@ module.exports = (context) => {
   function _makeCommandsHelp(query) {
     const ret = matcher.head(COMMANDS, `${PREFIX}${query}`, (x) => x).map((x) => {
       return {
-        id: x.elem,
-        payload: 'changeinput',
+        setinput: x.elem,
         title: matcher.makeStringBoldHtml(x.elem, x.matches),
-        desc: TITLE
+        desc: NAME
       };
     });
     return ret;
@@ -130,8 +128,6 @@ module.exports = (context) => {
     } else if (payload === 'remove') {
       co(removePackage(id));
       return `${PREFIX} `;
-    } else if (payload === 'changeinput') {
-      return id;
     }
   }
 

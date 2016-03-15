@@ -5,82 +5,74 @@ const electron = require('electron');
 const cp = require('child_process');
 
 const dialog = electron.dialog;
-const app = electron.app;
+const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
 
-const logger = require('./logger').create('main');
+const logger = require('./logger').create('app');
 
 const window = require('./window');
-const server = require('./server');
-const iconProtocol = require('./icon-protocol');
-const toast = require('./services/toast');
-const autolaunch = require('./autolaunch');
+const iconProtocol = require('./iconprotocol');
 
-function registerShortcut() {
-  globalShortcut.register('alt+space', () => {
-    if (window.isContentLoading() || server.isLoading()) {
-      logger.log('please wait a seconds, you can use shortcut after loaded');
+const toast = require('./services/toast');
+
+module.exports = (context) => {
+  let _isRestarting = false;
+
+  function registerShortcut() {
+    globalShortcut.register('alt+space', () => {
+      if (window.isContentLoading() && !context.isPluginsLoaded()) {
+        logger.log('please wait a seconds, you can use shortcut after loaded');
+        return;
+      }
+      window.showWindowOnCenter();
+    });
+  }
+
+  const isRestarted = (_.includes(process.argv, '--restarted'));
+  const shouldQuit = electronApp.makeSingleInstance((cmdLine, workingDir) => {
+    if (_isRestarting)
       return;
-    }
     window.showWindowOnCenter();
   });
-}
 
-let _isRestarting = false;
-
-const shouldSetAutolaunch = (_.includes(process.argv, '--setautolaunch'));
-if (shouldSetAutolaunch) {
-  autolaunch.activate();
-}
-
-const isRestarted = (_.includes(process.argv, '--restarted'));
-const shouldQuit = app.makeSingleInstance((cmdLine, workingDir) => {
-  if (_isRestarting)
+  if (shouldQuit && !isRestarted) {
+    electronApp.quit();
     return;
-  window.showWindowOnCenter();
-});
+  }
 
-if (shouldQuit && !isRestarted) {
-  app.quit();
-} else {
-  app.on('ready', () => {
+  electronApp.on('ready', () => {
     window.createTray();
-    server.start().then(() => {
-      registerShortcut();
-      window.createWindow(() => {
-        if (isRestarted) {
-          window.showWindowOnCenter();
-          toast('restarted');
-        }
-      });
-    }).catch((err) => {
-      logger.log(err);
-      dialog.showErrorBox('unhandled error occured!', err);
-      app.quit();
+    registerShortcut();
+    window.createWindow(() => {
+      if (isRestarted) {
+        window.showWindowOnCenter();
+        toast('restarted');
+      }
     });
   });
 
-  app.on('will-quit', () => {
+  electronApp.on('will-quit', () => {
     globalShortcut.unregisterAll();
     window.destroyRefs();
   });
-
   iconProtocol.register();
-}
 
-function restart() {
-  if (_isRestarting)
-    return;
-  _isRestarting = true;
+  function restart() {
+    if (_isRestarting)
+      return;
+    _isRestarting = true;
 
-  const argv = [].concat(process.argv);
-  if (!_.includes(argv, '--restarted')) {
-    argv.push('--restarted');
+    const argv = [].concat(process.argv);
+    if (!_.includes(argv, '--restarted')) {
+      argv.push('--restarted');
+    }
+    cp.exec(argv.join(' '));
+    setTimeout(() => electronApp.quit(), 500);
   }
-  cp.exec(argv.join(' '));
-  setTimeout(() => app.quit(), 500);
-}
 
-module.exports = {
-  restart: restart
+  function quit() {
+    electronApp.quit();
+  }
+
+  return { restart, quit };
 };

@@ -10,26 +10,6 @@ const textutil = require('./utils/textutil');
 const logger = require('./logger').create('plugins');
 const pluginLoader = require('./plugin-loader');
 
-let plugins = null;
-let pluginConfigs = null;
-
-function* _startup() {
-  const _gens = [];
-  logger.log('startup: begin');
-  for (const prop in plugins) {
-    logger.log(`startup: ${prop}`);
-    const startupFunc = plugins[prop].startup;
-    if (!_.isFunction(startupFunc)) {
-      logger.log('startup property should be a Function');
-      continue;
-    }
-    const promise = startupFunc();
-    _gens.push(promise);
-  }
-  yield _gens;
-  logger.log('startup: end');
-}
-
 function computePluginScore(pluginConfig) {
   if (pluginConfig.prefix) {
     return pluginConfig.prefix.length;
@@ -65,6 +45,7 @@ function _createReplyFuncForPlugin(pluginId, pluginScore, pluginConfig, reply) {
 function _makeIntroHelp(pluginConfig) {
   const usage = pluginConfig.usage || 'please fill usage';
   return [{
+    setinput: pluginConfig.prefix,
     title: textutil.sanitize(usage),
     desc: textutil.sanitize(pluginConfig.name),
     icon: pluginConfig.icon
@@ -77,8 +58,7 @@ function _makePrefixHelp(pluginConfig, query) {
   const filtered = matcher.head(candidates, query, (x) => x);
   return filtered.map((x) => {
     return {
-      id: pluginConfig.prefix,
-      payload: '__sys__change__input__',
+      setinput: pluginConfig.prefix,
       title: textutil.sanitize(matcher.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
       icon: pluginConfig.icon
@@ -86,70 +66,89 @@ function _makePrefixHelp(pluginConfig, query) {
   });
 }
 
-function* start() {
-  const ret = pluginLoader.loadPlugins();
-  plugins = ret.plugins;
-  pluginConfigs = ret.pluginConfigs;
-  yield* _startup();
-}
+module.exports = (context) => {
+  let plugins = null;
+  let pluginConfigs = null;
 
-function* searchAll(query, reply) {
-  for (const prop in plugins) {
-    const pluginId = prop;
-    const plugin = plugins[pluginId];
-    const pluginConfig = pluginConfigs[pluginId];
-
-    const pluginScore = computePluginScore(pluginConfig);
-    const _replyFunc = _createReplyFuncForPlugin(pluginId, pluginScore, pluginConfig, reply);
-
-    if (query.length === 0) {
-      const help = _makeIntroHelp(pluginConfig);
-      if (help && help.length > 0) {
-        _replyFunc(help);
+  function* _startup() {
+    const _gens = [];
+    logger.log('startup: begin');
+    for (const prop in plugins) {
+      logger.log(`startup: ${prop}`);
+      const startupFunc = plugins[prop].startup;
+      if (!_.isFunction(startupFunc)) {
+        logger.log('startup property should be a Function');
+        continue;
       }
-      continue;
+      const promise = startupFunc();
+      _gens.push(promise);
     }
+    yield _gens;
+    logger.log('startup: end');
+  }
 
-    let _query = query;
-    const _query_lower = query.toLowerCase();
-    const _prefix = pluginConfig.prefix;
+  function* initialize() {
+    const ret = pluginLoader.loadPlugins(context);
+    plugins = ret.plugins;
+    pluginConfigs = ret.pluginConfigs;
+    yield* _startup();
+  }
 
-    if (_prefix /* != null || != undefined */) {
-      const prefix_lower = _prefix.toLowerCase();
-      if (_query_lower.startsWith(prefix_lower) === false) {
-        const prefixHelp = _makePrefixHelp(pluginConfig, query);
-        if (prefixHelp && prefixHelp.length > 0) {
-          _replyFunc(prefixHelp);
+  function searchAll(query, reply) {
+    for (const prop in plugins) {
+      const pluginId = prop;
+      const plugin = plugins[pluginId];
+      const pluginConfig = pluginConfigs[pluginId];
+
+      const pluginScore = computePluginScore(pluginConfig);
+      const sysReplyFunc = _createReplyFuncForPlugin('*', pluginScore, pluginConfig, reply);
+      if (query.length === 0) {
+        const help = _makeIntroHelp(pluginConfig);
+        if (help && help.length > 0) {
+          sysReplyFunc(help);
         }
         continue;
       }
-      _query = _query.substring(_prefix.length);
-    }
 
-    plugin.search(_query, _replyFunc).then((ret) => {
-      if (ret === null || ret === undefined) {
-        return;
+      let _query = query;
+      const _query_lower = query.toLowerCase();
+      const _prefix = pluginConfig.prefix;
+
+      if (_prefix /* != null || != undefined */) {
+        const prefix_lower = _prefix.toLowerCase();
+        if (_query_lower.startsWith(prefix_lower) === false) {
+          const prefixHelp = _makePrefixHelp(pluginConfig, query);
+          if (prefixHelp && prefixHelp.length > 0) {
+            sysReplyFunc(prefixHelp);
+          }
+          continue;
+        }
+        _query = _query.substring(_prefix.length);
       }
-      _replyFunc(ret);
-    }).catch((err) => {
-      logger.log(err);
-    });
+
+      const _replyFunc = _createReplyFuncForPlugin(pluginId, pluginScore, pluginConfig, reply);
+      plugin.search(_query, _replyFunc).then((ret) => {
+        if (ret === null || ret === undefined) {
+          return;
+        }
+        _replyFunc(ret);
+      }).catch((err) => {
+        logger.log(err);
+      });
+    }
   }
-}
 
-function* execute(pluginId, id, payload) {
-  if (payload === '__sys__change__input__')
-    return id;
+  function* execute(pluginId, id, payload) {
+    const executeFunc = plugins[pluginId].execute;
+    if (executeFunc === undefined)
+      return;
+    const ret = yield executeFunc(id, payload);
+    return ret;
+  }
 
-  const executeFunc = plugins[pluginId].execute;
-  if (executeFunc === undefined)
-    return;
-  const ret = yield executeFunc(id, payload);
-  return ret;
-}
-
-module.exports = {
-  start: co.wrap(start),
-  searchAll: co.wrap(searchAll),
-  execute: co.wrap(execute)
+  return {
+    initialize: co.wrap(initialize),
+    searchAll: co.wrap(searchAll),
+    execute: co.wrap(execute)
+  };
 };
