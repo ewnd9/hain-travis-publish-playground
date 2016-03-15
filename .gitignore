@@ -1,0 +1,12 @@
+node_modules
+/.vscode
+/main/
+/_localStorage/
+/dist/app.bundle.js
+
+/platform-util/build
+/platform-util/node_modules
+
+/plugins/
+
+/debug.log

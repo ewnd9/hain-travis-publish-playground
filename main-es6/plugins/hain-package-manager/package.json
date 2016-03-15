@@ -1,0 +1,15 @@
+{
+  "name": "hain-package-manager",
+  "version": "0.0.1",
+  "description": "hain package manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Heejin Lee <monster@teamappetizer.com>",
+  "license": "MIT",
+  "hain": {
+    "prefix": "/hpm",
+    "icon": "#fa fa-plus"
+  }
+}
