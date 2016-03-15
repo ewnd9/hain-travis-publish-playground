@@ -7,7 +7,7 @@ const got = require('got');
 const pm = new Packman('./plugins', './_temp');
 
 const COMMANDS_RE = / (install|remove|list)(\s+([^\s]+))?/i;
-const NAME = 'hain-package-manager';
+const NAME = 'hain-package-manager (experimental)';
 const PREFIX = '/hpm';
 
 const COMMANDS = [`${PREFIX} install`, `${PREFIX} remove`, `${PREFIX} list`];
@@ -29,6 +29,7 @@ module.exports = (context) => {
   let availablePackages = [];
 
   function* startup() {
+    yield pm.readPackages();
     availablePackages = yield* searchPackages('hain-plugin');
   }
 
@@ -90,21 +91,21 @@ module.exports = (context) => {
       });
     }
     if (command === 'remove') {
-      const packages = yield* pm.listPackages();
+      const packages = pm.listPackages();
       return packages.map((x) => {
         return {
-          id: x,
+          id: x.name,
           payload: 'remove',
-          title: `remove <b>${x}</b>`,
+          title: `remove <b>${x.name}</b> ${x.version}`,
           desc: NAME
         };
       });
     }
     // list
     if (command === 'list') {
-      const packages = yield* pm.listPackages();
+      const packages = pm.listPackages();
       return packages.map((x) => {
-        return { id: x, title: `<b>${x}</b>`, desc: NAME };
+        return { id: x.name, title: `<b>${x.name}</b> ${x.version}`, desc: NAME };
       });
     }
     return _makeCommandsHelp(query);
@@ -134,8 +135,8 @@ module.exports = (context) => {
   function* removePackage(packageName) {
     currentStatus = `removing <b>${packageName}`;
     try {
-      yield* pm.removePackage(packageName);
-      toast(`${packageName} removed`);
+      yield pm.removePackage(packageName);
+      toast(`${packageName} removed, restart hain to take effect`);
     } catch (e) {
       toast(e.toString());
     } finally {
@@ -147,8 +148,8 @@ module.exports = (context) => {
     logger.log(`installing ${packageName}`);
     currentStatus = `installing <b>${packageName}</b>`;
     try {
-      yield* pm.installPackage(packageName, versionRange);
-      toast(`${packageName} installed`);
+      yield pm.installPackage(packageName, versionRange);
+      toast(`${packageName} installed, restart hain to take effect`);
       logger.log(`${packageName} installed`);
     } catch (e) {
       toast(e.toString());

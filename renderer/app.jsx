@@ -59,7 +59,7 @@ class AppContainer extends React.Component {
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.setState({ toastOpen: false });
-    }, 1500);
+    }, 2000);
   }
 
   componentDidMount() {

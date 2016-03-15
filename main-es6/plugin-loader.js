@@ -84,10 +84,14 @@ function loadPlugins(context) {
       localStorage: _localStorage
     });
 
-    const pluginInstance = PluginModule(finalContext);
-    plugins[pluginId] = pluginInstance;
-    pluginConfigs[pluginId] = pluginConfig;
-    logger.log(`${pluginId} loaded`);
+    try {
+      const pluginInstance = PluginModule(finalContext);
+      plugins[pluginId] = pluginInstance;
+      pluginConfigs[pluginId] = pluginConfig;
+      logger.log(`${pluginId} loaded`);
+    } catch (e) {
+      logger.log(`${pluginId} could'nt be created: ${e}`);
+    }
   }
   return { plugins, pluginConfigs };
 }

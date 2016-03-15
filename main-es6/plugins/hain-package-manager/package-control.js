@@ -4,9 +4,8 @@ const _ = require('lodash');
 const co = require('co');
 const got = require('got');
 const semver = require('semver');
-const fs = require('fs-extra');
 const path = require('path');
-const util = require('./package-control.util');
+const fileutil = require('./fileutil');
 
 const REGISTRY_URL = 'https://registry.npmjs.org';
 
@@ -57,11 +56,11 @@ function* downloadAndExtractPackage(packageName, versionRange, destDir, tempDir)
   const downloadPath = path.join(tempDir, filename);
   const tempPackageDir = path.join(tempDir, 'package');
 
-  yield util.downloadFile(distUrl, downloadPath);
-  yield util.extractTarball(downloadPath, tempDir);
-  yield util.move(tempPackageDir, destDir);
+  yield fileutil.downloadFile(distUrl, downloadPath);
+  yield fileutil.extractTarball(downloadPath, tempDir);
+  yield fileutil.move(tempPackageDir, destDir);
 
-  yield util.remove(downloadPath);
+  yield fileutil.remove(downloadPath);
 }
 
 function* installPackage(packageName, versionRange, destDir, tempDir) {
@@ -70,33 +69,34 @@ function* installPackage(packageName, versionRange, destDir, tempDir) {
 
   const incompleteDir = path.join(tempDir, '__incomplete__');
 
-  yield util.ensureDir(tempDir);
-  yield util.ensureDir(incompleteDir);
+  yield fileutil.ensureDir(tempDir);
+  yield fileutil.ensureDir(incompleteDir);
 
   try {
     yield* downloadAndExtractPackage(packageName, versionRange, incompleteDir, tempDir);
 
     if (data.dependencies && (_.size(data.dependencies) > 0)) {
       const modulePath = path.join(incompleteDir, 'node_modules');
-      yield util.ensureDir(modulePath);
+      yield fileutil.ensureDir(modulePath);
 
       const gens = [];
       for (const depName in data.dependencies) {
         const depVersion = data.dependencies[depName];
         const depDir = path.join(modulePath, depName);
         const _tempDir = path.join(tempDir, depDir);
-        yield util.ensureDir(_tempDir);
-        gens.push(installPackage(depName, depVersion, depDir, _tempDir));
+        yield fileutil.ensureDir(_tempDir);
+        gens.push(co(installPackage(depName, depVersion, depDir, _tempDir)));
       }
       yield gens;
     }
   } catch (e) {
   }
 
-  yield util.move(incompleteDir, destDir);
-  yield util.remove(tempDir);
+  yield fileutil.move(incompleteDir, destDir);
+  yield fileutil.remove(tempDir);
+  return data;
 }
 
 module.exports = {
-  installPackage: installPackage
+  installPackage: co.wrap(installPackage)
 };
