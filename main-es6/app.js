@@ -4,7 +4,6 @@ const _ = require('lodash');
 const electron = require('electron');
 const cp = require('child_process');
 
-const dialog = electron.dialog;
 const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
 

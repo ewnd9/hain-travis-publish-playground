@@ -1,8 +1,10 @@
 'use strict';
 
+process.noAsar = false;
 require('babel-polyfill');
 
 const co = require('co');
+const dialog = require('electron').dialog;
 const logger = require('./logger').create('main');
 
 let _app = null;
@@ -28,4 +30,8 @@ co(function* () {
   _isPluginsLoaded = true;
 }).catch((err) => {
   logger.log(err);
+  dialog.showErrorBox('Hain', `Unhandled Error: ${err}`);
+  if (_app) {
+    _app.quit();
+  }
 });
