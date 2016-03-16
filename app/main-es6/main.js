@@ -7,6 +7,7 @@ const co = require('co');
 const dialog = require('electron').dialog;
 const loggerFactory = require('./logger');
 const logger = loggerFactory.create('main');
+const electronApp = require('electron').app;
 
 const appContext = {
   app: null,
@@ -32,8 +33,6 @@ co(function* () {
   yield plugins.initialize();
 }).catch((err) => {
   logger.log(err);
-  dialog.showErrorBox('Hain', `Unhandled Error: ${err}`);
-  if (appContext.app) {
-    appContext.app.quit();
-  }
+  dialog.showErrorBox('Hain', `Unhandled Error: ${err}\n${err.stack}`);
+  electronApp.quit();
 });
