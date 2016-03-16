@@ -2,7 +2,7 @@
   "name": "hain",
   "version": "0.0.1",
   "description": "A alt+space launcher for Windows, built with Electron",
-  "main": "main/main.js",
+  "main": "app/main/main.js",
   "scripts": {},
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",

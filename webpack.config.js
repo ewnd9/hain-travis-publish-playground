@@ -6,10 +6,10 @@ const path = require('path');
 
 const options = {
   entry: {
-    app: './renderer/app.jsx'
+    app: './app/renderer/app.jsx'
   },
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'app', 'dist'),
     filename: '[name].bundle.js'
   },
   resolve: {

@@ -1,11 +1,11 @@
 node_modules
 /.vscode
-/main/
+/app/main/
+/app/dist/app.bundle.js
 /_localStorage/
-/dist/app.bundle.js
 
-/platform-util/build
-/platform-util/node_modules
+platform-util/build
+platform-util/node_modules
 
 /plugins/
 

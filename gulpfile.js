@@ -9,15 +9,15 @@ const shell = require('gulp-shell');
 const webpack = require('webpack');
 
 gulp.task('main', () => {
-  gulp.src('./main-es6/**/*.js')
+  gulp.src('./app/main-es6/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
       presets: ['es2015', 'react']
     }))
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('main'));
-  gulp.src('./main-es6/**/*.json')
-    .pipe(gulp.dest('main'));
+    .pipe(gulp.dest('./app/main'));
+  gulp.src('./app/main-es6/**/*.json')
+    .pipe(gulp.dest('./app/main'));
 });
 
 gulp.task('renderer', (complete) => {
@@ -31,8 +31,8 @@ gulp.task('renderer', (complete) => {
 });
 
 gulp.task('watch', ['main', 'renderer'], () => {
-  gulp.watch('./main-es6/**/*', ['main']);
-  gulp.watch('./renderer/**/*', ['renderer']);
+  gulp.watch('./app/main-es6/**/*', ['main']);
+  gulp.watch('./app/renderer/**/*', ['renderer']);
 });
 
 gulp.task('default', ['main', 'renderer']);
