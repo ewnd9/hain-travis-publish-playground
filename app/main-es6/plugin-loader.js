@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const LocalStorage = require('node-localstorage').LocalStorage;
 
-const Logger = require('./Logger');
+const Logger = require('./logger');
 const logger = Logger.create('plugin-loader');
 
 const LOCAL_STORAGE_DIR = './_localStorage';
