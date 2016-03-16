@@ -5,7 +5,13 @@ const logger = new (winston.Logger)({
   level: 'debug',
   transports: [
     new (winston.transports.Console)({ timestamp: true, prettyPrint: true }),
-    new (winston.transports.File)({ filename: 'debug.log', json: false, prettyPrint: true })
+    new (winston.transports.File)({
+      filename: 'debug.log',
+      json: false,
+      prettyPrint: true,
+      maxFiles: 3,
+      maxsize: 1024 * 1024
+    })
   ]
 });
 
