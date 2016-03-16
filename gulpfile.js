@@ -8,6 +8,7 @@ const packager = require('electron-packager');
 const path = require('path');
 const install = require('gulp-install');
 const merge = require('merge-stream');
+const zip = require('gulp-zip');
 
 const webpack = require('webpack');
 
@@ -54,6 +55,12 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
     }
     return done();
   });
+});
+
+gulp.task('build-zip', ['build'], () => {
+  return gulp.src('./Hain-win32-x64/*')
+            .pipe(zip('Hain-win32-x64.zip'))
+            .pipe(gulp.dest('./'));
 });
 
 gulp.task('watch', ['main', 'renderer'], () => {
