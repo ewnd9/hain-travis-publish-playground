@@ -47,10 +47,10 @@ module.exports = (context) => {
     window.createTray().catch(err => logger.log(err));
     registerShortcut();
     window.createWindow(() => {
-      if (isRestarted) {
+      if (isRestarted || firstLaunch.isFirstLaunch)
         window.showWindowOnCenter();
+      if (isRestarted)
         context.toast('Restarted');
-      }
     });
   });
 

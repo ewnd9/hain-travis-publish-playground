@@ -1,13 +1,9 @@
 'use strict';
 
 const fs = require('fs');
-const _isFirstLaunch = !fs.existsSync('./_launched_');
+const isFirstLaunch = !fs.existsSync('./_launched_');
 
-function isFirstLaunch() {
-  return _isFirstLaunch;
-}
-
-if (_isFirstLaunch) {
+if (isFirstLaunch) {
   fs.writeFileSync('./_launched_', 'HELLO');
 }
 
