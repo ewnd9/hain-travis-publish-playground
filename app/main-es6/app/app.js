@@ -73,6 +73,9 @@ module.exports = (context) => {
     if (!_.includes(argv, '--restarted')) {
       argv.push('--restarted');
     }
+    if (!argv[0].startsWith('"')) {
+      argv[0] = `"${argv[0]}"`;
+    }
     cp.exec(argv.join(' '));
     setTimeout(() => electronApp.quit(), 500);
   }
