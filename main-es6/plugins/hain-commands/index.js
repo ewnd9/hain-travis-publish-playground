@@ -38,7 +38,7 @@ module.exports = (context) => {
 
   function* execute(id, payload) {
     if (id === 'restart') {
-      context.toast('Hain will be restarted, it will take seconds');
+      context.toast('Hain will be restarted, it will takes seconds');
       setTimeout(() => app.restart(), 1000);
       return '';
     } else if (id === 'quit') {
