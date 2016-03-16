@@ -1,0 +1,31 @@
+{
+  "name": "Hain",
+  "version": "0.0.1",
+  "description": "A alt+space launcher for Windows, built with Electron",
+  "main": "main/main.js",
+  "author": "Heejin Lee <monster@teamappetizer.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-polyfill": "^6.6.1",
+    "co": "^4.6.0",
+    "fs-extra": "^0.26.5",
+    "got": "^6.2.0",
+    "html-escape": "^1.0.2",
+    "jquery": "^2.2.1",
+    "lodash": "^4.6.0",
+    "material-ui": "^0.15.0-alpha.1",
+    "mathjs": "^3.0.0",
+    "node-hacker-news": "^0.1.1",
+    "node-localstorage": "^1.1.2",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "react-notification": "^4.2.0",
+    "sanitize-html": "^1.11.3",
+    "semver": "^5.1.0",
+    "simple-lru-cache": "0.0.2",
+    "tarball-extract": "0.0.3",
+    "twitter-text": "^1.13.4",
+    "winreg": "^1.0.1",
+    "winston": "^2.2.0"
+  }
+}
