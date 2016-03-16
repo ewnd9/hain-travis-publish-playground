@@ -46,7 +46,7 @@ module.exports = (context) => {
   function _makeCommandsHelp(query) {
     const ret = matcher.head(COMMANDS, query, (x) => x).map((x) => {
       return {
-        setinput: x.elem,
+        redirect: x.elem,
         title: matcher.makeStringBoldHtml(x.elem, x.matches),
         desc: NAME
       };

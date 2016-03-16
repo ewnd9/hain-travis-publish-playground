@@ -176,8 +176,8 @@ class AppContainer extends React.Component {
   execute(item) {
     if (item === undefined)
       return;
-    if (item.setinput) {
-      const newInput = item.setinput;
+    if (item.redirect) {
+      const newInput = item.redirect;
       this.setState({ input: newInput, selectionIndex: 0 });
       this.search(newInput);
       return;

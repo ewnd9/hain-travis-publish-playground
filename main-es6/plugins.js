@@ -45,7 +45,7 @@ function _createReplyFuncForPlugin(pluginId, pluginScore, pluginConfig, reply) {
 function _makeIntroHelp(pluginConfig) {
   const usage = pluginConfig.usage || 'please fill usage';
   return [{
-    setinput: pluginConfig.prefix,
+    redirect: pluginConfig.prefix,
     title: textutil.sanitize(usage),
     desc: textutil.sanitize(pluginConfig.name),
     icon: pluginConfig.icon
@@ -58,7 +58,7 @@ function _makePrefixHelp(pluginConfig, query) {
   const filtered = matcher.head(candidates, query, (x) => x);
   return filtered.map((x) => {
     return {
-      setinput: pluginConfig.prefix,
+      redirect: pluginConfig.prefix,
       title: textutil.sanitize(matcher.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
       icon: pluginConfig.icon
