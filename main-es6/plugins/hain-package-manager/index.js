@@ -10,13 +10,20 @@ const COMMANDS_RE = / (install|remove|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
 const PREFIX = '/hpm';
 
-const COMMANDS = [`${PREFIX} install`, `${PREFIX} remove`, `${PREFIX} list`];
+const COMMANDS = [`${PREFIX} install `, `${PREFIX} remove `, `${PREFIX} list `];
+const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 
 function* searchPackages(query) {
   const query_enc = query;
-  const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=name,rating,version&default_operator=AND&sort=rating:desc`;
+  const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=name,rating,version,description&default_operator=AND&sort=rating:desc`;
   const res = yield got(url, { json: true });
-  return res.body.results.map(x => { return { name: x.name[0], version: x.version[0] }; });
+  return res.body.results.map(x => {
+    return {
+      name: x.name[0],
+      version: x.version[0],
+      desc: x.description[0]
+    };
+  });
 }
 
 module.exports = (context) => {
@@ -26,14 +33,30 @@ module.exports = (context) => {
 
   let currentStatus = null;
   let progressTimer = 0;
+  let lastUpdatedTime = 0;
   let availablePackages = [];
 
   function* startup() {
     yield pm.readPackages();
-    availablePackages = yield* searchPackages('hain-plugin');
+    checkAvailablePackages();
+  }
+
+  function checkAvailablePackages() {
+    const elapsed = (Date.now() - lastUpdatedTime) / 1000;
+    if (elapsed <= CACHE_DURATION_SEC)
+      return;
+    lastUpdatedTime = Date.now();
+    return co(function* () {
+      currentStatus = 'fetching available packages...';
+      availablePackages = yield searchPackages('hain-plugin');
+      currentStatus = null;
+    });
   }
 
   function* search(query, reply) {
+    if (currentStatus === null) {
+      checkAvailablePackages();
+    }
     clearTimeout(progressTimer);
     if (currentStatus) {
       reply([{
@@ -77,7 +100,7 @@ module.exports = (context) => {
             id: x.elem.name,
             payload: 'install',
             title: `install ${m}</b> ${x.elem.version}`,
-            desc: NAME
+            desc: x.elem.desc || NAME
           };
         });
       }
@@ -86,7 +109,7 @@ module.exports = (context) => {
           id: x.name,
           payload: 'install',
           title: `install <b>${x.name}</b> ${x.version}`,
-          desc: NAME
+          desc: x.desc || NAME
         };
       });
     }
@@ -136,7 +159,7 @@ module.exports = (context) => {
     currentStatus = `removing <b>${packageName}`;
     try {
       yield pm.removePackage(packageName);
-      toast(`${packageName} removed, restart hain to take effect`);
+      toast(`${packageName} removed, <b>Restart</b> Hain to take effect`, 3000);
     } catch (e) {
       toast(e.toString());
     } finally {
@@ -149,7 +172,7 @@ module.exports = (context) => {
     currentStatus = `installing <b>${packageName}</b>`;
     try {
       yield pm.installPackage(packageName, versionRange);
-      toast(`${packageName} installed, restart hain to take effect`);
+      toast(`${packageName} installed, <b>Restart</b> Hain to take effect`, 3000);
       logger.log(`${packageName} installed`);
     } catch (e) {
       toast(e.toString());

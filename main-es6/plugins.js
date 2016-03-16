@@ -69,6 +69,13 @@ function _makePrefixHelp(pluginConfig, query) {
 module.exports = (context) => {
   let plugins = null;
   let pluginConfigs = null;
+  let isLoaded = false;
+
+  const pluginContext = {
+    get app() { return context.app; },
+    get toast() { return context.toast; },
+    matcher: require('./utils/matcher')
+  };
 
   function* _startup() {
     const _gens = [];
@@ -88,10 +95,11 @@ module.exports = (context) => {
   }
 
   function* initialize() {
-    const ret = pluginLoader.loadPlugins(context);
+    const ret = pluginLoader.loadPlugins(pluginContext);
     plugins = ret.plugins;
     pluginConfigs = ret.pluginConfigs;
     yield* _startup();
+    isLoaded = true;
   }
 
   function searchAll(query, reply) {
@@ -149,6 +157,7 @@ module.exports = (context) => {
   return {
     initialize: co.wrap(initialize),
     searchAll: co.wrap(searchAll),
-    execute: co.wrap(execute)
+    execute: co.wrap(execute),
+    get isLoaded() { return isLoaded; }
   };
 };

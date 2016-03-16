@@ -6,20 +6,24 @@ const cp = require('child_process');
 
 const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
-
-const logger = require('./logger').create('app');
-
-const window = require('./window');
-const iconProtocol = require('./iconprotocol');
-
-const toast = require('./services/toast');
+const firstLaunch = require('./firstlaunch');
+const autolaunch = require('./autolaunch');
 
 module.exports = (context) => {
+  const logger = context.logger.create('app');
+  const window = require('./window')(context);
+  const iconProtocol = require('./iconprotocol')(context);
   let _isRestarting = false;
+
+  if (firstLaunch.isFirstLaunch) {
+    autolaunch.activate();
+  }
 
   function registerShortcut() {
     globalShortcut.register('alt+space', () => {
-      if (window.isContentLoading() && !context.isPluginsLoaded()) {
+      if (_isRestarting)
+        return;
+      if (window.isContentLoading() || !context.plugins.isLoaded) {
         logger.log('please wait a seconds, you can use shortcut after loaded');
         return;
       }
@@ -40,12 +44,12 @@ module.exports = (context) => {
   }
 
   electronApp.on('ready', () => {
-    window.createTray();
+    window.createTray().catch(err => logger.log(err));
     registerShortcut();
     window.createWindow(() => {
       if (isRestarted) {
         window.showWindowOnCenter();
-        toast('restarted');
+        context.toast('Restarted');
       }
     });
   });
@@ -55,6 +59,10 @@ module.exports = (context) => {
     window.destroyRefs();
   });
   iconProtocol.register();
+
+  function closeWindow() {
+    window.hideAndRefreshWindow();
+  }
 
   function restart() {
     if (_isRestarting)
@@ -73,5 +81,5 @@ module.exports = (context) => {
     electronApp.quit();
   }
 
-  return { restart, quit };
+  return { closeWindow, restart, quit };
 };

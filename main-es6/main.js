@@ -5,33 +5,35 @@ require('babel-polyfill');
 
 const co = require('co');
 const dialog = require('electron').dialog;
-const logger = require('./logger').create('main');
+const loggerFactory = require('./logger');
+const logger = loggerFactory.create('main');
 
-let _app = null;
-let _plugins = null;
-let _server = null;
-let _isPluginsLoaded = false;
-
-const context = {
-  get app() { return _app; },
-  toast: require('./services/toast'),
-  matcher: require('./services/matcher'),
-  isPluginsLoaded: () => _isPluginsLoaded
+const appContext = {
+  app: null,
+  logger: null,
+  plugins: null,
+  server: null,
+  toast: null
 };
 
 co(function* () {
-  _app = require('./app')(context);
-  _server = require('./server')();
+  // has no-dependency
+  appContext.logger = loggerFactory;
+  appContext.toast = require('./toast');
+  // has a dependency
+  const server = require('./server')(appContext);
+  const app = require('./app/app')(appContext);
+  const plugins = require('./plugins')(appContext);
 
-  _plugins = require('./plugins')(context);
-  yield _plugins.initialize();
+  appContext.server = server;
+  appContext.app = app;
+  appContext.plugins = plugins;
 
-  _server.injectPlugins(_plugins);
-  _isPluginsLoaded = true;
+  yield plugins.initialize();
 }).catch((err) => {
   logger.log(err);
   dialog.showErrorBox('Hain', `Unhandled Error: ${err}`);
-  if (_app) {
-    _app.quit();
+  if (appContext.app) {
+    appContext.app.quit();
   }
 });

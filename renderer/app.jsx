@@ -50,23 +50,25 @@ class AppContainer extends React.Component {
         this.state.toastOpen || !remote.getCurrentWindow().isVisible()) {
       return;
     }
-    const msg = this.toastQueue.shift();
-    this.setState({ toastMessage: msg, toastOpen: true });
-    this.autoHideToast();
+    const contents = this.toastQueue.shift();
+    const message = contents.message;
+    const duration = contents.duration || 2000;
+    this.setState({ toastMessage: message, toastOpen: true });
+    this.autoHideToast(duration);
   }
 
-  autoHideToast() {
+  autoHideToast(duration) {
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       this.setState({ toastOpen: false });
-    }, 2000);
+    }, duration);
   }
 
   componentDidMount() {
     this.refs.input.focus();
     ipc.on('on-toast', (evt, args) => {
-      const { message } = args;
-      this.toastQueue.push(message);
+      const { message, duration } = args;
+      this.toastQueue.push({ message, duration });
     });
     ipc.on('on-result', (evt, args) => {
       const { ticket, ret } = args;
@@ -275,7 +277,7 @@ class AppContainer extends React.Component {
             { list }
           </SelectableList>
         </div>
-        <Notification isActive={this.state.toastOpen} message={this.state.toastMessage} />
+        <Notification isActive={this.state.toastOpen} message={<div dangerouslySetInnerHTML={{ __html: this.state.toastMessage }} />} />
       </div>
     );
   }

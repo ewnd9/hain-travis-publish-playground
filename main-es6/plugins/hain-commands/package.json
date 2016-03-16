@@ -9,6 +9,6 @@
   "hain": {
     "prefix": null,
     "usage": "/about, /restart, /quit",
-    "icon": "../../../images/hain.png"
+    "icon": "#fa fa-gear"
   }
 }

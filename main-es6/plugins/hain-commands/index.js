@@ -15,20 +15,21 @@ module.exports = (context) => {
     if (query_lower === '/restart') {
       return [{
         id: 'restart',
-        title: '<b>Restart</b> Hain',
+        title: 'Restart Hain',
         desc: NAME
       }];
     }
     if (query_lower === '/about') {
       return [{
-        title: 'Hain by <b>Heejin Lee</b> &lt;monster@teamappetizer.com&gt;',
+        id: 'about',
+        title: 'Hain by Heejin Lee &lt;monster@teamappetizer.com&gt;',
         desc: NAME
       }];
     }
     if (query_lower === '/quit') {
       return [{
         id: 'quit',
-        title: '<b>Quit</b> Hain',
+        title: 'Quit Hain',
         desc: NAME
       }];
     }
@@ -37,9 +38,14 @@ module.exports = (context) => {
 
   function* execute(id, payload) {
     if (id === 'restart') {
-      app.restart();
+      context.toast('Hain will be restarted, it will take seconds');
+      setTimeout(() => app.restart(), 1000);
+      return '';
     } else if (id === 'quit') {
       app.quit();
+    } else if (id === 'about') {
+      context.toast('Thank you for using Hain');
+      return '';
     }
   }
 
