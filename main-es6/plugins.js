@@ -4,7 +4,7 @@
 const _ = require('lodash');
 const co = require('co');
 
-const matcher = require('./services/matcher');
+const matcher = require('./utils/matcher');
 const textutil = require('./utils/textutil');
 
 const logger = require('./logger').create('plugins');
@@ -74,7 +74,7 @@ module.exports = (context) => {
   const pluginContext = {
     get app() { return context.app; },
     get toast() { return context.toast; },
-    matcher: require('./utils/matcher')
+    matcher: matcher
   };
 
   function* _startup() {
