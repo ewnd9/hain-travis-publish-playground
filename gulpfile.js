@@ -31,7 +31,7 @@ gulp.task('renderer', (complete) => {
 });
 
 gulp.task('watch', ['main', 'renderer'], () => {
-  gulp.watch('./main-es6/**/*.js', ['main']);
+  gulp.watch('./main-es6/**/*', ['main']);
   gulp.watch('./renderer/**/*', ['renderer']);
 });
 
