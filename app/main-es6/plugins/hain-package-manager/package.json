@@ -10,6 +10,7 @@
   "license": "MIT",
   "hain": {
     "prefix": "/hpm",
-    "icon": "#fa fa-cube"
+    "icon": "#fa fa-cube",
+    "redirect": "/hpm "
   }
 }

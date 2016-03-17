@@ -12,8 +12,8 @@ const LOCAL_STORAGE_DIR = './_localStorage';
 
 const PLUGIN_REPOS = [
   path.join(__dirname, '../plugins'),
-  path.resolve('./plugins'),
-  path.resolve('./devplugins')
+  path.resolve('./devplugins'),
+  path.resolve('./plugins')
 ];
 
 function ensureLocalStorageDir() {
@@ -47,6 +47,11 @@ function loadPlugins(context) {
   const plugins = {};
   const pluginConfigs = {};
   for (const pluginFile of files) {
+    if (plugins[pluginFile] !== undefined) {
+      logger.log(`conflict: ${pluginFile} is already loaded`);
+      continue;
+    }
+
     let PluginModule = null;
     try {
       PluginModule = require(`${pluginFile}`);

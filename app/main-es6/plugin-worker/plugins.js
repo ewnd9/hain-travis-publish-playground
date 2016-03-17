@@ -57,10 +57,11 @@ function createResponseObject(resFunc, pluginId, pluginConfig) {
 function _makeIntroHelp(pluginConfig) {
   const usage = pluginConfig.usage || 'please fill usage in package.json';
   return [{
-    redirect: pluginConfig.prefix,
+    redirect: pluginConfig.redirect || pluginConfig.prefix,
     title: textutil.sanitize(usage),
     desc: textutil.sanitize(pluginConfig.name),
-    icon: pluginConfig.icon
+    icon: pluginConfig.icon,
+    score: Math.random()
   }];
 }
 
@@ -70,7 +71,7 @@ function _makePrefixHelp(pluginConfig, query) {
   const filtered = matcher.head(candidates, query, (x) => x);
   return filtered.map((x) => {
     return {
-      redirect: pluginConfig.prefix,
+      redirect: pluginConfig.redirect || pluginConfig.prefix,
       title: textutil.sanitize(matcher.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
       icon: pluginConfig.icon
