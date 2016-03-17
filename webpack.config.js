@@ -5,6 +5,7 @@ const webpackTargetElectronRenderer = require('webpack-target-electron-renderer'
 const path = require('path');
 
 const options = {
+  bail: true,
   entry: {
     app: './app/renderer/app.jsx'
   },
