@@ -12,7 +12,12 @@ const zip = require('gulp-zip');
 
 const webpack = require('webpack');
 
-gulp.task('main', () => {
+gulp.task('deps', () => {
+  return gulp.src('./app/package.json')
+    .pipe(install({ production: true }));
+});
+
+gulp.task('main', ['deps'], () => {
   const js = gulp.src('./app/main-es6/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
@@ -25,7 +30,7 @@ gulp.task('main', () => {
   return merge(js, json);
 });
 
-gulp.task('renderer', (done) => {
+gulp.task('renderer', ['deps'], (done) => {
   webpack(require('./webpack.config.js'), (err, stats) => {
     if (err) {
       throw new gutil.PluginError('webpack', err);
@@ -33,11 +38,6 @@ gulp.task('renderer', (done) => {
     gutil.log('webpack', stats.toString());
     done();
   });
-});
-
-gulp.task('deps', () => {
-  return gulp.src('./app/package.json')
-    .pipe(install({ production: true }));
 });
 
 gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
