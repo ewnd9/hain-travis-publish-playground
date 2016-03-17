@@ -21,7 +21,7 @@ Following is describing a basic structure of a plugin module.
   "hain": {                         // Hain options (Required)
     "prefix": "/hello",             // String || null (required)
     "usage": "you can put /hello",  // String (optional)
-    "icon": "#fa fa-heart"          // String (required)
+    "icon": "#fa fa-heart",         // String (required)
     "redirect": "/helloworld"       // String (optional)
   }
 }
@@ -78,4 +78,3 @@ then, **hpm** can find your plugins in npmjs registry.
 ```
 npm publish
 ```
-
