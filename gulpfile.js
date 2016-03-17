@@ -47,6 +47,7 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
     platform: 'win32',
     asar: true,
     overwrite: true,
+    out: path.join(__dirname, 'out'),
     icon: path.join(__dirname, 'build', 'icon.ico')
   }, (err, appPath) => {
     if (err) {
@@ -58,9 +59,9 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
 });
 
 gulp.task('build-zip', ['build'], () => {
-  return gulp.src('./Hain-win32-x64/**/*')
+  return gulp.src('./out/Hain-win32-x64/**/*')
             .pipe(zip('Hain-win32-x64.zip'))
-            .pipe(gulp.dest('./'));
+            .pipe(gulp.dest('./out/'));
 });
 
 gulp.task('watch', ['main', 'renderer'], () => {
