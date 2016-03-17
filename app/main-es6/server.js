@@ -1,51 +1,71 @@
 'use strict';
 
 const _ = require('lodash');
-const electron = require('electron');
-const ipc = electron.ipcMain;
-
-const rpc = require('./rpc-server');
-const logger = require('./logger').create('server');
+const cp = require('child_process');
+const path = require('path');
 
 module.exports = (context) => {
+  const rpc = context.rpc;
+  const logger = context.logger.create('server');
+  const proxyHandler = require('./server-proxyhandler')(context);
+
+  let workerProcess = null;
   let _delayedSearch = 0;
 
-  function searchAll(sender, ticket, query) {
-    context.plugins.searchAll(query, (ret) => {
-      sender.send('on-result', { ticket, ret });
+  function searchAll(ticket, query) {
+    workerProcess.send({
+      type: 'searchAll',
+      args: { ticket, query }
     });
   }
 
-  ipc.on('search', (evt, params) => {
+  function handleWorkerMessage(msg) {
+    if (msg.type === 'on-result') {
+      rpc.send('on-result', msg.args); /* ticket, type (add, remove), payload */
+    } else if (msg.type === 'proxy') {
+      const { service, func, args } = msg.args;
+      proxyHandler.handle(service, func, args);
+    }
+  }
+
+  function initialize() {
+    workerProcess = cp.fork(path.join(__dirname, './plugin-worker/worker.js'));
+    workerProcess.on('message', (msg) => {
+      handleWorkerMessage(msg);
+    });
+  }
+
+  rpc.on('search', (evt, params) => {
     const { ticket, query } = params;
-    const sender = evt.sender;
 
     clearInterval(_delayedSearch);
-    if (context.plugins === null) {
-      // wait
+    if (workerProcess === null || !workerProcess.connected) {
       _delayedSearch = setInterval(() => {
         logger.log('waiting plugins...');
-        if (context.plugins !== null) {
-          searchAll(sender, ticket, query);
+        if (workerProcess !== null && workerProcess.connected) {
+          searchAll(ticket, query);
           clearInterval(_delayedSearch);
         }
       }, 500);
       return;
     }
-    searchAll(sender, ticket, query);
+    searchAll(ticket, query);
   });
 
   rpc.define('execute', function* (params) {
     const { pluginId, id, payload } = params;
-    const ret = yield context.plugins.execute(pluginId, id, payload);
-    if (ret === undefined || ret === null) {
-      context.app.closeWindow();
-    }
-    return ret;
+    workerProcess.send({
+      type: 'execute',
+      args: { pluginId, id, payload }
+    });
   });
 
   rpc.define('close', function* () {
-    context.app.closeWindow();
+    context.app.close();
   });
-  return this;
+
+  return {
+    initialize,
+    get isLoaded() { return (workerProcess !== null && workerProcess.connected); }
+  };
 };

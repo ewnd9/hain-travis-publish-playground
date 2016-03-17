@@ -3,34 +3,35 @@
 const _ = require('lodash');
 const co = require('co');
 const twitter = require('twitter-text');
-const shell = require('electron').shell;
 
 module.exports = (context) => {
-  function* search(query, reply) {
+  const shell = context.shell;
+  const app = context.app;
+
+  function search(query, res) {
     const urls = twitter.extractUrls(query);
     if (urls.length === 0) {
       return;
     }
 
     const url = _.first(urls);
-    return [{
+    res.add({
       id: url,
       title: url,
-      desc: url
-    }];
+      desc: url,
+      score: 1
+    });
   }
 
-  function* execute(id, payload) {
+  function execute(id, payload) {
     const protocol_re = /https?:\/\//i;
     let url = id;
     if (protocol_re.test(url) === false) {
       url = `http://${url}`;
     }
     shell.openExternal(url);
+    app.close();
   }
 
-  return {
-    search: co.wrap(search),
-    execute: co.wrap(execute)
-  };
+  return { search, execute };
 };

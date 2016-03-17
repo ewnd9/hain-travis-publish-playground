@@ -5,21 +5,25 @@ const co = require('co');
 
 const self = {};
 const funcs = {};
-let _clientSender = null;
+let connectedClient = null;
 
-self.define = function (funcName, func) {
+self.define = (funcName, func) => {
   funcs[funcName] = func;
 };
 
-self.send = function (channel, args) {
-  if (!_clientSender) {
-    throw 'can\'t find a client';
+self.send = (channel, msg) => {
+  if (connectedClient === null) {
+    throw new Error('didn\'t connected with a client');
   }
-  _clientSender.send(channel, args);
+  connectedClient.send(channel, msg);
+};
+
+self.on = (channel, func) => {
+  ipc.on(channel, func);
 };
 
 ipc.on('__connect', (evt, args) => {
-  _clientSender = evt.sender;
+  connectedClient = evt.sender;
 });
 
 ipc.on('__rpc_call', (evt, args) => {

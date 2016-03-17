@@ -14,23 +14,19 @@ const appContext = {
   logger: null,
   plugins: null,
   server: null,
-  toast: null
+  toast: null,
+  rpc: null
 };
 
 co(function* () {
-  // has no-dependency
   appContext.logger = loggerFactory;
-  appContext.toast = require('./toast');
-  // has a dependency
-  const server = require('./server')(appContext);
-  const app = require('./app/app')(appContext);
-  const plugins = require('./plugins')(appContext);
+  appContext.rpc = require('./rpc-server');
 
-  appContext.server = server;
-  appContext.app = app;
-  appContext.plugins = plugins;
+  appContext.toast = require('./toast')(appContext);
+  appContext.app = require('./app/app')(appContext);
+  appContext.server = require('./server')(appContext);
 
-  yield plugins.initialize();
+  appContext.server.initialize();
 }).catch((err) => {
   logger.log(err);
   dialog.showErrorBox('Hain', `Unhandled Error: ${err}\n${err.stack}`);

@@ -5,7 +5,6 @@ const readdir = require('./readdir');
 const co = require('co');
 
 const path = require('path');
-const shell = require('electron').shell;
 
 const matchFunc = (filePath, stats) => {
   const ext = path.extname(filePath).toLowerCase();
@@ -19,6 +18,9 @@ module.exports = (context) => {
 
   const matcher = context.matcher;
   const logger = context.logger;
+  const shell = context.shell;
+  const app = context.app;
+
   const recursiveSearchDirs = [
     `${process.env.USERPROFILE}\\Desktop`,
     `${process.env.ProgramData}\\Microsoft\\Windows\\Start Menu\\Programs`,
@@ -45,17 +47,22 @@ module.exports = (context) => {
     }
   }
 
-  function* startup() {
-    yield* refreshIndex(recursiveSearchDirs, true);
-    yield* refreshIndex(flatSearchDirs, false);
-    yield* setupWatchers(recursiveSearchDirs, true);
-    yield* setupWatchers(flatSearchDirs, false);
+  function startup() {
+    co(function* () {
+      yield* refreshIndex(recursiveSearchDirs, true);
+      yield* refreshIndex(flatSearchDirs, false);
+      yield* setupWatchers(recursiveSearchDirs, true);
+      yield* setupWatchers(flatSearchDirs, false);
+    }).catch((err) => {
+      logger.log(err);
+      logger.log(err.stack);
+    });
   }
 
-  function* search(query) {
+  function search(query, res) {
     const query_trim = query.replace(' ', '');
     const searched = matcher.fuzzy(db, query_trim, (x) => x);
-    return searched.slice(0, 20).map((x) => {
+    const result = searched.slice(0, 20).map((x) => {
       const filePath = x.elem;
       const filePath_bold = matcher.makeStringBoldHtml(filePath, x.matches);
       const filePath_base64 = new Buffer(filePath).toString('base64');
@@ -66,11 +73,13 @@ module.exports = (context) => {
         icon: `icon://${filePath_base64}`
       };
     });
+    res.add(result);
   }
 
-  function* execute(id, payload) {
+  function execute(id, payload) {
     logger.log(`${id} executed`);
     shell.openItem(id);
+    app.close();
   }
 
   function lazyRefreshIndex(dir, recursive) {
@@ -96,9 +105,5 @@ module.exports = (context) => {
     }
   }
 
-  return {
-    startup: co.wrap(startup),
-    search: co.wrap(search),
-    execute: co.wrap(execute)
-  };
+  return { startup, search, execute };
 };

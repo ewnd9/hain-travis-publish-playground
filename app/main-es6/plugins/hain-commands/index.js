@@ -9,43 +9,44 @@ const NAME = 'hain-commands';
 module.exports = (context) => {
   const app = context.app;
   const matcher = context.matcher;
+  const toast = context.toast;
 
-  function* search(query, reply) {
+  function search(query, res) {
     const query_lower = query.toLowerCase();
     if (query_lower === '/restart') {
-      return [{
+      return res.add({
         id: 'restart',
         title: 'Restart Hain',
         desc: NAME
-      }];
+      });
     }
     if (query_lower === '/about') {
-      return [{
+      return res.add({
         id: 'about',
         title: 'Hain by Heejin Lee &lt;monster@teamappetizer.com&gt;',
         desc: NAME
-      }];
+      });
     }
     if (query_lower === '/quit') {
-      return [{
+      return res.add({
         id: 'quit',
         title: 'Quit Hain',
         desc: NAME
-      }];
+      });
     }
-    return _makeCommandsHelp(query);
+    return res.add(_makeCommandsHelp(query));
   }
 
-  function* execute(id, payload) {
+  function execute(id, payload) {
     if (id === 'restart') {
-      context.toast('Hain will be restarted, it will takes seconds');
+      toast.enqueue('Hain will be restarted, it will takes seconds');
       setTimeout(() => app.restart(), 1000);
-      return '';
+      app.setInput('');
     } else if (id === 'quit') {
       app.quit();
     } else if (id === 'about') {
-      context.toast('Thank you for using Hain');
-      return '';
+      toast.enqueue('Thank you for using Hain');
+      app.setInput('');
     }
   }
 
@@ -60,8 +61,5 @@ module.exports = (context) => {
     return ret;
   }
 
-  return {
-    search: co.wrap(search),
-    execute: co.wrap(execute)
-  };
+  return { search, execute };
 };

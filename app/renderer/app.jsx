@@ -7,7 +7,6 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const rpc = require('./rpc-client');
 const remote = require('electron').remote;
-const ipc = require('electron').ipcRenderer;
 
 import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, FontIcon } from 'material-ui';
 import { Notification } from 'react-notification';
@@ -66,15 +65,20 @@ class AppContainer extends React.Component {
 
   componentDidMount() {
     this.refs.input.focus();
-    ipc.on('on-toast', (evt, args) => {
+    rpc.connect();
+    rpc.on('on-toast', (evt, args) => {
       const { message, duration } = args;
       this.toastQueue.push({ message, duration });
     });
-    ipc.on('on-result', (evt, args) => {
-      const { ticket, ret } = args;
-      if (this.lastSearchTicket !== ticket) {
+    rpc.on('set-input', (evt, args) => {
+      this.setState({ input: args, selectionIndex: 0 });
+      this.search(args);
+    });
+    rpc.on('on-result', (evt, args) => {
+      const { ticket, type, payload } = args;
+      if (this.lastSearchTicket !== ticket)
         return;
-      }
+
       let results = this.state.results;
       let selectionIndex = this.state.selectionIndex;
       if (this.lastResultTicket !== ticket) {
@@ -82,20 +86,19 @@ class AppContainer extends React.Component {
         selectionIndex = 0;
         this.lastResultTicket = ticket;
       }
-      if (_.isArray(ret)) {
-        results = results.concat(ret);
+
+      if (type === 'add') {
+        results = results.concat(payload);
         results = _.sortBy(results, (x) => (x.score * -1)); // stable sort (desc)
-      } else if (_.isObject(ret)) {
-        if (_.has(ret, 'remove')) {
-          const _id = ret.remove;
-          results = _.reject(results, (x) => {
-            return (x.id === _id && x.pluginId === ret.pluginId);
-          });
-        }
+      } else if (type === 'remove') {
+        const _id = payload.id;
+        results = _.reject(results, (x) => {
+          return (x.id === _id && x.pluginId === payload.pluginId);
+        });
       }
+
       this.setState({ results, selectionIndex });
     });
-    ipc.send('__connect', null);
     setInterval(this.processToast.bind(this), 200);
     this.search('');
   }
@@ -157,8 +160,14 @@ class AppContainer extends React.Component {
 
     clearTimeout(this.lastSearchTimer);
     this.lastSearchTimer = setTimeout(() => {
-      ipc.send('search', { ticket, query });
+      rpc.send('search', { ticket, query });
     }, 50);
+    clearTimeout(this.lastClearTimer);
+    this.lastClearTimer = setTimeout(() => {
+      if (this.lastResultTicket === ticket)
+        return;
+      this.setState({ results: [], selectionIndex: 0 });
+    }, 250);
   }
 
   handleKeyDown(evt) {
@@ -190,15 +199,7 @@ class AppContainer extends React.Component {
       id: item.id,
       payload: item.payload
     };
-    rpc.call('execute', args).then((ret) => {
-      if (_.isString(ret) === false) {
-        return;
-      }
-      this.setState({ input: ret, selectionIndex: 0 });
-      this.search(ret);
-    }).catch((err) => {
-      console.log(err);
-    });
+    rpc.call('execute', args);
   }
 
   handleEnter(key) {

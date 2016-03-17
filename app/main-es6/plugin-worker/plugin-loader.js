@@ -3,16 +3,18 @@
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-const LocalStorage = require('node-localstorage').LocalStorage;
+const storage = require('node-persist');
 
-const Logger = require('./logger');
+const Logger = require('../logger');
 const logger = Logger.create('plugin-loader');
 
 const LOCAL_STORAGE_DIR = './_localStorage';
 
-const pluginRepos = [];
-pluginRepos.push(path.join(__dirname, 'plugins'));
-pluginRepos.push(path.resolve('./plugins'));
+const PLUGIN_REPOS = [
+  path.join(__dirname, '../plugins'),
+  path.resolve('./plugins'),
+  path.resolve('./devplugins')
+];
 
 function ensureLocalStorageDir() {
   if (!fs.existsSync(LOCAL_STORAGE_DIR)) {
@@ -33,12 +35,12 @@ function parseIconUrl(baseDir, url) {
 
 function loadPlugins(context) {
   let files = [];
-  for (const repo of pluginRepos) {
+  for (const repo of PLUGIN_REPOS) {
     try {
       const _files = fs.readdirSync(repo);
       files = files.concat(_files.map((x) => path.join(repo, x)));
     } catch (e) {
-      console.log(e);
+      logger.log(e);
     }
   }
 
@@ -77,15 +79,18 @@ function loadPlugins(context) {
     }
 
     const _logger = Logger.create(pluginId);
-    const _localStorage = new LocalStorage(`${LOCAL_STORAGE_DIR}/${pluginId}`);
+    const _localStorage = storage.create({
+      dir: `${LOCAL_STORAGE_DIR}/${pluginId}`
+    });
+    _localStorage.initSync();
 
-    const finalContext = _.assign(context, {
+    const finalPluginContext = _.assign(context, {
       logger: _logger,
       localStorage: _localStorage
     });
 
     try {
-      const pluginInstance = PluginModule(finalContext);
+      const pluginInstance = PluginModule(finalPluginContext);
       plugins[pluginId] = pluginInstance;
       pluginConfigs[pluginId] = pluginConfig;
       logger.log(`${pluginId} loaded`);

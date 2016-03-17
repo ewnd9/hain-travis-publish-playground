@@ -13,7 +13,19 @@ function allocateId() {
   return incrId;
 }
 
-self.call = function (funcName, params) {
+self.connect = () => {
+  ipc.send('__connect', null);
+};
+
+self.on = (channel, func) => {
+  ipc.on(channel, func);
+};
+
+self.send = (channel, args) => {
+  ipc.send(channel, args);
+};
+
+self.call = (funcName, params) => {
   const id = allocateId();
   const promise = new Promise((resolve, reject) => {
     ipc.once(`__rpc_${id}`, (evt, err, ret) => {

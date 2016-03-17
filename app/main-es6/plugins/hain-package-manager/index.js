@@ -30,16 +30,12 @@ module.exports = (context) => {
   const toast = context.toast;
   const logger = context.logger;
   const matcher = context.matcher;
+  const app = context.app;
 
   let currentStatus = null;
   let progressTimer = 0;
   let lastUpdatedTime = 0;
   let availablePackages = [];
-
-  function* startup() {
-    yield pm.readPackages();
-    checkAvailablePackages();
-  }
 
   function checkAvailablePackages() {
     const elapsed = (Date.now() - lastUpdatedTime) / 1000;
@@ -53,38 +49,40 @@ module.exports = (context) => {
     });
   }
 
-  function* search(query, reply) {
+  function startup() {
+    co(function* () {
+      pm.readPackages();
+      checkAvailablePackages();
+    }).catch((err) => {
+      logger.log(err);
+    });
+  }
+
+  function search(query, res) {
     if (currentStatus === null) {
       checkAvailablePackages();
     }
     clearTimeout(progressTimer);
     if (currentStatus) {
-      reply([{
+      res.add({
         id: '**',
         title: currentStatus,
         desc: NAME,
         icon: '#fa fa-spinner fa-spin'
-      }]);
+      });
       progressTimer = setInterval(() => {
         if (!currentStatus) {
-          reply({ remove: '**' });
-          _parseCommandsWrap(query, reply);
+          res.remove('**');
+          res.add(parseCommands(query));
           return clearTimeout(progressTimer);
         }
       }, 500);
       return;
     }
-    const ret = yield* parseCommands(query, reply);
-    return ret;
+    res.add(parseCommands(query));
   }
 
-  function _parseCommandsWrap(query, reply) {
-    co(parseCommands(query)).then((x) => {
-      reply(x);
-    });
-  }
-
-  function* parseCommands(query) {
+  function parseCommands(query) {
     // install
     const parsed = COMMANDS_RE.exec(query.toLowerCase());
     if (!parsed) {
@@ -145,13 +143,13 @@ module.exports = (context) => {
     return ret;
   }
 
-  function* execute(id, payload) {
+  function execute(id, payload) {
     if (payload === 'install') {
       co(installPackage(id, 'latest'));
-      return `${PREFIX} `;
+      app.setInput(`${PREFIX} `);
     } else if (payload === 'remove') {
       co(removePackage(id));
-      return `${PREFIX} `;
+      app.setInput(`${PREFIX} `);
     }
   }
 
@@ -159,9 +157,9 @@ module.exports = (context) => {
     currentStatus = `removing <b>${packageName}`;
     try {
       yield pm.removePackage(packageName);
-      toast(`${packageName} removed, <b>Restart</b> Hain to take effect`, 3000);
+      toast.enqueue(`${packageName} removed, <b>Restart</b> Hain to take effect`, 3000);
     } catch (e) {
-      toast(e.toString());
+      toast.enqueue(e.toString());
     } finally {
       currentStatus = null;
     }
@@ -172,10 +170,10 @@ module.exports = (context) => {
     currentStatus = `installing <b>${packageName}</b>`;
     try {
       yield pm.installPackage(packageName, versionRange);
-      toast(`${packageName} installed, <b>Restart</b> Hain to take effect`, 3000);
+      toast.enqueue(`${packageName} installed, <b>Restart</b> Hain to take effect`, 3000);
       logger.log(`${packageName} installed`);
     } catch (e) {
-      toast(e.toString());
+      toast.enqueue(e.toString());
       logger.log(`${packageName} ${e}`);
       throw e;
     } finally {
@@ -183,9 +181,5 @@ module.exports = (context) => {
     }
   }
 
-  return {
-    startup: co.wrap(startup),
-    search: co.wrap(search),
-    execute: co.wrap(execute)
-  };
+  return { startup, search, execute };
 };

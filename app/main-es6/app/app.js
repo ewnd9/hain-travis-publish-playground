@@ -23,7 +23,7 @@ module.exports = (context) => {
     globalShortcut.register('alt+space', () => {
       if (_isRestarting)
         return;
-      if (window.isContentLoading() || !context.plugins.isLoaded) {
+      if (window.isContentLoading() || !context.server.isLoaded) {
         logger.log('please wait a seconds, you can use shortcut after loaded');
         return;
       }
@@ -50,7 +50,7 @@ module.exports = (context) => {
       if (isRestarted || firstLaunch.isFirstLaunch)
         window.showWindowOnCenter();
       if (isRestarted)
-        context.toast('Restarted');
+        context.toast.enqueue('Restarted');
     });
   });
 
@@ -60,7 +60,7 @@ module.exports = (context) => {
   });
   iconProtocol.register();
 
-  function closeWindow() {
+  function close() {
     window.hideAndRefreshWindow();
   }
 
@@ -84,5 +84,5 @@ module.exports = (context) => {
     electronApp.quit();
   }
 
-  return { closeWindow, restart, quit };
+  return { close, restart, quit };
 };

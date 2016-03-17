@@ -8,6 +8,7 @@ platform-util/build
 platform-util/node_modules
 
 /plugins/
+/devplugins/
 
 /debug.log
 /_launched_
