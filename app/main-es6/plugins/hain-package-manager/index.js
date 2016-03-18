@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const co = require('co');
 const Packman = require('./packman');
 const got = require('got');
@@ -13,29 +14,33 @@ const PREFIX = '/hpm';
 const COMMANDS = [`${PREFIX} install `, `${PREFIX} remove `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 
-function* searchPackages(query) {
-  const query_enc = query;
-  const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=name,rating,version,description&default_operator=AND&sort=rating:desc`;
-  const res = yield got(url, { json: true });
-  return res.body.results.map(x => {
-    return {
-      name: x.name[0],
-      version: x.version[0],
-      desc: x.description[0]
-    };
-  });
-}
-
 module.exports = (context) => {
   const toast = context.toast;
   const logger = context.logger;
   const matcher = context.matcher;
   const app = context.app;
+  const PLUGIN_API_VERSION = context.PLUGIN_API_VERSION;
 
   let currentStatus = null;
   let progressTimer = 0;
   let lastUpdatedTime = 0;
   let availablePackages = [];
+
+  function* searchPackages(query) {
+    const query_enc = query;
+    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=name,rating,version,description,keywords&default_operator=AND&sort=rating:desc`;
+    const res = yield got(url, { json: true });
+    const packages = _.filter(res.body.results, x => {
+      return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
+    });
+    return packages.map(x => {
+      return {
+        name: x.name[0],
+        version: x.version[0],
+        desc: x.description[0]
+      };
+    });
+  }
 
   function checkAvailablePackages() {
     const elapsed = (Date.now() - lastUpdatedTime) / 1000;

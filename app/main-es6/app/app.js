@@ -23,7 +23,7 @@ module.exports = (context) => {
     globalShortcut.register('alt+space', () => {
       if (_isRestarting)
         return;
-      if (window.isContentLoading() || !context.server.isLoaded) {
+      if (window.isContentLoading()) {
         logger.log('please wait a seconds, you can use shortcut after loaded');
         return;
       }

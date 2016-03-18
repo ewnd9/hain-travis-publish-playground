@@ -1,11 +1,10 @@
 'use strict';
 
-process.noAsar = false;
 require('babel-polyfill');
 
 const co = require('co');
 const dialog = require('electron').dialog;
-const loggerFactory = require('./logger');
+const loggerFactory = require('./logger')('main.log');
 const logger = loggerFactory.create('main');
 const electronApp = require('electron').app;
 

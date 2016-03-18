@@ -46,6 +46,7 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
     dir: path.join(__dirname, 'app'),
     platform: 'win32',
     asar: true,
+    ignore: /(main-es6|renderer)/i,
     overwrite: true,
     out: path.join(__dirname, 'out'),
     icon: path.join(__dirname, 'build', 'icon.ico')

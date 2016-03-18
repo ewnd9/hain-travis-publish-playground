@@ -3,6 +3,9 @@
 
 require('babel-polyfill');
 
+const loggerFactory = require('../logger')('plugins.log');
+const logger = loggerFactory.create('worker');
+
 function proxyFunc(srcServiceName, funcName, args) {
   process.send({
     type: 'proxy',
@@ -50,31 +53,55 @@ const shellProxy = {
 const workerContext = {
   app: appProxy,
   toast: toastProxy,
-  shell: shellProxy
+  shell: shellProxy,
+  logger: loggerFactory
 };
 
-const plugins = require('./plugins')(workerContext);
-plugins.initialize();
+let plugins = null;
 
 function handleProcessMessage(msg) {
-  const { type, args } = msg;
-  if (type === 'searchAll') {
-    const { query, ticket } = args;
-    const res = (obj) => {
-      process.send({
-        type: 'on-result',
-        args: {
-          ticket,
-          type: obj.type,
-          payload: obj.payload
-        }
-      });
-    };
-    plugins.searchAll(query, res);
-  } else if (type === 'execute') {
-    const { pluginId, id, payload } = args;
-    plugins.execute(pluginId, id, payload);
+  if (plugins === null)
+    return;
+
+  try {
+    const { type, args } = msg;
+    if (type === 'searchAll') {
+      const { query, ticket } = args;
+      const res = (obj) => {
+        process.send({
+          type: 'on-result',
+          args: {
+            ticket,
+            type: obj.type,
+            payload: obj.payload
+          }
+        });
+      };
+      plugins.searchAll(query, res);
+    } else if (type === 'execute') {
+      const { pluginId, id, payload } = args;
+      plugins.execute(pluginId, id, payload);
+    }
+  } catch (e) {
+    const err = (e.stack) ? e.stack : e;
+    process.send({
+      type: 'error',
+      error: err
+    });
+    logger.log(err);
   }
 }
 
-process.on('message', handleProcessMessage);
+try {
+  plugins = require('./plugins')(workerContext);
+  plugins.initialize();
+
+  process.on('message', handleProcessMessage);
+} catch (e) {
+  const err = (e.stack) ? e.stack : e;
+  process.send({
+    type: 'error',
+    error: err
+  });
+  logger.log(err);
+}

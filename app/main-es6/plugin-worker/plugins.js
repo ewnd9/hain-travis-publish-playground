@@ -6,9 +6,6 @@ const _ = require('lodash');
 const matcher = require('../utils/matcher');
 const textutil = require('../utils/textutil');
 
-const logger = require('../logger').create('plugins');
-const pluginLoader = require('./plugin-loader');
-
 function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
     const _icon = x.icon;
@@ -80,10 +77,13 @@ function _makePrefixHelp(pluginConfig, query) {
 }
 
 module.exports = (workerContext) => {
+  const pluginLoader = require('./plugin-loader')(workerContext);
+  const logger = workerContext.logger.create('plugins');
   let plugins = null;
   let pluginConfigs = null;
 
   const pluginContext = {
+    PLUGIN_API_VERSION: 'hain0',
     app: workerContext.app,
     toast: workerContext.toast,
     shell: workerContext.shell,

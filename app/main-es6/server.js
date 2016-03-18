@@ -2,7 +2,9 @@
 
 const _ = require('lodash');
 const cp = require('child_process');
+const fs = require('fs');
 const path = require('path');
+const dialog = require('electron').dialog;
 
 module.exports = (context) => {
   const rpc = context.rpc;
@@ -20,7 +22,10 @@ module.exports = (context) => {
   }
 
   function handleWorkerMessage(msg) {
-    if (msg.type === 'on-result') {
+    if (msg.type === 'error') {
+      const err = msg.error;
+      logger.log(`Unhandled plugin Error: ${err}`);
+    } else if (msg.type === 'on-result') {
       rpc.send('on-result', msg.args); /* ticket, type (add, remove), payload */
     } else if (msg.type === 'proxy') {
       const { service, func, args } = msg.args;
@@ -29,7 +34,13 @@ module.exports = (context) => {
   }
 
   function initialize() {
-    workerProcess = cp.fork(path.join(__dirname, './plugin-worker/worker.js'));
+    const workerPath = path.join(__dirname, './plugin-worker/worker.js');
+    if (!fs.existsSync(workerPath)) {
+      throw new Error('can\'t execute plugin process');
+    }
+    workerProcess = cp.fork(workerPath, [], {
+      silent: true
+    });
     workerProcess.on('message', (msg) => {
       handleWorkerMessage(msg);
     });
@@ -40,8 +51,8 @@ module.exports = (context) => {
 
     clearInterval(_delayedSearch);
     if (workerProcess === null || !workerProcess.connected) {
+      logger.log('waiting plugins...');
       _delayedSearch = setInterval(() => {
-        logger.log('waiting plugins...');
         if (workerProcess !== null && workerProcess.connected) {
           searchAll(ticket, query);
           clearInterval(_delayedSearch);
