@@ -7,7 +7,7 @@ function sanitize(text) {
     return undefined;
   }
   return sanitizeHtml(text, {
-    allowedTags: ['b', 'i', 'em', 'strong', 'span'],
+    allowedTags: ['b', 'i', 'u', 'em', 'strong', 'span'],
     allowedAttributes: {
       'span': ['style']
     }
