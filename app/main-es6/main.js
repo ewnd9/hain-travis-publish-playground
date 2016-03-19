@@ -3,6 +3,15 @@
 require('babel-polyfill');
 
 ((function startup() {
+  if (require('electron-squirrel-startup')) return;
+
+  // workaround for fixing auto-launch cwd problem
+  const path = require('path');
+  const exeName = path.basename(process.execPath);
+  if (!exeName.startsWith('electron')) {
+    process.chdir(path.dirname(process.execPath));
+  }
+
   const co = require('co');
   const dialog = require('electron').dialog;
   const loggerFactory = require('./logger')('main.log');

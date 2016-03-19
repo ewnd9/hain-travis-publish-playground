@@ -1,13 +1,14 @@
 {
-  "name": "Hain",
-  "version": "0.0.1",
-  "description": "A alt+space launcher for Windows, built with Electron",
+  "name": "hain",
+  "version": "0.0.2",
+  "description": "An `alt+space` launcher for Windows, built with Electron",
   "main": "main/main.js",
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
   "dependencies": {
     "babel-polyfill": "^6.6.1",
     "co": "^4.6.0",
+    "electron-squirrel-startup": "^0.1.4",
     "fs-extra": "^0.26.5",
     "got": "^6.2.0",
     "html-escape": "^1.0.2",

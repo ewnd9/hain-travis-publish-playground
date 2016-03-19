@@ -9,6 +9,8 @@ const path = require('path');
 const install = require('gulp-install');
 const merge = require('merge-stream');
 const zip = require('gulp-zip');
+const electronInstaller = require('electron-winstaller');
+const fs = require('fs');
 
 const webpack = require('webpack');
 
@@ -49,7 +51,11 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
     ignore: /(main-es6|renderer)/i,
     overwrite: true,
     out: path.join(__dirname, 'out'),
-    icon: path.join(__dirname, 'build', 'icon.ico')
+    icon: path.join(__dirname, 'build', 'icon.ico'),
+    'version-string': {
+      ProductName: 'Hain',
+      CompanyName: 'Heejin Lee'
+    }
   }, (err, appPath) => {
     if (err) {
       console.log(err);
@@ -64,6 +70,23 @@ gulp.task('build-zip', ['build'], () => {
             .pipe(zip('Hain-win32-x64.zip'))
             .pipe(gulp.dest('./out/'));
 });
+
+gulp.task('build-installer', ['build'], (done) => {
+  electronInstaller.createWindowsInstaller({
+    appDirectory: './out/Hain-win32-x64',
+    outputDirectory: './out',
+    authors: 'Heejin Lee',
+    title: 'Hain',
+    iconUrl: 'https://raw.githubusercontent.com/appetizermonster/Hain/master/build/icon.ico',
+    setupIcon: path.resolve('./build/icon.ico'),
+    noMsi: true
+  }).then(() => {
+    fs.renameSync('./out/Setup.exe', './out/HainSetup-x64.exe');
+    done();
+  }).catch((err) => done(err));
+});
+
+gulp.task('build-all', ['build-zip', 'build-installer']);
 
 gulp.task('watch', ['main', 'renderer'], () => {
   gulp.watch('./app/main-es6/**/*', ['main']);

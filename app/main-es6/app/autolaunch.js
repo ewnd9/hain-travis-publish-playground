@@ -11,7 +11,7 @@ const VALUE_NAME = 'Hain';
 
 function activate() {
   return new Promise((resolve, reject) => {
-    regKey.set(VALUE_NAME, Registry.REG_SZ, `"${process.execPath}"`, (err) => {
+    regKey.set(VALUE_NAME, Registry.REG_SZ, `"${process.execPath}" --silent`, (err) => {
       if (err)
         return reject(err);
       return resolve();

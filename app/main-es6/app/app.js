@@ -33,6 +33,7 @@ module.exports = (context) => {
   }
 
   const isRestarted = (_.includes(process.argv, '--restarted'));
+  const silentLaunch = (_.includes(process.argv, '--silent'));
   const shouldQuit = electronApp.makeSingleInstance((cmdLine, workingDir) => {
     if (_isRestarting)
       return;
@@ -48,7 +49,7 @@ module.exports = (context) => {
     window.createTray().catch(err => logger.log(err));
     registerShortcut();
     window.createWindow(() => {
-      if (isRestarted || firstLaunch.isFirstLaunch) {
+      if (!silentLaunch || isRestarted) {
         waiter.runWhen(() => (!window.isContentLoading() && context.server.isLoaded),
           () => window.showWindowOnCenter(), 100);
       }
