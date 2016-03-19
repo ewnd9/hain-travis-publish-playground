@@ -44,7 +44,7 @@ gulp.task('renderer', ['deps'], (done) => {
 
 gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
   packager({
-    arch: 'x64',
+    arch: 'ia32',
     dir: path.join(__dirname, 'app'),
     platform: 'win32',
     asar: true,
@@ -73,7 +73,7 @@ gulp.task('build-zip', ['build'], () => {
 
 gulp.task('build-installer', ['build'], (done) => {
   electronInstaller.createWindowsInstaller({
-    appDirectory: './out/Hain-win32-x64',
+    appDirectory: './out/Hain-win32-ia32',
     outputDirectory: './out',
     authors: 'Heejin Lee',
     title: 'Hain',
@@ -81,7 +81,7 @@ gulp.task('build-installer', ['build'], (done) => {
     setupIcon: path.resolve('./build/icon.ico'),
     noMsi: true
   }).then(() => {
-    fs.renameSync('./out/Setup.exe', './out/HainSetup-x64.exe');
+    fs.renameSync('./out/Setup.exe', './out/HainSetup-ia32.exe');
     done();
   }).catch((err) => done(err));
 });
