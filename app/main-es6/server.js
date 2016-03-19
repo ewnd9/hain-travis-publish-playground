@@ -13,6 +13,7 @@ module.exports = (context) => {
 
   let workerProcess = null;
   let _delayedSearch = 0;
+  let isPluginsReady = false;
 
   function searchAll(ticket, query) {
     workerProcess.send({
@@ -25,6 +26,8 @@ module.exports = (context) => {
     if (msg.type === 'error') {
       const err = msg.error;
       logger.log(`Unhandled plugin Error: ${err}`);
+    } else if (msg.type === 'ready') {
+      isPluginsReady = true;
     } else if (msg.type === 'on-result') {
       rpc.send('on-result', msg.args); /* ticket, type (add, remove), payload */
     } else if (msg.type === 'proxy') {
@@ -77,6 +80,6 @@ module.exports = (context) => {
 
   return {
     initialize,
-    get isLoaded() { return (workerProcess !== null && workerProcess.connected); }
+    get isLoaded() { return (workerProcess !== null && workerProcess.connected && isPluginsReady); }
   };
 };

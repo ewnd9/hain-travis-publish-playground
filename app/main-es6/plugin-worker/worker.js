@@ -97,6 +97,7 @@ try {
   plugins.initialize();
 
   process.on('message', handleProcessMessage);
+  process.send({ type: 'ready' });
 } catch (e) {
   const err = (e.stack) ? e.stack : e;
   process.send({

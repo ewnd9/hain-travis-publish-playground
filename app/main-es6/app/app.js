@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const electron = require('electron');
 const cp = require('child_process');
+const waiter = require('../utils/waiter');
 
 const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
@@ -47,8 +48,10 @@ module.exports = (context) => {
     window.createTray().catch(err => logger.log(err));
     registerShortcut();
     window.createWindow(() => {
-      if (isRestarted || firstLaunch.isFirstLaunch)
-        window.showWindowOnCenter();
+      if (isRestarted || firstLaunch.isFirstLaunch) {
+        waiter.runWhen(() => (!window.isContentLoading() && context.server.isLoaded),
+          () => window.showWindowOnCenter(), 100);
+      }
       if (isRestarted)
         context.toast.enqueue('Restarted');
     });
