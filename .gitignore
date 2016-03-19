@@ -4,8 +4,7 @@ node_modules
 /app/dist/app.bundle.js
 /_localStorage/
 
-platform-util/build
-platform-util/node_modules
+/app/platform-util/build
 
 /plugins/
 /devplugins/
