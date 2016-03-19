@@ -7,12 +7,12 @@ All plugin configurations must be located in package.json
 * `version` String - Plugin version 'x.y.z' (**required**)
 * `hain` Object - (**required**)
   - `prefix` String - Plugin command prefix, e.g. '/g' (optional, default is `null`)
-  - `usage` String - Plugin usage to be displayed in first. e.g. 'type /g' (optional, default is `prefix` value)
-  - `icon` String - Icon URL, see `Icon URL` (**required**)
+  - `usage` String - Plugin usage to be displayed in the empty ResultList. e.g. 'type /g' (optional, default is `prefix` value)
+  - `icon` String - Icon URL, see [Icon URL Format](icon-url-format.md) (**required**)
   - `redirect` String - Query to redirect user input when user did select intro help (optional, default is `undefined`)
 
 and...
-* `keywords` Array\<String\> - Add a keyword `hain0` for sharing your plugin (required, **hacky, but important**)
+* `keywords` Array\<String\> - Add a keyword `hain0` for sharing your plugin (**required**)
 
 
 
