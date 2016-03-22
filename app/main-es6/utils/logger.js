@@ -21,7 +21,7 @@ const logger = new (winston.Logger)({
 function log(msg) {
   try {
     logger.debug(msg);
-  } catch(e) {
+  } catch (e) {
   }
 }
 
