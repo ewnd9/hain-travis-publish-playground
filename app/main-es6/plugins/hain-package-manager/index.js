@@ -16,6 +16,7 @@ module.exports = (context) => {
   const pm = new Packman(context.MAIN_PLUGIN_REPO, './_temp');
   const toast = context.toast;
   const logger = context.logger;
+  const shell = context.shell;
   const matchutil = context.matchutil;
   const app = context.app;
   const PLUGIN_API_VERSION = context.PLUGIN_API_VERSION;
@@ -27,7 +28,8 @@ module.exports = (context) => {
 
   function* searchPackages(query) {
     const query_enc = query;
-    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=name,rating,version,description,keywords&default_operator=AND&sort=rating:desc`;
+    const fields = 'name,rating,version,description,keywords,author';
+    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc`;
     const res = yield got(url, { json: true });
     const packages = _.filter(res.body.results, x => {
       return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
@@ -36,7 +38,8 @@ module.exports = (context) => {
       return {
         name: x.name[0],
         version: x.version[0],
-        desc: x.description[0]
+        desc: x.description[0],
+        author: x.author[0] || ''
       };
     });
   }
@@ -51,6 +54,10 @@ module.exports = (context) => {
       availablePackages = yield searchPackages('hain-plugin');
       currentStatus = null;
     });
+  }
+
+  function getPackageInfo(packageName) {
+    return _.find(pm.listPackages(), (x) => x.name === packageName);
   }
 
   function startup() {
@@ -86,6 +93,15 @@ module.exports = (context) => {
     res.add(parseCommands(query));
   }
 
+  function _toSearchResult(cmdType, packageinfo, name, payload) {
+    return {
+      id: packageinfo.name,
+      payload: payload || cmdType,
+      title: `${cmdType} ${name || packageinfo.name} ${packageinfo.version} <span style='font-size: 9pt'>by ${packageinfo.author}</span>`,
+      desc: `${packageinfo.desc}`
+    };
+  }
+
   function parseCommands(query) {
     // install
     const parsed = COMMANDS_RE.exec(query.toLowerCase());
@@ -98,40 +114,19 @@ module.exports = (context) => {
       if (arg) {
         return matchutil.fuzzy(availablePackages, arg.trim(), x => x.name).map(x => {
           const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
-          return {
-            id: x.elem.name,
-            payload: 'install',
-            title: `install ${m}</b> ${x.elem.version}`,
-            desc: x.elem.desc || NAME
-          };
+          return _toSearchResult('install', x.elem, m);
         });
       }
-      return availablePackages.map(x => {
-        return {
-          id: x.name,
-          payload: 'install',
-          title: `install <b>${x.name}</b> ${x.version}`,
-          desc: x.desc || NAME
-        };
-      });
+      return availablePackages.map(x => _toSearchResult('install', x));
     }
     if (command === 'remove') {
       const packages = pm.listPackages();
-      return packages.map((x) => {
-        return {
-          id: x.name,
-          payload: 'remove',
-          title: `remove <b>${x.name}</b> ${x.version}`,
-          desc: NAME
-        };
-      });
+      return packages.map((x) => _toSearchResult('remove', x));
     }
     // list
     if (command === 'list') {
       const packages = pm.listPackages();
-      return packages.map((x) => {
-        return { id: x.name, title: `<b>${x.name}</b> ${x.version}`, desc: NAME };
-      });
+      return packages.map((x) => _toSearchResult('', x, null, 'list'));
     }
     return _makeCommandsHelp(query);
   }
@@ -154,6 +149,10 @@ module.exports = (context) => {
     } else if (payload === 'remove') {
       co(removePackage(id));
       app.setInput(`${PREFIX} `);
+    } else if (payload === 'list') {
+      const pkgInfo = getPackageInfo(id);
+      if (pkgInfo.homepage)
+        shell.openExternal(pkgInfo.homepage);
     }
   }
 

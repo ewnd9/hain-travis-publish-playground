@@ -2,17 +2,28 @@
 
 const _ = require('lodash');
 const co = require('co');
-const fs = require('fs');
 const path = require('path');
 const packageControl = require('./package-control');
 const fileutil = require('./fileutil');
 
+function _createPackegeInfo(name, data) {
+  return {
+    name,
+    version: data.version || 'none',
+    desc: data.description || '',
+    author: data.author || '',
+    homepage: data.homepage || ''
+  };
+}
+
 class Packman {
+
   constructor(repoDir, tempDir) {
     this.repoDir = repoDir;
     this.tempDir = tempDir;
     this.packages = [];
   }
+
   readPackages() {
     const self = this;
     this.packages = [];
@@ -24,11 +35,8 @@ class Packman {
         try {
           const fileContents = yield fileutil.readFile(packageJsonFile);
           const pkgJson = JSON.parse(fileContents.toString());
-          const pkgItem = {
-            name: _packageDir,
-            version: pkgJson.version || 'none'
-          };
-          self.packages.push(pkgItem);
+          const pkgInfo = _createPackegeInfo(_packageDir, pkgJson);
+          self.packages.push(pkgInfo);
         } catch (e) {
           console.log(e);
           continue;
@@ -36,12 +44,15 @@ class Packman {
       }
     });
   }
+
   listPackages() {
     return this.packages;
   }
+
   hasPackage(packageName) {
     return (_.findIndex(this.packages, x => x.name === packageName) >= 0);
   }
+
   installPackage(packageName, versionRange) {
     const self = this;
     return co(function* () {
@@ -50,12 +61,10 @@ class Packman {
       }
       const saveDir = path.join(self.repoDir, packageName);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
-      self.packages.push({
-        name: packageName,
-        version: data.version || 'none'
-      });
+      self.packages.push(_createPackegeInfo(packageName, data));
     });
   }
+
   removePackage(packageName) {
     const self = this;
     return co(function* () {
@@ -67,6 +76,7 @@ class Packman {
       _.remove(self.packages, x => x.name === packageName);
     });
   }
+
 }
 
 module.exports = Packman;
