@@ -66,8 +66,8 @@ gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
 });
 
 gulp.task('build-zip', ['build'], () => {
-  return gulp.src('./out/Hain-win32-x64/**/*')
-            .pipe(zip('Hain-win32-x64.zip'))
+  return gulp.src('./out/Hain-win32-ia32/**/*')
+            .pipe(zip('Hain-win32-ia32.zip'))
             .pipe(gulp.dest('./out/'));
 });
 
