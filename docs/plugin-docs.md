@@ -12,6 +12,7 @@
 
 ## Guides
 
+* [Plugin Directories](plugin-directories.md)
 * Run your plugins
 * [Share your plugins](share-your-plugins.md)
 
