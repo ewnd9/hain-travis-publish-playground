@@ -5,6 +5,7 @@ const co = require('co');
 
 const self = {};
 const funcs = {};
+const msgQueue = [];
 let connectedClient = null;
 
 self.define = (funcName, func) => {
@@ -12,11 +13,17 @@ self.define = (funcName, func) => {
 };
 
 self.send = (channel, msg) => {
-  if (connectedClient === null) {
-    throw new Error('didn\'t connected with a client');
-  }
-  connectedClient.send(channel, msg);
+  msgQueue.push({ channel, msg });
 };
+
+setInterval(() => {
+  if (connectedClient === null)
+    return;
+  while (msgQueue.length > 0) {
+    const item = msgQueue.shift();
+    connectedClient.send(item.channel, item.msg);
+  }
+}, 10);
 
 self.on = (channel, func) => {
   ipc.on(channel, func);

@@ -3,7 +3,6 @@
 const shell = require('electron').shell;
 
 module.exports = (context) => {
-
   const proxyHandlers = {};
 
   function handle(service, func, args) {
@@ -32,6 +31,10 @@ module.exports = (context) => {
     showItemInFolder: (fullPath) => shell.showItemInFolder(fullPath),
     openItem: (fullPath) => shell.openItem(fullPath),
     openExternal: (fullPath) => shell.openExternal(fullPath)
+  };
+
+  proxyHandlers.logger = {
+    log: (msg) => context.clientLogger.log(msg)
   };
 
   return { handle };

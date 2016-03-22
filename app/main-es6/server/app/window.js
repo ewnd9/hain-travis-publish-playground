@@ -8,7 +8,7 @@ const Menu = electron.Menu;
 const BrowserWindow = electron.BrowserWindow;
 
 const path = require('path');
-const platformUtil = require('../../platform-util');
+const platformUtil = require('../../../platform-util');
 
 const autolaunch = require('./autolaunch');
 
@@ -36,7 +36,7 @@ module.exports = (context) => {
       mainWindow.webContents.on('did-finish-load', cb);
     }
 
-    mainWindow.loadURL(`file://${__dirname}/../../dist/index.html`);
+    mainWindow.loadURL(`file://${__dirname}/../../../dist/index.html`);
     mainWindow.on('blur', () => {
       hideAndRefreshWindow(true);
     });
@@ -97,7 +97,7 @@ module.exports = (context) => {
   }
 
   function* createTray() {
-    const iconPath = path.normalize(`${__dirname}\\..\\..\\images\\tray_16.ico`);
+    const iconPath = path.normalize(`${__dirname}/../../../images/tray_16.ico`);
     const autoLaunchActivated = yield autolaunch.isActivated();
     tray = new Tray(iconPath);
     const menu = Menu.buildFromTemplate([

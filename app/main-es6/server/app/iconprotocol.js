@@ -7,11 +7,10 @@ const SimpleCache = require('simple-lru-cache');
 const electron = require('electron');
 const app = electron.app;
 
-const platformUtil = require('../../platform-util');
+const logger = require('../../utils/logger');
+const platformUtil = require('../../../platform-util');
 
 module.exports = (context) => {
-  const logger = context.logger.create('iconprotocol');
-
   function register() {
     app.on('ready', () => {
       const cache = new SimpleCache({ maxSize: 100 });

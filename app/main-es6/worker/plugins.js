@@ -3,8 +3,10 @@
 
 const _ = require('lodash');
 
-const matcher = require('../utils/matcher');
+const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
+
+const conf = require('./conf');
 
 function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
@@ -65,11 +67,11 @@ function _makeIntroHelp(pluginConfig) {
 function _makePrefixHelp(pluginConfig, query) {
   if (!pluginConfig.prefix) return;
   const candidates = [pluginConfig.prefix];
-  const filtered = matcher.head(candidates, query, (x) => x);
+  const filtered = matchutil.head(candidates, query, (x) => x);
   return filtered.map((x) => {
     return {
       redirect: pluginConfig.redirect || pluginConfig.prefix,
-      title: textutil.sanitize(matcher.makeStringBoldHtml(x.elem, x.matches)),
+      title: textutil.sanitize(matchutil.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
       icon: pluginConfig.icon
     };
@@ -78,16 +80,19 @@ function _makePrefixHelp(pluginConfig, query) {
 
 module.exports = (workerContext) => {
   const pluginLoader = require('./plugin-loader')(workerContext);
-  const logger = workerContext.logger.create('plugins');
+  const logger = workerContext.logger;
+
   let plugins = null;
   let pluginConfigs = null;
 
   const pluginContext = {
     PLUGIN_API_VERSION: 'hain0',
+    MAIN_PLUGIN_REPO: conf.MAIN_PLUGIN_REPO,
     app: workerContext.app,
     toast: workerContext.toast,
     shell: workerContext.shell,
-    matcher
+    logger: workerContext.logger,
+    matchutil
   };
 
   function _startup() {

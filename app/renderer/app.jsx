@@ -70,6 +70,10 @@ class AppContainer extends React.Component {
       const { message, duration } = args;
       this.toastQueue.push({ message, duration });
     });
+    rpc.on('on-log', (evt, args) => {
+      const { msg } = args;
+      console.log(msg);
+    });
     rpc.on('set-input', (evt, args) => {
       this.setState({ input: args, selectionIndex: 0 });
       this.search(args);

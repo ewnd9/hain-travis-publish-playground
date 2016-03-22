@@ -3,8 +3,7 @@
 
 require('babel-polyfill');
 
-const loggerFactory = require('../logger')('plugins.log');
-const logger = loggerFactory.create('worker');
+const logger = require('../utils/logger');
 
 function proxyFunc(srcServiceName, funcName, args) {
   process.send({
@@ -18,43 +17,31 @@ function proxyFunc(srcServiceName, funcName, args) {
 }
 
 const appProxy = {
-  restart: () => {
-    proxyFunc('app', 'restart');
-  },
-  quit: () => {
-    proxyFunc('app', 'quit');
-  },
-  close: () => {
-    proxyFunc('app', 'close');
-  },
-  setInput: (text) => {
-    proxyFunc('app', 'setInput', text);
-  }
+  restart: () => proxyFunc('app', 'restart'),
+  quit: () => proxyFunc('app', 'quit'),
+  close: () => proxyFunc('app', 'close'),
+  setInput: (text) => proxyFunc('app', 'setInput', text)
 };
 
 const toastProxy = {
-  enqueue: (message, duration) => {
-    proxyFunc('toast', 'enqueue', { message, duration });
-  }
+  enqueue: (message, duration) => proxyFunc('toast', 'enqueue', { message, duration })
 };
 
 const shellProxy = {
-  showItemInFolder: (fullPath) => {
-    proxyFunc('shell', 'showItemInFolder', fullPath);
-  },
-  openItem: (fullPath) => {
-    proxyFunc('shell', 'openItem', fullPath);
-  },
-  openExternal: (fullPath) => {
-    proxyFunc('shell', 'openExternal', fullPath);
-  }
+  showItemInFolder: (fullPath) => proxyFunc('shell', 'showItemInFolder', fullPath),
+  openItem: (fullPath) => proxyFunc('shell', 'openItem', fullPath),
+  openExternal: (fullPath) => proxyFunc('shell', 'openExternal', fullPath)
+};
+
+const loggerProxy = {
+  log: (msg) => proxyFunc('logger', 'log', msg)
 };
 
 const workerContext = {
   app: appProxy,
   toast: toastProxy,
   shell: shellProxy,
-  logger: loggerFactory
+  logger: loggerProxy
 };
 
 let plugins = null;
@@ -83,11 +70,8 @@ function handleProcessMessage(msg) {
       plugins.execute(pluginId, id, payload);
     }
   } catch (e) {
-    const err = (e.stack) ? e.stack : e;
-    process.send({
-      type: 'error',
-      error: err
-    });
+    const err = e.stack || e;
+    process.send({ type: 'error', error: err });
     logger.log(err);
   }
 }
@@ -99,10 +83,7 @@ try {
   process.on('message', handleProcessMessage);
   process.send({ type: 'ready' });
 } catch (e) {
-  const err = (e.stack) ? e.stack : e;
-  process.send({
-    type: 'error',
-    error: err
-  });
+  const err = e.stack || e;
+  process.send({ type: 'error', error: err });
   logger.log(err);
 }

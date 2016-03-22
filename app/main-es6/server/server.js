@@ -4,11 +4,10 @@ const _ = require('lodash');
 const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const dialog = require('electron').dialog;
+const logger = require('../utils/logger');
 
 module.exports = (context) => {
   const rpc = context.rpc;
-  const logger = context.logger.create('server');
   const proxyHandler = require('./server-proxyhandler')(context);
 
   let workerProcess = null;
@@ -37,7 +36,7 @@ module.exports = (context) => {
   }
 
   function initialize() {
-    const workerPath = path.join(__dirname, './plugin-worker/worker.js');
+    const workerPath = path.join(__dirname, '../worker/worker.js');
     if (!fs.existsSync(workerPath)) {
       throw new Error('can\'t execute plugin process');
     }

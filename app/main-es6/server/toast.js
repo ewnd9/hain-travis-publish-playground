@@ -1,6 +1,6 @@
 'use strict';
 
-const textutil = require('./utils/textutil');
+const textutil = require('../utils/textutil');
 
 module.exports = (context) => {
   const rpc = context.rpc;

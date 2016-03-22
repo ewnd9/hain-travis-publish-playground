@@ -5,8 +5,6 @@ const co = require('co');
 const Packman = require('./packman');
 const got = require('got');
 
-const pm = new Packman('./plugins', './_temp');
-
 const COMMANDS_RE = / (install|remove|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
 const PREFIX = '/hpm';
@@ -15,9 +13,10 @@ const COMMANDS = [`${PREFIX} install `, `${PREFIX} remove `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 
 module.exports = (context) => {
+  const pm = new Packman(context.MAIN_PLUGIN_REPO, './_temp');
   const toast = context.toast;
   const logger = context.logger;
-  const matcher = context.matcher;
+  const matchutil = context.matchutil;
   const app = context.app;
   const PLUGIN_API_VERSION = context.PLUGIN_API_VERSION;
 
@@ -97,8 +96,8 @@ module.exports = (context) => {
     const arg = parsed[2];
     if (command === 'install') {
       if (arg) {
-        return matcher.fuzzy(availablePackages, arg.trim(), x => x.name).map(x => {
-          const m = matcher.makeStringBoldHtml(x.elem.name, x.matches);
+        return matchutil.fuzzy(availablePackages, arg.trim(), x => x.name).map(x => {
+          const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
           return {
             id: x.elem.name,
             payload: 'install',
@@ -138,10 +137,10 @@ module.exports = (context) => {
   }
 
   function _makeCommandsHelp(query) {
-    const ret = matcher.head(COMMANDS, `${PREFIX}${query}`, (x) => x).map((x) => {
+    const ret = matchutil.head(COMMANDS, `${PREFIX}${query}`, (x) => x).map((x) => {
       return {
         redirect: x.elem,
-        title: matcher.makeStringBoldHtml(x.elem, x.matches),
+        title: matchutil.makeStringBoldHtml(x.elem, x.matches),
         desc: NAME
       };
     });

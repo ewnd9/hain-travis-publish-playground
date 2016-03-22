@@ -15,8 +15,7 @@ const matchFunc = (filePath, stats) => {
 };
 
 module.exports = (context) => {
-
-  const matcher = context.matcher;
+  const matchutil = context.matchutil;
   const logger = context.logger;
   const shell = context.shell;
   const app = context.app;
@@ -61,10 +60,10 @@ module.exports = (context) => {
 
   function search(query, res) {
     const query_trim = query.replace(' ', '');
-    const searched = matcher.fuzzy(db, query_trim, (x) => x);
+    const searched = matchutil.fuzzy(db, query_trim, (x) => x);
     const result = searched.slice(0, 20).map((x) => {
       const filePath = x.elem;
-      const filePath_bold = matcher.makeStringBoldHtml(filePath, x.matches);
+      const filePath_bold = matchutil.makeStringBoldHtml(filePath, x.matches);
       const filePath_base64 = new Buffer(filePath).toString('base64');
       return {
         id: filePath,

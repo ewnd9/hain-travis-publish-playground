@@ -3,7 +3,8 @@
 const _ = require('lodash');
 const electron = require('electron');
 const cp = require('child_process');
-const waiter = require('../utils/waiter');
+const asyncutil = require('../../utils/asyncutil');
+const logger = require('../../utils/logger');
 
 const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
@@ -11,7 +12,6 @@ const firstLaunch = require('./firstlaunch');
 const autolaunch = require('./autolaunch');
 
 module.exports = (context) => {
-  const logger = context.logger.create('app');
   const window = require('./window')(context);
   const iconProtocol = require('./iconprotocol')(context);
   let _isRestarting = false;
@@ -50,7 +50,7 @@ module.exports = (context) => {
     registerShortcut();
     window.createWindow(() => {
       if (!silentLaunch || isRestarted) {
-        waiter.runWhen(() => (!window.isContentLoading() && context.server.isLoaded),
+        asyncutil.runWhen(() => (!window.isContentLoading() && context.server.isLoaded),
           () => window.showWindowOnCenter(), 100);
       }
       if (isRestarted)
