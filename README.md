@@ -1,25 +1,41 @@
 # Hain
 [![Build status](https://ci.appveyor.com/api/projects/status/l4p8r613wckaiqm6?svg=true)](https://ci.appveyor.com/project/appetizermonster/hain)
 
-An `alt+space` launcher for Windows, alternative to Alfred, built with Electron
+An `alt+space` launcher for Windows, built with Electron.
 
-this repository is **under active development**
+I always dreamed an alternative to Alfred on Windows, that is made with JavaScript.
+so, I made it.
 
-
+<p align="center">
+  <img src="docs/demo.gif" width="700"/>
+</p>
 
 ## Features
 
-* Searching executable files very fast with Fuzzy Matching
-* Plugins in JavaScript
-
-
+* Searching Executable files very fast with Fuzzy Matching
+* Plugins in Pure JavaScript
 
 ## Downloads
 
-Go to [Releases](https://github.com/appetizermonster/Hain/releases), then you can download prebuilt binaries. 
+Go to [Releases](https://github.com/appetizermonster/Hain/releases), then you can download prebuilt binaries.  
 
+## Usage
+Run and press `alt+space` anywhere
+      
+## How to make Plugins
 
+See [Plugin Documentation](docs/plugin-docs.md)
 
-## How to make plugins
+## Building
 
-See [How to make plugins](https://github.com/appetizermonster/Hain/blob/master/docs/how-to-make-plugins.md)
+```
+npm install
+gulp build-all
+```
+>**Note:** this project uses Electron 32bit version
+
+## Contributing
+Feel free to send any pull request to `develop` branch!
+
+## License
+MIT

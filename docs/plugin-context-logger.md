@@ -6,11 +6,8 @@ Logger object has a following function:
 
   Logs your messages.  
 
->**Note:** You can find logging messages in `plugins.log` file in the app directory.
-
-
->**Note:** You can see logging messages in the command prompt if you run Hain in the command prompt.
-  
+>**Note:** You can see logging messages in `Chrome Developer Tools` in the app.  
+>You can open `Chrome Developer Tools` by pressing <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> in the app.
 
 **Example**
 ```javascript

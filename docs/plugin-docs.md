@@ -5,12 +5,17 @@
 * Hello, World
 * Making Github Trending Plugin
 
+## Examples
+
+* [hain-plugin-trending](https://github.com/appetizermonster/hain-plugin-trending)
+* [hain-plugin-youtube](https://github.com/appetizermonster/hain-plugin-youtube)
+
 ## Guides
 
 * Run your plugins
 * [Share your plugins](share-your-plugins.md)
 
-## API References
+## API Reference
 
 * [Plugin Skeleton (How to define a plugin module)](plugin-skeleton.md)
 * [package.json Format](package-json-format.md)
