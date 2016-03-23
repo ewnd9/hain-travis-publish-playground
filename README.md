@@ -27,13 +27,36 @@ Run and press `alt+space` anywhere
 
 See [Plugin Documentation](docs/plugin-docs.md)
 
+## Running from Sources
+```shell
+# Clone this repo
+git clone https://github.com/appetizermonster/hain.git
+# Go into the repo
+cd hain
+# Install dependencies
+npm install
+npm install -g --arch=ia32 electron-prebuilt
+# Build sources
+gulp
+# Run with electron
+electron .
+```
+
 ## Building
 
-```
+```shell
+# Clone this repo
+git clone https://github.com/appetizermonster/hain.git
+# Go into the repo
+cd hain
+# Install dependencies
 npm install
+# Build installers
 gulp build-all
 ```
+
 >**Note:** this project uses Electron 32bit version
+
 
 ## Contributing
 Feel free to send any pull request to `develop` branch!
