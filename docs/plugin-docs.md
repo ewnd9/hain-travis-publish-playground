@@ -1,4 +1,4 @@
-# Plugin Documentation
+# Plugin Documentation (working)
 
 ## Tutorials
 
@@ -9,6 +9,7 @@
 
 * [hain-plugin-trending](https://github.com/appetizermonster/hain-plugin-trending)
 * [hain-plugin-youtube](https://github.com/appetizermonster/hain-plugin-youtube)
+* [hain-plugin-hackernews](https://github.com/appetizermonster/hain-plugin-hackernews)
 
 ## Guides
 
