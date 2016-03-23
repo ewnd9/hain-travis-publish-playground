@@ -5,6 +5,7 @@ const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
+const app = require('electron').app;
 
 module.exports = (context) => {
   const rpc = context.rpc;
@@ -45,6 +46,12 @@ module.exports = (context) => {
     });
     workerProcess.on('message', (msg) => {
       handleWorkerMessage(msg);
+    });
+    app.on('quit', () => {
+      try {
+        if (workerProcess)
+          workerProcess.kill();
+      } catch (e) { }
     });
   }
 
