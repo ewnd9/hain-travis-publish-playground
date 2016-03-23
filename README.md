@@ -38,5 +38,10 @@ gulp build-all
 ## Contributing
 Feel free to send any pull request to `develop` branch!
 
+## Credits
+The name "Hain" is named by Hyunseop Lee, it means "a Servant" in Korean.  
+The app icon is designed by Yunsung Lee.  
+It uses [npmsearch.com](https://github.com/solids/npmsearch) for searching modules for now  
+
 ## License
 MIT
