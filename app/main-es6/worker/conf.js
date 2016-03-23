@@ -2,12 +2,12 @@
 
 const path = require('path');
 
-const HAIN_APPDATA = `${process.env.LOCALAPPDATA}/hain`;
-const LOCAL_STORAGE_DIR = `${HAIN_APPDATA}/localStorages`;
+const HAIN_USER_PATH = `${process.env.LOCALAPPDATA}/hain-user`;
+const LOCAL_STORAGE_DIR = `${HAIN_USER_PATH}/localStorages`;
 
 const INTERNAL_PLUGIN_REPO = path.join(__dirname, '../plugins');
-const MAIN_PLUGIN_REPO = path.resolve(`${HAIN_APPDATA}/plugins`);
-const DEV_PLUGIN_REPO = path.resolve(`${HAIN_APPDATA}/devplugins`);
+const MAIN_PLUGIN_REPO = path.resolve(`${HAIN_USER_PATH}/plugins`);
+const DEV_PLUGIN_REPO = path.resolve(`${HAIN_USER_PATH}/devplugins`);
 
 const PLUGIN_REPOS = [
   INTERNAL_PLUGIN_REPO,
