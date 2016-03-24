@@ -29,7 +29,7 @@ module.exports = (context) => {
   function* searchPackages(query) {
     const query_enc = query;
     const fields = 'name,rating,version,description,keywords,author';
-    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc`;
+    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=50`;
     const res = yield got(url, { json: true });
     const packages = _.filter(res.body.results, x => {
       return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
