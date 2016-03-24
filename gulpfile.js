@@ -11,6 +11,7 @@ const merge = require('merge-stream');
 const zip = require('gulp-zip');
 const electronInstaller = require('electron-winstaller');
 const fs = require('fs');
+const del = require('del');
 
 const webpack = require('webpack');
 
@@ -19,7 +20,11 @@ gulp.task('deps', () => {
     .pipe(install({ production: true }));
 });
 
-gulp.task('main', ['deps'], () => {
+gulp.task('clean:main', () => {
+  return del(['./app/main']);
+});
+
+gulp.task('main', ['deps', 'clean:main'], () => {
   const js = gulp.src('./app/main-es6/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
