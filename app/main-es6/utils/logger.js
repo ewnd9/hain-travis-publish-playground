@@ -5,7 +5,7 @@ const logger = new (winston.Logger)({
   level: 'debug',
   transports: [
     new (winston.transports.File)({
-      filename: 'hain.log',
+      filename: 'hain-debug.log',
       json: false,
       prettyPrint: true,
       maxFiles: 3,
@@ -21,8 +21,7 @@ const logger = new (winston.Logger)({
 function log(msg) {
   try {
     logger.debug(msg);
-  } catch (e) {
-  }
+  } catch (e) {}
 }
 
 module.exports = { log };

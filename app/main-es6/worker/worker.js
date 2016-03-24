@@ -76,7 +76,15 @@ function handleProcessMessage(msg) {
   }
 }
 
+function handleExceptions() {
+  process.on('uncaughtException', (err) => {
+    logger.log(err);
+  });
+}
+
 try {
+  handleExceptions();
+
   plugins = require('./plugins')(workerContext);
   plugins.initialize();
 

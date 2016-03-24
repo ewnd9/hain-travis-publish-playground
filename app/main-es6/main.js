@@ -16,6 +16,12 @@ require('babel-polyfill');
   const dialog = require('electron').dialog;
   const electronApp = require('electron').app;
 
+  const logger = require('./utils/logger');
+  process.on('uncaughtException', (err) => {
+    logger.log(err);
+    dialog.showErrorBox('Hain', `Unhandled Error: ${err.stack || err}`);
+  });
+
   const appContext = {
     app: null,
     plugins: null,
@@ -35,7 +41,7 @@ require('babel-polyfill');
 
     appContext.server.initialize();
   }).catch((err) => {
-    dialog.showErrorBox('Hain', `Unhandled Error: ${err}\n${err.stack}`);
+    dialog.showErrorBox('Hain', `Unhandled Error: ${err.stack || err}`);
     electronApp.quit();
   });
 })());

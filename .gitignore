@@ -9,7 +9,7 @@ node_modules
 /plugins/
 /devplugins/
 
-/debug.log
+/hain-debug.log
 /_launched_
 
 /out
