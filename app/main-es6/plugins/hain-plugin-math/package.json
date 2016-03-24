@@ -6,8 +6,9 @@
   "description": "a hain-plugin to calculate things",
   "main": "index.js",
   "hain": {
-    "prefix": "",
+    "prefix": "=",
     "usage": "type something to calculate",
-    "icon": "#fa fa-calculator"
+    "icon": "#fa fa-calculator",
+    "redirect": "= "
   }
 }
