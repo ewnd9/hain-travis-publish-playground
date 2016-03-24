@@ -57,7 +57,7 @@ class Packman {
     const self = this;
     return co(function* () {
       if (self.hasPackage(packageName)) {
-        throw 'installed package';
+        throw `Installed package: ${packageName}`;
       }
       const saveDir = path.join(self.repoDir, packageName);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
@@ -69,7 +69,7 @@ class Packman {
     const self = this;
     return co(function* () {
       if (!self.hasPackage(packageName)) {
-        throw 'not-installed package';
+        throw `Can't find a package: ${packageName}`;
       }
       const saveDir = path.join(self.repoDir, packageName);
       yield fileutil.remove(saveDir);

@@ -5,11 +5,11 @@ const co = require('co');
 const Packman = require('./packman');
 const got = require('got');
 
-const COMMANDS_RE = / (install|remove|list)(\s+([^\s]+))?/i;
+const COMMANDS_RE = / (install|uninstall|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
 const PREFIX = '/hpm';
 
-const COMMANDS = [`${PREFIX} install `, `${PREFIX} remove `, `${PREFIX} list `];
+const COMMANDS = [`${PREFIX} install `, `${PREFIX} uninstall `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 
 module.exports = (context) => {
@@ -93,12 +93,13 @@ module.exports = (context) => {
     res.add(parseCommands(query));
   }
 
-  function _toSearchResult(cmdType, packageinfo, name, payload) {
+  function _toSearchResult(cmdType, pkgInfo, customName, payload) {
     return {
-      id: packageinfo.name,
+      id: pkgInfo.name,
       payload: payload || cmdType,
-      title: `${cmdType} ${name || packageinfo.name} ${packageinfo.version} <span style='font-size: 9pt'>by ${packageinfo.author}</span>`,
-      desc: `${packageinfo.desc}`
+      title: `${customName || pkgInfo.name} ` +
+             ` <span style='font-size: 9pt'>${pkgInfo.version} by <b>${pkgInfo.author}</b></span>`,
+      desc: `${pkgInfo.desc}`
     };
   }
 
@@ -119,9 +120,9 @@ module.exports = (context) => {
       }
       return availablePackages.map(x => _toSearchResult('install', x));
     }
-    if (command === 'remove') {
+    if (command === 'uninstall') {
       const packages = pm.listPackages();
-      return packages.map((x) => _toSearchResult('remove', x));
+      return packages.map((x) => _toSearchResult('uninstall', x));
     }
     // list
     if (command === 'list') {
@@ -146,8 +147,8 @@ module.exports = (context) => {
     if (payload === 'install') {
       co(installPackage(id, 'latest'));
       app.setInput(`${PREFIX} `);
-    } else if (payload === 'remove') {
-      co(removePackage(id));
+    } else if (payload === 'uninstall') {
+      co(uninstallPackage(id));
       app.setInput(`${PREFIX} `);
     } else if (payload === 'list') {
       const pkgInfo = getPackageInfo(id);
@@ -156,11 +157,11 @@ module.exports = (context) => {
     }
   }
 
-  function* removePackage(packageName) {
-    currentStatus = `removing <b>${packageName}`;
+  function* uninstallPackage(packageName) {
+    currentStatus = `Uninstalling <b>${packageName}`;
     try {
       yield pm.removePackage(packageName);
-      toast.enqueue(`${packageName} removed, <b>Restart</b> Hain to take effect`, 3000);
+      toast.enqueue(`${packageName} has uninstalled, <b>Restart</b> Hain to take effect`, 3000);
     } catch (e) {
       toast.enqueue(e.toString());
     } finally {
@@ -169,11 +170,11 @@ module.exports = (context) => {
   }
 
   function* installPackage(packageName, versionRange) {
-    logger.log(`installing ${packageName}`);
-    currentStatus = `installing <b>${packageName}</b>`;
+    logger.log(`Installing ${packageName}`);
+    currentStatus = `Installing <b>${packageName}</b>`;
     try {
       yield pm.installPackage(packageName, versionRange);
-      toast.enqueue(`${packageName} installed, <b>Restart</b> Hain to take effect`, 3000);
+      toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
       logger.log(`${packageName} installed`);
     } catch (e) {
       toast.enqueue(e.toString());
