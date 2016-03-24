@@ -79,6 +79,7 @@ gulp.task('build-installer', ['build'], (done) => {
     title: 'Hain',
     iconUrl: 'https://raw.githubusercontent.com/appetizermonster/Hain/master/build/icon.ico',
     setupIcon: path.resolve('./build/icon.ico'),
+    loadingGif: path.resolve('./build/installer.gif'),
     noMsi: true
   }).then(() => {
     fs.renameSync('./out/Setup.exe', './out/HainSetup-ia32.exe');
