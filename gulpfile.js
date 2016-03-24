@@ -11,6 +11,7 @@ const merge = require('merge-stream');
 const zip = require('gulp-zip');
 const electronInstaller = require('electron-winstaller');
 const fs = require('fs');
+const del = require('del');
 
 const webpack = require('webpack');
 
@@ -19,7 +20,11 @@ gulp.task('deps', () => {
     .pipe(install({ production: true }));
 });
 
-gulp.task('main', ['deps'], () => {
+gulp.task('clean:main', () => {
+  return del(['./app/main']);
+});
+
+gulp.task('main', ['deps', 'clean:main'], () => {
   const js = gulp.src('./app/main-es6/**/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
@@ -79,6 +84,7 @@ gulp.task('build-installer', ['build'], (done) => {
     title: 'Hain',
     iconUrl: 'https://raw.githubusercontent.com/appetizermonster/Hain/master/build/icon.ico',
     setupIcon: path.resolve('./build/icon.ico'),
+    loadingGif: path.resolve('./build/installer.gif'),
     noMsi: true
   }).then(() => {
     fs.renameSync('./out/Setup.exe', './out/HainSetup-ia32.exe');

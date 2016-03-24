@@ -52,12 +52,10 @@ module.exports = (context) => {
     for (const display of displays) {
       const bounds = display.bounds;
       const [left, right, top, bottom] = [bounds.x, bounds.x + bounds.width, bounds.y, bounds.y + bounds.height];
-      if (cursorPos.x < left || cursorPos.x > right) {
+      if (cursorPos.x < left || cursorPos.x > right)
         continue;
-      }
-      if (cursorPos.y < top || cursorPos.y > bottom) {
+      if (cursorPos.y < top || cursorPos.y > bottom)
         continue;
-      }
 
       selectedDisplay = display;
       break;
@@ -70,7 +68,7 @@ module.exports = (context) => {
     centerPos[0] -= windowSize[0] * 0.5; // x
     centerPos[1] -= windowSize[1] * 0.5; // y
 
-    window.setPosition(centerPos[0], centerPos[1]);
+    window.setPosition(Math.round(centerPos[0]), Math.round(centerPos[1]));
   }
 
   function showWindowOnCenter() {
