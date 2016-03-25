@@ -10,16 +10,19 @@ const conf = require('./conf');
 
 function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
+    const defaultScore = 0.5;
     const _icon = x.icon;
-    const _score = x.score || 0;
+    const _score = Math.max(0, Math.min(x.score || defaultScore, 1)); // clamp01(x.score)
     const _title = textutil.sanitize(x.title);
     const _desc = textutil.sanitize(x.desc);
+    const _group = x.group;
     const sanitizedProps = {
       pluginId: pluginId,
       title: _title,
       desc: _desc,
       score: _score,
-      icon: _icon || pluginConfig.icon
+      icon: _icon || pluginConfig.icon,
+      group: _group || pluginId
     };
     return _.assign(x, sanitizedProps);
   };
@@ -60,6 +63,7 @@ function _makeIntroHelp(pluginConfig) {
     title: textutil.sanitize(usage),
     desc: textutil.sanitize(pluginConfig.name),
     icon: pluginConfig.icon,
+    group: 'Plugins',
     score: Math.random()
   }];
 }
@@ -73,6 +77,7 @@ function _makePrefixHelp(pluginConfig, query) {
       redirect: pluginConfig.redirect || pluginConfig.prefix,
       title: textutil.sanitize(matchutil.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
+      group: 'Commands',
       icon: pluginConfig.icon
     };
   });

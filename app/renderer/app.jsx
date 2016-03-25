@@ -8,7 +8,7 @@ const ReactDOM = require('react-dom');
 const rpc = require('./rpc-client');
 const remote = require('electron').remote;
 
-import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, FontIcon } from 'material-ui';
+import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, Subheader, FontIcon } from 'material-ui';
 import { Notification } from 'react-notification';
 
 const SelectableList = SelectableContainerEnhance(List);
@@ -93,7 +93,19 @@ class AppContainer extends React.Component {
 
       if (type === 'add') {
         results = results.concat(payload);
-        results = _.sortBy(results, (x) => (x.score * -1)); // stable sort (desc)
+        results = _.orderBy(results, ['score'], ['desc']);
+
+        // Grouping results
+        const groups = _.uniq(_.map(results, x => x.group));
+        const groupedResults = [];
+        for (const x of groups) {
+          for (const k of results) {
+            if (k.group !== x)
+              continue;
+            groupedResults.push(k);
+          }
+        }
+        results = groupedResults;
       } else if (type === 'remove') {
         const _id = payload.id;
         results = _.reject(results, (x) => {
@@ -109,16 +121,18 @@ class AppContainer extends React.Component {
 
   scrollTo(selectionIndex) {
     const listItem = this.refs[`item.${selectionIndex}`];
-    if (listItem) {
-      const listItem_dom = ReactDOM.findDOMNode(listItem);
+    const header = this.refs[`header.${selectionIndex}`];
+    const target = header || listItem;
+    if (target) {
+      const target_dom = ReactDOM.findDOMNode(target);
       const listContainer_dom = ReactDOM.findDOMNode(this.refs.listContainer);
 
-      const rect = listItem_dom.getBoundingClientRect();
+      const rect = target_dom.getBoundingClientRect();
       const parentRect = listContainer_dom.getBoundingClientRect();
       const isOutside = ((rect.bottom - rect.height) <= parentRect.top || (rect.top + rect.height) >= parentRect.bottom);
 
       if (isOutside) {
-        $(listContainer_dom).scrollTo(listItem_dom);
+        $(listContainer_dom).scrollTo(target_dom);
       }
     }
   }
@@ -244,18 +258,27 @@ class AppContainer extends React.Component {
     const selectionIndex = this.state.selectionIndex;
 
     const list = [];
+    let lastGroup = null;
     for (let i = 0; i < results.length; ++i) {
       const result = results[i];
       const avatar = this.parseIconUrl(result.icon);
-
+      if (result.group !== lastGroup) {
+        list.push(
+          <div ref={ `header.${i}` }>
+            <Subheader style={{ lineHeight: '32px', fontSize: 13 }}>{ result.group }</Subheader>
+          </div>
+        );
+        lastGroup = result.group;
+      }
       list.push(
         <ListItem
           key={ `item.${i}` }
           value={ i }
           ref={ `item.${i}` }
           onKeyboardFocus={ this.handleKeyboardFocus.bind(this) }
+          style={{ fontSize: 15, lineHeight: '13px' }}
           primaryText={<div dangerouslySetInnerHTML={{ __html: result.title }} />}
-          secondaryText={<div dangerouslySetInnerHTML={{ __html: result.desc }} />}
+          secondaryText={<div style={{ fontSize: 13 }} dangerouslySetInnerHTML={{ __html: result.desc }} />}
           onClick={ this.handleItemClick.bind(this, i) }
           onKeyDown={ this.handleKeyDown.bind(this) }
           leftAvatar={avatar}
@@ -263,6 +286,7 @@ class AppContainer extends React.Component {
       );
     }
 
+    const containerStyles = { overflowX: 'hidden', overflowY: 'auto', height: '440px' };
     return (
       <div>
         <div style={{ position: 'fixed', height: '40px', 'zIndex': 1000, top: 0, width: '776px' }}>
@@ -276,11 +300,13 @@ class AppContainer extends React.Component {
             onChange={ this.handleChange.bind(this) }
             />
         </div>
-        <div ref="listContainer" style={{ 'overflowX': 'hidden', 'overflowY': 'auto', height: '440px' }}>
-          <SelectableList style={{ 'padding-top': '0px', 'padding-bottom': '0px' }}
-                          valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
-            { list }
-          </SelectableList>
+        <div>
+          <div ref="listContainer" style={ containerStyles }>
+            <SelectableList style={{ 'padding-top': '0px', 'padding-bottom': '0px' }}
+                            valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
+              { list }
+            </SelectableList>
+          </div>
         </div>
         <Notification isActive={this.state.toastOpen} message={<div dangerouslySetInnerHTML={{ __html: this.state.toastMessage }} />} />
       </div>
