@@ -9,6 +9,7 @@
   "hain": {
     "prefix": null,
     "usage": "/about, /restart, /quit",
-    "icon": "#fa fa-gear"
+    "icon": "#fa fa-gear",
+    "group": "Hain Operation Commands"
   }
 }

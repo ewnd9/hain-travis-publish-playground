@@ -7,7 +7,7 @@
   "main": "index.js",
   "hain": {
     "prefix": "=",
-    "usage": "type something to calculate",
+    "usage": "type something to calculate (e.g. =1+1)",
     "icon": "#fa fa-calculator",
     "redirect": "= "
   }

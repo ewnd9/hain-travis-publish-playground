@@ -1,8 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
-const co = require('co');
-
 const COMMANDS = ['/restart', '/quit', '/about'];
 const NAME = 'hain-commands';
 
