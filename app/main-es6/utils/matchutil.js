@@ -2,53 +2,57 @@
 
 const _ = require('lodash');
 
-function fuzzyMatchFallback(elem, keyword, testStr, matchScore) {
-  let add = 0;
+function fuzzyMatchFallback(elem, keyword, testStr, fuzzyScore) {
   let srcStr = keyword;
-  let _score = matchScore;
+  let score = fuzzyScore * 0.5;
   for (let i = 0; i < testStr.length; ++i) {
     const chr = testStr.charAt(i);
     const occurIndex = srcStr.indexOf(chr);
     if (occurIndex < 0) {
-      add *= 0.5;
-      _score = 0;
+      score = 0;
       break;
     }
-    add++;
+    score++;
     srcStr = srcStr.substring(0, occurIndex) + srcStr.substring(occurIndex + 1);
   }
-
-  _score = add + (_score * 0.5);
-  return { elem: elem, matches: [], score: _score };
+  if (srcStr.length > 0)
+    score /= srcStr.length;
+  score *= 0.1;
+  return { elem, matches: [], score, length: srcStr.length };
 }
 
 function fuzzyMatch(elem, testStr, keywordGetter) {
   const srcStr = keywordGetter(elem).toLowerCase();
 
-  const lengthScore = Math.max(0, 100 - srcStr.length) / 101;
-  let matchScore = lengthScore;
-
+  const maxLength = 15;
+  const maxScore = (maxLength + maxLength * maxLength) * 0.5;
+  let fuzzyScore = 0;
   let pattern_i = testStr.length - 1;
   let add = 1;
   const matches = [];
 
   for (let i = srcStr.length - 1; i >= 0; --i) {
-    if (pattern_i < 0 || srcStr.charCodeAt(i) !== testStr.charCodeAt(pattern_i)) {
+    const srcChr = srcStr.charAt(i);
+    const srcChrCode = srcStr.charCodeAt(i);
+    const testChrCode = testStr.charCodeAt(pattern_i);
+    if (pattern_i < 0 || srcChrCode !== testChrCode) {
       add *= 0.5;
       continue;
     }
-
     pattern_i--;
-    add = Math.max(2, 1 + add * 2);
-    matchScore += add;
+    add += 1;
+    fuzzyScore += add;
     matches.push(i);
   }
 
+  fuzzyScore = Math.min(maxScore, fuzzyScore);
+  fuzzyScore /= maxScore;
+
   const success = (pattern_i < 0);
   if (success) {
-    return { elem: elem, matches: matches.reverse(), score: matchScore };
+    return { elem, matches: matches.reverse(), score: fuzzyScore, length: srcStr.length };
   }
-  return fuzzyMatchFallback(elem, srcStr, testStr, matchScore);
+  return fuzzyMatchFallback(elem, srcStr, testStr, fuzzyScore);
 }
 
 function headMatch(elem, testStr, keywordGetter) {
@@ -93,7 +97,7 @@ function search(elems, testStr, keywordGetter, matchFunc) {
     // can't process
     return results;
   }
-  return _.sortBy(results, (x) => -x.score); // stable sort
+  return _.orderBy(results, ['score', 'length'], ['desc', 'asc']); // stable sort
 }
 
 function fuzzy(elems, testStr, keywordGetter) {
