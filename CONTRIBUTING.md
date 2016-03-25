@@ -31,4 +31,5 @@ When opening a pull request, please go by the following:
 - If the pull request is to fix an error/bug, please include the error message in the issue's description if possible
 - Include your system specs (OS, RAM and arch) in the issue description
 - Check that the app can be built and ran successfully before submitting a pull request
+- Check that the ci passes successfully. Fix any bugs in your code if our ci (appveyor) fails with an error that may have somthing to do with your added code.
 
