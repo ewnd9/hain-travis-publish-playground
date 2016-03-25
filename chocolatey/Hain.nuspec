@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Hain</id>
+    <version>0.0.2-rc4</version>
+    <title>Hain</title>
+    <authors>Heejin Lee</authors>
+    <owners>FlorianRappl</owners>
+    <licenseUrl>https://github.com/appetizermonster/hain/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/appetizermonster/hain/</projectUrl>
+    <releaseNotes>https://github.com/appetizermonster/hain/releases</releaseNotes>
+    <packageSourceUrl>https://github.com/appetizermonster/hain/tree/master/chocolatey</packageSourceUrl>
+    <projectSourceUrl>https://github.com/appetizermonster/hain</projectSourceUrl>
+    <docsUrl>https://github.com/appetizermonster/hain/tree/master/docs</docsUrl>
+    <bugTrackerUrl>https://github.com/appetizermonster/hain/issues</bugTrackerUrl>
+    <iconUrl>https://raw.githubusercontent.com/appetizermonster/hain/master/build/icon.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An 'alt+space' launcher for Windows, built with Electron.</description>
+    <summary>An alternative to Alfred on Windows, that is made with JavaScript.</summary>
+    <tags>alfred hain windows electron launcher javascript program</tags>
+  </metadata>
+  <files>
+    <file src="tools\*.*" target="tools" />
+  </files>
+</package>
