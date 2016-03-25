@@ -11,9 +11,9 @@ module.exports = (pluginContext) => {
       const ans = math.eval(query);
       if (_.isNumber(ans) || _.isString(ans) || (_.isObject(ans) && _.has(ans, 'value'))) {
         res.add({
-          id: 'math',
           title: `${query.trim()} = ${ans.toString()}`,
-          score: 1
+          score: 0.5,
+          group: 'Math'
         });
       }
     } catch (e) {

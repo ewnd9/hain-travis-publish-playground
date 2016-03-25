@@ -9,17 +9,24 @@ module.exports = (context) => {
   const app = context.app;
 
   function search(query, res) {
-    const urls = twitter.extractUrls(query);
-    if (urls.length === 0) {
+    const query_trim = query.trim();
+    if (query_trim.length <= 2)
       return;
-    }
+
+    const urls = twitter.extractUrls(query_trim);
+    if (urls.length === 0)
+      return;
 
     const url = _.first(urls);
+    const ratio = url.length / query_trim.length;
+    if (ratio <= 0.9)
+      return;
+
     res.add({
       id: url,
       title: url,
       desc: url,
-      score: 1
+      group: 'Links'
     });
   }
 
