@@ -1,11 +1,9 @@
 'use strict';
 
-module.exports = (context) => {
-  const rpc = context.rpc;
+const rpc = require('./rpc-server');
 
-  function log(msg) {
-    rpc.send('on-log', { msg });
-  }
+function log(msg) {
+  rpc.send('on-log', { msg });
+}
 
-  return { log };
-};
+module.exports = { log };
