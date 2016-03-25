@@ -8,7 +8,8 @@ SearchResult is a plain object which has a following format:
 * `desc` String - Description text, See [Text Format](text-format.md) (**required**)
 * `icon` String - Icon URL, See [Icon URL Format](icon-url-format.md) (optional, default is `icon` of package.json)
 * `redirect` String - Redirection query (optional, default is `undefined`)
-   
+* `group` String - Result group name (optional, default is `group` of package.json)
+
   
 SearchResult object is used as a argument for [Response](response.md) object.  
 You can send SearchResult using Response object,
@@ -19,7 +20,8 @@ function search(query, res) { // res is a Response object
     id: 'identifier',
     payload: {},
     title: 'Hello, World',
-    desc: 'Goodbye'
+    desc: 'Goodbye',
+    group: 'Hello'
   };
   res.add(searchResult);
 }

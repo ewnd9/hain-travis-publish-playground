@@ -10,6 +10,7 @@ All plugin configurations must be located in package.json
   - `usage` String - Plugin usage to be displayed in the empty ResultList. e.g. 'type /g' (optional, default is `prefix` value)
   - `icon` String - Icon URL, see [Icon URL Format](icon-url-format.md) (**required**)
   - `redirect` String - Query to redirect user input when user did select intro help (optional, default is `undefined`)
+  - `group` String - Default result group name (optional, default is `name` value)
 
 and...
 * `keywords` Array\<String\> - Add a keyword `hain0` for sharing your plugin (**required**)
