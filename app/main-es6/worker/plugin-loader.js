@@ -56,6 +56,7 @@ module.exports = (workerContext) => {
         pluginConfig = _.assign(pluginConfig, hainProps);
         pluginConfig.usage = pluginConfig.usage || pluginConfig.prefix;
         pluginConfig.icon = iconFmt.parseIconUrl(pluginFile, pluginConfig.icon);
+        pluginConfig.group = pluginConfig.group || pluginId;
       }
       pluginConfig.name = packageJson.name;
       pluginConfig.version = packageJson.version;

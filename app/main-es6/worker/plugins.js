@@ -22,7 +22,7 @@ function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
       desc: _desc,
       score: _score,
       icon: _icon || pluginConfig.icon,
-      group: _group || pluginId
+      group: _group || pluginConfig.group
     };
     return _.assign(x, sanitizedProps);
   };
@@ -77,7 +77,7 @@ function _makePrefixHelp(pluginConfig, query) {
       redirect: pluginConfig.redirect || pluginConfig.prefix,
       title: textutil.sanitize(matchutil.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
-      group: 'Commands',
+      group: 'Plugin Commands',
       icon: pluginConfig.icon
     };
   });
