@@ -7,7 +7,7 @@ Logger object has a following function:
   Logs your messages.  
 
 >**Note:** You can see logging messages in `Chrome Developer Tools` in the app.  
->You can open `Chrome Developer Tools` by pressing <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd> in the app.
+>You can open `Chrome Developer Tools` by pressing <kbd>F12</kbd> in the app.
 
 **Example**
 ```javascript

@@ -5,6 +5,14 @@
   <link rel="stylesheet" href="./lib/font-awesome-4.5.0/css/font-awesome.min.css">
   <script type="text/javascript">
     window.$ = window.jQuery = require('jquery');
+    // DevTools
+    document.addEventListener('keydown', function (e) {
+      if (e.which === 123 /* F12 */) {
+        require('remote').getCurrentWindow().toggleDevTools();
+      } else if (e.which === 116 /* F5 */) {
+        location.reload();
+      }
+    });
   </script>
   <script src="./lib/jquery.scrollTo.min.js"></script>
   <style type="text/css">
