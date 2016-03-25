@@ -18,7 +18,13 @@ so, I made it.
 
 ## Downloads
 
-Go to [Releases](https://github.com/appetizermonster/Hain/releases), then you can download prebuilt binaries.  
+Go to [Releases](https://github.com/appetizermonster/Hain/releases), then you can download prebuilt binaries.
+
+Alternatively, you can install Hain from the command prompt via [Chocolatey](https://chocolatey.org/packages/Hain):
+
+```ps
+cinst Hain -pre
+```
 
 ## Usage
 Run and press `alt+space` anywhere
