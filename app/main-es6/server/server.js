@@ -29,7 +29,8 @@ module.exports = (context) => {
     } else if (msg.type === 'ready') {
       isPluginsReady = true;
     } else if (msg.type === 'on-result') {
-      rpc.send('on-result', msg.args); /* ticket, type (add, remove), payload */
+      const { ticket, type, payload } = msg.args;
+      rpc.send('on-result', { ticket, type, payload });
     } else if (msg.type === 'proxy') {
       const { service, func, args } = msg.args;
       proxyHandler.handle(service, func, args);
