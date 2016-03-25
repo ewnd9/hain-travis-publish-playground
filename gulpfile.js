@@ -95,8 +95,11 @@ gulp.task('build-installer', ['build'], (done) => {
 gulp.task('build-all', ['build-zip', 'build-installer']);
 
 gulp.task('watch', ['main', 'renderer'], () => {
-  gulp.watch('./app/main-es6/**/*', ['main']);
-  gulp.watch('./app/renderer/**/*', ['renderer']);
+  const opts = {
+    debounceDelay: 2000
+  };
+  gulp.watch('./app/main-es6/**/*', opts, ['main']);
+  gulp.watch('./app/renderer/**/*', opts, ['renderer']);
 });
 
 gulp.task('default', ['main', 'renderer']);
