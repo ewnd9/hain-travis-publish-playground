@@ -112,6 +112,7 @@ function* installPackage(packageName, versionRange, destDir, tempDir) {
       yield gens;
     }
   } catch (e) {
+    console.log(e);
   }
 
   yield fileutil.move(incompleteDir, destDir);

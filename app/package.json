@@ -6,6 +6,7 @@
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
   "dependencies": {
+    "application-config-path": "^0.1.0",
     "co": "^4.6.0",
     "electron-squirrel-startup": "^0.1.4",
     "fs-extra": "^0.26.5",

@@ -1,6 +1,13 @@
 'use strict';
 
-var native = require('./addon');
+var native = /^win/.test(process.platform) ? require('./addon') : {
+  fetchFileIconAsPng: function(path, cb) {
+    cb([]);
+  },
+  saveFocus: function() {},
+  restoreFocus: function() {}
+};
+
 var wrapper = {};
 
 wrapper.fetchFileIconAsPng = function (filePath, callback) {
