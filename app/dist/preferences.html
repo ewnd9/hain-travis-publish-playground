@@ -1,0 +1,33 @@
+<html>
+
+<head>
+  <title>Hain - Preferences</title>
+  <link rel="stylesheet" href="./lib/font-awesome-4.5.0/css/font-awesome.min.css">
+  <script type="text/javascript">
+    window.$ = window.jQuery = require('jquery');
+  </script>
+  <style type="text/css">
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      src: local('Roboto'), local('Roboto-Regular'), url('./lib/Roboto-Regular.ttf') format('truetype');
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script>
+    require('../renderer/pref.js');
+  </script>
+</body>
+
+</html>

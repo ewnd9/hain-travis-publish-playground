@@ -12,6 +12,7 @@ let tray = null;
 
 function* createTray() {
   const mainWindow = require('./mainwindow');
+  const prefWindow = require('./prefwindow');
   const app = require('./app');
 
   const iconPath = path.normalize(`${__dirname}/../../../images/tray_16.ico`);
@@ -27,6 +28,9 @@ function* createTray() {
     },
     {
       type: 'separator'
+    },
+    {
+      label: 'Preferences', click: () => prefWindow.show()
     },
     {
       label: 'Restart', click: () => app.restart()
