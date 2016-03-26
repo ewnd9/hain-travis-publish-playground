@@ -1,6 +1,6 @@
 {
   "name": "hain",
-  "main": "app/main/main.js",
+  "main": "app/main-es6/main.js",
   "scripts": {},
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
@@ -22,8 +22,6 @@
     "gulp-shell": "^0.5.2",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-util": "^3.0.7",
-    "gulp-zip": "^3.2.0",
-    "merge-stream": "^1.0.0",
-    "webpack-target-electron-renderer": "^0.4.0"
+    "gulp-zip": "^3.2.0"
   }
 }

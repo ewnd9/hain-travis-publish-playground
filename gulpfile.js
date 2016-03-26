@@ -1,59 +1,43 @@
 'use strict';
 
 const gulp = require('gulp');
-const gutil = require('gulp-util');
 const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
 const packager = require('electron-packager');
 const path = require('path');
 const install = require('gulp-install');
-const merge = require('merge-stream');
 const zip = require('gulp-zip');
 const electronInstaller = require('electron-winstaller');
 const fs = require('fs');
 const del = require('del');
-
-const webpack = require('webpack');
 
 gulp.task('deps', () => {
   return gulp.src('./app/package.json')
     .pipe(install({ production: true }));
 });
 
-gulp.task('clean:main', () => {
-  return del(['./app/main']);
+gulp.task('clean:renderer', () => {
+  return del(['./app/renderer']);
 });
 
-gulp.task('main', ['deps', 'clean:main'], () => {
-  const js = gulp.src('./app/main-es6/**/*.js')
+gulp.task('renderer', ['deps', 'clean:renderer'], () => {
+  const js = gulp.src('./app/renderer-jsx/**/*.js*')
     .pipe(sourcemaps.init())
     .pipe(babel({
       presets: ['es2015', 'react']
     }))
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('./app/main'));
-  const json = gulp.src('./app/main-es6/**/*.json')
-    .pipe(gulp.dest('./app/main'));
-  return merge(js, json);
+    .pipe(gulp.dest('./app/renderer'));
+  return js;
 });
 
-gulp.task('renderer', ['deps'], (done) => {
-  webpack(require('./webpack.config.js'), (err, stats) => {
-    if (err) {
-      throw new gutil.PluginError('webpack', err);
-    }
-    gutil.log('webpack', stats.toString());
-    done();
-  });
-});
-
-gulp.task('build', ['main', 'renderer', 'deps'], (done) => {
+gulp.task('build', ['renderer', 'deps'], (done) => {
   packager({
     arch: 'ia32',
     dir: path.join(__dirname, 'app'),
     platform: 'win32',
     asar: true,
-    ignore: /(main-es6|renderer)/i,
+    ignore: /(renderer-jsx)/i,
     overwrite: true,
     out: path.join(__dirname, 'out'),
     icon: path.join(__dirname, 'build', 'icon.ico'),
@@ -94,12 +78,11 @@ gulp.task('build-installer', ['build'], (done) => {
 
 gulp.task('build-all', ['build-zip', 'build-installer']);
 
-gulp.task('watch', ['main', 'renderer'], () => {
+gulp.task('watch', ['renderer'], () => {
   const opts = {
     debounceDelay: 2000
   };
-  gulp.watch('./app/main-es6/**/*', opts, ['main']);
-  gulp.watch('./app/renderer/**/*', opts, ['renderer']);
+  gulp.watch('./app/renderer-jsx/**/*', opts, ['renderer']);
 });
 
-gulp.task('default', ['main', 'renderer']);
+gulp.task('default', ['renderer']);

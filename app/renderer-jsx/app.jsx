@@ -5,6 +5,7 @@ const _ = require('lodash');
 
 const React = require('react');
 const ReactDOM = require('react-dom');
+
 const rpc = require('./rpc-client');
 const remote = require('electron').remote;
 
