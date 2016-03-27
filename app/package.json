@@ -13,7 +13,7 @@
     "html-escape": "^1.0.2",
     "jquery": "^2.2.1",
     "lodash": "^4.6.0",
-    "material-ui": "^0.15.0-alpha.1",
+    "material-ui": "^0.15.0-alpha.2",
     "mathjs": "^3.0.0",
     "node-persist": "0.0.10",
     "react": "^0.14.7",

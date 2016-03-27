@@ -252,7 +252,7 @@ class AppContainer extends React.Component {
       const iconClass = iconUrl.substring(1);
       return <Avatar icon={<FontIcon className={iconClass} />} />;
     }
-    return <Avatar src={ iconUrl } />;
+    return <Avatar src={iconUrl} />;
   }
 
   render() {
@@ -265,24 +265,26 @@ class AppContainer extends React.Component {
       const result = results[i];
       const avatar = this.parseIconUrl(result.icon);
       if (result.group !== lastGroup) {
+        const headerId = `header.${i}`;
         list.push(
-          <div ref={ `header.${i}` }>
+          <div key={headerId} ref={headerId}>
             <Subheader style={{ lineHeight: '32px', fontSize: 13 }}>{ result.group }</Subheader>
           </div>
         );
         lastGroup = result.group;
       }
+      const itemId = `item.${i}`;
       list.push(
         <ListItem
-          key={ `item.${i}` }
-          value={ i }
-          ref={ `item.${i}` }
-          onKeyboardFocus={ this.handleKeyboardFocus.bind(this) }
+          key={itemId}
+          ref={itemId}
+          value={i}
+          onKeyboardFocus={this.handleKeyboardFocus.bind(this)}
           style={{ fontSize: 15, lineHeight: '13px' }}
           primaryText={<div dangerouslySetInnerHTML={{ __html: result.title }} />}
           secondaryText={<div style={{ fontSize: 13 }} dangerouslySetInnerHTML={{ __html: result.desc }} />}
-          onClick={ this.handleItemClick.bind(this, i) }
-          onKeyDown={ this.handleKeyDown.bind(this) }
+          onClick={this.handleItemClick.bind(this, i)}
+          onKeyDown={this.handleKeyDown.bind(this)}
           leftAvatar={avatar}
           />
       );
@@ -297,16 +299,16 @@ class AppContainer extends React.Component {
             style={{ fontSize: '20px' }}
             hintText="Enter your command!"
             fullWidth={true}
-            value={ this.state.input }
-            onKeyDown={ this.handleKeyDown.bind(this) }
-            onChange={ this.handleChange.bind(this) }
+            value={this.state.input}
+            onKeyDown={this.handleKeyDown.bind(this)}
+            onChange={this.handleChange.bind(this)}
             />
         </div>
         <div>
-          <div ref="listContainer" style={ containerStyles }>
+          <div ref="listContainer" style={containerStyles}>
             <SelectableList style={{ paddingTop: '0px', paddingBottom: '0px' }}
                             valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
-              { list }
+              {list}
             </SelectableList>
           </div>
         </div>
