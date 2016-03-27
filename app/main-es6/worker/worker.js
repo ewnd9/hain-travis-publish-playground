@@ -1,8 +1,6 @@
 /* global process */
 'use strict';
 
-require('babel-polyfill');
-
 const logger = require('../utils/logger');
 
 function proxyFunc(srcServiceName, funcName, args) {
