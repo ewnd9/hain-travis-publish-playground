@@ -41,7 +41,6 @@ ipc.on('__rpc_call', (evt, args) => {
   const params = args.params;
   const replyChannel = `__rpc_${id}`;
 
-
   const generator = funcs[funcName];
   if (generator === undefined) {
     evt.sender.send(replyChannel, 'undefined function', null);

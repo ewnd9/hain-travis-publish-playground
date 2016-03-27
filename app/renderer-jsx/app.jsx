@@ -303,7 +303,7 @@ class AppContainer extends React.Component {
         </div>
         <div>
           <div ref="listContainer" style={ containerStyles }>
-            <SelectableList style={{ 'padding-top': '0px', 'padding-bottom': '0px' }}
+            <SelectableList style={{ paddingTop: '0px', paddingBottom: '0px' }}
                             valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
               { list }
             </SelectableList>
