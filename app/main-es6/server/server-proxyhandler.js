@@ -19,7 +19,7 @@ proxyHandlers.app = {
   quit: () => app.quit(),
   close: () => app.close(),
   setInput: (text) => {
-    rpc.send('set-input', text);
+    rpc.send('mainwindow', 'set-input', text);
   }
 };
 

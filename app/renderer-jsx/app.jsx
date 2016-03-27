@@ -6,7 +6,8 @@ const _ = require('lodash');
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const rpc = require('./rpc-client');
+const RPCRenderer = require('./rpc-renderer');
+const rpc = new RPCRenderer('mainwindow');
 const remote = require('electron').remote;
 
 import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, Subheader, FontIcon } from 'material-ui';

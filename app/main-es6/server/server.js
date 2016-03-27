@@ -30,7 +30,7 @@ function handleWorkerMessage(msg) {
     isPluginsReady = true;
   } else if (msg.type === 'on-result') {
     const { ticket, type, payload } = msg.args;
-    rpc.send('on-result', { ticket, type, payload });
+    rpc.send('mainwindow', 'on-result', { ticket, type, payload });
   } else if (msg.type === 'proxy') {
     const { service, func, args } = msg.args;
     proxyHandler.handle(service, func, args);

@@ -1,38 +1,50 @@
 'use strict';
 
+const assert = require('assert');
 const ipc = require('electron').ipcMain;
 const co = require('co');
 const logger = require('../utils/logger');
 
 const funcs = {};
-const msgQueue = [];
-let connectedClient = null;
+const clients = {};
+const msgQueuePerClients = {};
 
 function define(funcName, func) {
   funcs[funcName] = func;
 }
 
-function send(channel, msg) {
-  msgQueue.push({ channel, msg });
+function send(clientName, channel, msg) {
+  let msgQueue = msgQueuePerClients[clientName];
+  if (msgQueue === undefined) {
+    msgQueue = [];
+    msgQueuePerClients[clientName] = msgQueue;
+  }
+  msgQueue.push({ clientName, channel, msg });
 }
 
 function on(channel, func) {
   ipc.on(channel, func);
 }
 
-function processQueue() {
+function startProcessingQueue() {
   setInterval(() => {
-    if (connectedClient === null)
-      return;
-    while (msgQueue.length > 0) {
-      const item = msgQueue.shift();
-      connectedClient.send(item.channel, item.msg);
+    for (const clientName in msgQueuePerClients) {
+      const client = clients[clientName];
+      if (client === undefined)
+        continue;
+
+      const msgQueue = msgQueuePerClients[clientName];
+      while (msgQueue.length > 0) {
+        const item = msgQueue.shift();
+        client.send(item.channel, item.msg);
+      }
     }
   }, 10);
 }
 
 ipc.on('__connect', (evt, args) => {
-  connectedClient = evt.sender;
+  const clientName = args;
+  clients[clientName] = evt.sender;
 });
 
 ipc.on('__rpc_call', (evt, args) => {
@@ -56,5 +68,5 @@ ipc.on('__rpc_call', (evt, args) => {
 });
 
 module.exports = {
-  define, send, on, processQueue
+  define, send, on, startProcessingQueue
 };

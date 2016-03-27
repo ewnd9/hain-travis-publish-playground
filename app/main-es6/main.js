@@ -1,7 +1,5 @@
 'use strict';
 
-require('babel-polyfill');
-
 ((function startup() {
   if (require('electron-squirrel-startup')) return;
 
@@ -25,7 +23,7 @@ require('babel-polyfill');
   co(function* () {
     require('./server/app/app').launch();
     require('./server/server').initialize();
-    require('./server/rpc-server').processQueue();
+    require('./server/rpc-server').startProcessingQueue();
   }).catch((err) => {
     dialog.showErrorBox('Hain', `Unhandled Error: ${err.stack || err}`);
     electronApp.quit();
