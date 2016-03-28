@@ -24,8 +24,8 @@ class RPCRenderer {
     ipc.on(channel, func);
   }
 
-  send(channel, args) {
-    ipc.send(channel, args);
+  send(channel, msg) {
+    ipc.send(channel, msg);
   }
 
   call(funcName, params) {

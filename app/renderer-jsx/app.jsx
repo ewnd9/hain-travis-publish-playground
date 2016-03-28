@@ -68,20 +68,19 @@ class AppContainer extends React.Component {
   componentDidMount() {
     this.refs.input.focus();
     rpc.connect();
-    rpc.on('on-toast', (evt, args) => {
-      const { message, duration } = args;
+    rpc.on('on-toast', (evt, msg) => {
+      const { message, duration } = msg;
       this.toastQueue.push({ message, duration });
     });
-    rpc.on('on-log', (evt, args) => {
-      const { msg } = args;
+    rpc.on('on-log', (evt, msg) => {
       console.log(msg);
     });
-    rpc.on('set-input', (evt, args) => {
-      this.setState({ input: args, selectionIndex: 0 });
-      this.search(args);
+    rpc.on('set-input', (evt, msg) => {
+      this.setState({ input: msg, selectionIndex: 0 });
+      this.search(msg);
     });
-    rpc.on('on-result', (evt, args) => {
-      const { ticket, type, payload } = args;
+    rpc.on('on-result', (evt, msg) => {
+      const { ticket, type, payload } = msg;
       if (this.lastSearchTicket !== ticket)
         return;
 
@@ -214,12 +213,12 @@ class AppContainer extends React.Component {
       return;
     }
 
-    const args = {
+    const params = {
       pluginId: item.pluginId,
       id: item.id,
       payload: item.payload
     };
-    rpc.call('execute', args);
+    rpc.call('execute', params);
   }
 
   handleEnter(key) {

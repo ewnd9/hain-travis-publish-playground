@@ -12,36 +12,33 @@ const proxyHandler = require('./server-proxyhandler');
 const app = require('./app/app');
 
 let workerProcess = null;
-let _delayedSearch = 0;
 let isPluginsReady = false;
 
-function searchAll(ticket, query) {
-  workerProcess.send({
-    type: 'searchAll',
-    args: { ticket, query }
-  });
-}
+const workerHandlers = {
+  error: (payload) => logger.log(`Unhandled Plugin Error: ${payload}`),
+  ready: (payload) => (isPluginsReady = true),
+  proxy: (payload) => {
+    const { service, func, args } = payload;
+    proxyHandler.handle(service, func, args);
+  },
+  'on-ipc-pipe': (payload) => {
+    const { target, channel, msg } = payload;
+    rpc.send(target, channel, msg);
+  }
+};
 
 function handleWorkerMessage(msg) {
-  if (msg.type === 'error') {
-    const err = msg.error;
-    logger.log(`Unhandled plugin Error: ${err}`);
-  } else if (msg.type === 'ready') {
-    isPluginsReady = true;
-  } else if (msg.type === 'on-result') {
-    const { ticket, type, payload } = msg.args;
-    rpc.send('mainwindow', 'on-result', { ticket, type, payload });
-  } else if (msg.type === 'proxy') {
-    const { service, func, args } = msg.args;
-    proxyHandler.handle(service, func, args);
-  }
+  const handler = workerHandlers[msg.type];
+  if (handler === undefined)
+    throw new Error('can\'t find a worker handler');
+  handler(msg.payload);
 }
 
 function initialize() {
   const workerPath = path.join(__dirname, '../worker/worker.js');
-  if (!fs.existsSync(workerPath)) {
+  if (!fs.existsSync(workerPath))
     throw new Error('can\'t execute plugin process');
-  }
+
   workerProcess = cp.fork(workerPath, [], {
     silent: true
   });
@@ -56,29 +53,23 @@ function initialize() {
   });
 }
 
-rpc.on('search', (evt, params) => {
-  const { ticket, query } = params;
+function sendmsg(type, payload) {
+  workerProcess.send({ type, payload });
+}
 
-  clearInterval(_delayedSearch);
-  if (workerProcess === null || !workerProcess.connected) {
-    logger.log('waiting plugins...');
-    _delayedSearch = setInterval(() => {
-      if (workerProcess !== null && workerProcess.connected) {
-        searchAll(ticket, query);
-        clearInterval(_delayedSearch);
-      }
-    }, 500);
-    return;
-  }
-  searchAll(ticket, query);
+rpc.on('search', (evt, msg) => {
+  const { ticket, query } = msg;
+  sendmsg('searchAll', { ticket, query });
+});
+
+rpc.define('worker-pipe', function* (params) {
+  const { type, payload } = params;
+  sendmsg(type, payload);
 });
 
 rpc.define('execute', function* (params) {
   const { pluginId, id, payload } = params;
-  workerProcess.send({
-    type: 'execute',
-    args: { pluginId, id, payload }
-  });
+  sendmsg('execute', { pluginId, id, payload });
 });
 
 rpc.define('close', function* () {

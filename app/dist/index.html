@@ -1,5 +1,5 @@
+<!doctype html>
 <html>
-
 <head>
   <title>Hain</title>
   <link rel="stylesheet" href="./lib/font-awesome-4.5.0/css/font-awesome.min.css">
@@ -13,6 +13,7 @@
         location.reload();
       }
     });
+    process.env.NODE_ENV = 'production';
   </script>
   <script src="./lib/jquery.scrollTo.min.js"></script>
   <style type="text/css">
@@ -31,12 +32,10 @@
     }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
   <script>
     require('../renderer/app.js');
   </script>
 </body>
-
 </html>

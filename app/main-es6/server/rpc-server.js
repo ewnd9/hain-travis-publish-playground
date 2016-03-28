@@ -42,15 +42,13 @@ function startProcessingQueue() {
   }, 10);
 }
 
-ipc.on('__connect', (evt, args) => {
-  const clientName = args;
+ipc.on('__connect', (evt, msg) => {
+  const clientName = msg;
   clients[clientName] = evt.sender;
 });
 
-ipc.on('__rpc_call', (evt, args) => {
-  const funcName = args.funcName;
-  const id = args.id;
-  const params = args.params;
+ipc.on('__rpc_call', (evt, msg) => {
+  const { funcName, id, params } = msg;
   const replyChannel = `__rpc_${id}`;
 
   const generator = funcs[funcName];

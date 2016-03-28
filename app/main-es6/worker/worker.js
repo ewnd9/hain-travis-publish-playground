@@ -6,7 +6,7 @@ const logger = require('../utils/logger');
 function proxyFunc(srcServiceName, funcName, args) {
   process.send({
     type: 'proxy',
-    args: {
+    payload: {
       service: srcServiceName,
       func: funcName,
       args
