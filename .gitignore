@@ -13,3 +13,4 @@ node_modules
 /_launched_
 
 /out
+*.nupkg
