@@ -28,7 +28,7 @@ module.exports = (context) => {
         logger.log('please wait a seconds, you can use shortcut after loaded');
         return;
       }
-      window.showWindowOnCenter();
+      window.toggleWindow();
     });
   }
 
