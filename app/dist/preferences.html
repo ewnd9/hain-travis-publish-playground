@@ -1,33 +1,21 @@
+<!doctype html>
 <html>
-
 <head>
   <title>Hain - Preferences</title>
-  <link rel="stylesheet" href="./lib/font-awesome-4.5.0/css/font-awesome.min.css">
-  <script type="text/javascript">
-    window.$ = window.jQuery = require('jquery');
-  </script>
+  <link rel="stylesheet" href="./lib/common.css">
+  <link rel="stylesheet" href="./lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./lib/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
+  <script src="./lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
   <style type="text/css">
-    @font-face {
-      font-family: 'Roboto';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Roboto'), local('Roboto-Regular'), url('./lib/Roboto-Regular.ttf') format('truetype');
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 1.4;
+    body, div, h1 {
+      font-family: Roboto, sans-serif;
     }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
   <script>
     require('../renderer/pref.js');
   </script>
 </body>
-
 </html>

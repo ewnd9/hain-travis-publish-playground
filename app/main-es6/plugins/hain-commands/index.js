@@ -1,6 +1,6 @@
 'use strict';
 
-const COMMANDS = ['/restart', '/quit', '/about'];
+const COMMANDS = ['/restart', '/quit', '/about', '/preferences'];
 const NAME = 'hain-commands';
 
 module.exports = (context) => {
@@ -31,6 +31,13 @@ module.exports = (context) => {
         desc: NAME
       });
     }
+    if (query_lower === '/preferences') {
+      return res.add({
+        id: 'preferences',
+        title: 'Open Preferences',
+        desc: NAME
+      });
+    }
     return res.add(_makeCommandsHelp(query));
   }
 
@@ -44,6 +51,9 @@ module.exports = (context) => {
     } else if (id === 'about') {
       toast.enqueue('Thank you for using Hain');
       app.setInput('');
+    } else if (id === 'preferences') {
+      app.openPreferences();
+      app.close();
     }
   }
 

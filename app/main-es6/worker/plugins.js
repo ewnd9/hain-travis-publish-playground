@@ -3,10 +3,13 @@
 
 const _ = require('lodash');
 
+const jsonSchemaDefaults = require('json-schema-defaults');
+
 const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
+const prefStore = require('./pref-store');
 
-const conf = require('./conf');
+const conf = require('../conf');
 
 function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
@@ -89,6 +92,7 @@ module.exports = (workerContext) => {
 
   let plugins = null;
   let pluginConfigs = null;
+  let pluginPrefIds = null;
 
   const pluginContext = {
     PLUGIN_API_VERSION: 'hain0',
@@ -124,6 +128,8 @@ module.exports = (workerContext) => {
     const ret = pluginLoader.loadPlugins(pluginContext);
     plugins = ret.plugins;
     pluginConfigs = ret.pluginConfigs;
+    pluginPrefIds = _.reject(_.keys(pluginConfigs), x => pluginConfigs[x].prefSchema === null);
+
     _startup();
   }
 
@@ -184,9 +190,38 @@ module.exports = (workerContext) => {
     }
   }
 
+  function getPrefIds() {
+    return pluginPrefIds;
+  }
+
+  function getPreferences(prefId) {
+    const prefSchema = pluginConfigs[prefId].prefSchema;
+    return {
+      prefId,
+      schema: JSON.stringify(prefSchema),
+      model: prefStore.get(prefId)
+    };
+  }
+
+  function updatePreferences(prefId, model) {
+    prefStore.set(prefId, model);
+  }
+
+  function resetPreferences(prefId) {
+    const prefSchema = pluginConfigs[prefId].prefSchema;
+    const model = jsonSchemaDefaults(prefSchema);
+    updatePreferences(prefId, model);
+    console.log(model);
+    return getPreferences(prefId);
+  }
+
   return {
     initialize,
     searchAll,
-    execute
+    execute,
+    getPrefIds,
+    getPreferences,
+    updatePreferences,
+    resetPreferences
   };
 };

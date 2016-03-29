@@ -18,7 +18,8 @@ proxyHandlers.app = {
   restart: () => app.restart(),
   quit: () => app.quit(),
   close: () => app.close(),
-  setInput: (text) => rpc.send('mainwindow', 'set-input', text)
+  setInput: (text) => rpc.send('mainwindow', 'set-input', text),
+  openPreferences: () => app.openPreferences()
 };
 
 proxyHandlers.toast = {

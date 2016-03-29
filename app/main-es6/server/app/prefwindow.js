@@ -10,13 +10,14 @@ function show() {
     return;
   browserWindow = new BrowserWindow({
     width: 800,
-    height: 510,
+    height: 550,
     center: true,
     show: false,
     maximizable: false
   });
   browserWindow.loadURL(`file://${__dirname}/../../../dist/preferences.html`);
   browserWindow.on('close', () => (browserWindow = null));
+  browserWindow.setMenuBarVisibility(false);
   browserWindow.show();
 }
 

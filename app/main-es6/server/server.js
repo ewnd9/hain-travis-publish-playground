@@ -10,11 +10,12 @@ const electronApp = require('electron').app;
 const rpc = require('./rpc-server');
 const proxyHandler = require('./server-proxyhandler');
 const app = require('./app/app');
+const pref = require('./pref');
 
 let workerProcess = null;
 let isPluginsReady = false;
 
-const workerHandlers = {
+let workerHandlers = {
   error: (payload) => logger.log(`Unhandled Plugin Error: ${payload}`),
   ready: (payload) => (isPluginsReady = true),
   proxy: (payload) => {
@@ -26,6 +27,10 @@ const workerHandlers = {
     rpc.send(target, channel, msg);
   }
 };
+
+function mergeWorkerHandlers(handlers) {
+  workerHandlers = _.assign(workerHandlers, handlers);
+}
 
 function handleWorkerMessage(msg) {
   const handler = workerHandlers[msg.type];
@@ -57,14 +62,66 @@ function sendmsg(type, payload) {
   workerProcess.send({ type, payload });
 }
 
+const appPrefId = 'Hain';
+const workerPrefHandlers = {
+  'on-get-plugin-pref-ids': (payload) => {
+    const pluginPrefIds = payload;
+    const appPrefItem = {
+      id: appPrefId,
+      group: 'Application'
+    };
+    const pluginPrefItems = pluginPrefIds.map(x => ({
+      id: x,
+      group: 'Plugins'
+    }));
+    const prefItems = [appPrefItem].concat(pluginPrefItems);
+    rpc.send('prefwindow', 'on-get-pref-items', prefItems);
+  },
+  'on-get-preferences': (payload) => {
+    // const { prefId, schema, model } = payload;
+    rpc.send('prefwindow', 'on-get-preferences', payload);
+  }
+};
+mergeWorkerHandlers(workerPrefHandlers);
+
+rpc.on('getPrefItems', (evt, msg) => {
+  sendmsg('getPluginPrefIds');
+});
+
+rpc.on('getPreferences', (evt, msg) => {
+  const prefId = msg;
+  if (prefId === appPrefId) {
+    const schema = JSON.stringify(pref.schema);
+    const model = pref.get();
+    rpc.send('prefwindow', 'on-get-preferences', { prefId, schema, model });
+    return;
+  }
+  sendmsg('getPreferences', prefId);
+});
+
+rpc.on('updatePreferences', (evt, msg) => {
+  const { prefId, model } = msg;
+  if (prefId === appPrefId) {
+    pref.update(model);
+    return;
+  }
+  sendmsg('updatePreferences', msg);
+});
+
+rpc.on('resetPreferences', (evt, msg) => {
+  const prefId = msg;
+  if (prefId === appPrefId) {
+    const schema = JSON.stringify(pref.schema);
+    const model = pref.reset();
+    rpc.send('prefwindow', 'on-get-preferences', { prefId, schema, model });
+    return;
+  }
+  sendmsg('resetPreferences', prefId);
+});
+
 rpc.on('search', (evt, msg) => {
   const { ticket, query } = msg;
   sendmsg('searchAll', { ticket, query });
-});
-
-rpc.define('worker-pipe', function* (params) {
-  const { type, payload } = params;
-  sendmsg(type, payload);
 });
 
 rpc.define('execute', function* (params) {

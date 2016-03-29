@@ -3,22 +3,28 @@
 
 const logger = require('../utils/logger');
 
+function send(type, payload) {
+  process.send({ type, payload });
+}
+
 function proxyFunc(srcServiceName, funcName, args) {
-  process.send({
-    type: 'proxy',
-    payload: {
-      service: srcServiceName,
-      func: funcName,
-      args
-    }
+  send('proxy', {
+    service: srcServiceName,
+    func: funcName,
+    args
   });
+}
+
+function ipcPipe(target, channel, msg) {
+  send('on-ipc-pipe', { target, channel, msg });
 }
 
 const appProxy = {
   restart: () => proxyFunc('app', 'restart'),
   quit: () => proxyFunc('app', 'quit'),
   close: () => proxyFunc('app', 'close'),
-  setInput: (text) => proxyFunc('app', 'setInput', text)
+  setInput: (text) => proxyFunc('app', 'setInput', text),
+  openPreferences: () => proxyFunc('app', 'openPreferences')
 };
 
 const toastProxy = {
@@ -44,32 +50,54 @@ const workerContext = {
 
 let plugins = null;
 
+const msgHandlers = {
+  searchAll: (payload) => {
+    const { query, ticket } = payload;
+    const res = (obj) => {
+      const pipeMsg = {
+        ticket,
+        type: obj.type,
+        payload: obj.payload
+      };
+      ipcPipe('mainwindow', 'on-result', pipeMsg);
+    };
+    plugins.searchAll(query, res);
+  },
+  execute: (_payload) => {
+    const { pluginId, id, payload } = _payload;
+    plugins.execute(pluginId, id, payload);
+  },
+  getPluginPrefIds: (payload) => {
+    const prefIds = plugins.getPrefIds();
+    send('on-get-plugin-pref-ids', prefIds);
+  },
+  getPreferences: (payload) => {
+    const prefId = payload;
+    const pref = plugins.getPreferences(prefId);
+    send('on-get-preferences', pref);
+  },
+  updatePreferences: (payload) => {
+    const { prefId, model } = payload;
+    plugins.updatePreferences(prefId, model);
+  },
+  resetPreferences: (payload) => {
+    const prefId = payload;
+    const pref = plugins.resetPreferences(prefId);
+    send('on-get-preferences', pref);
+  }
+};
+
 function handleProcessMessage(msg) {
   if (plugins === null)
     return;
 
   try {
-    const { type, args } = msg;
-    if (type === 'searchAll') {
-      const { query, ticket } = args;
-      const res = (obj) => {
-        process.send({
-          type: 'on-result',
-          args: {
-            ticket,
-            type: obj.type,
-            payload: obj.payload
-          }
-        });
-      };
-      plugins.searchAll(query, res);
-    } else if (type === 'execute') {
-      const { pluginId, id, payload } = args;
-      plugins.execute(pluginId, id, payload);
-    }
+    const { type, payload } = msg;
+    const msgHandler = msgHandlers[type];
+    msgHandler(payload);
   } catch (e) {
     const err = e.stack || e;
-    process.send({ type: 'error', error: err });
+    send('error', err);
     logger.log(err);
   }
 }
@@ -87,9 +115,9 @@ try {
   plugins.initialize();
 
   process.on('message', handleProcessMessage);
-  process.send({ type: 'ready' });
+  send('ready');
 } catch (e) {
   const err = e.stack || e;
-  process.send({ type: 'error', error: err });
+  send('error', err);
   logger.log(err);
 }

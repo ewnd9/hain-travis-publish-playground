@@ -13,13 +13,16 @@ const firstLaunch = require('./firstlaunch');
 const autolaunch = require('./autolaunch');
 
 const mainWindow = require('./mainwindow');
+const prefWindow = require('./prefwindow');
 const iconProtocol = require('./iconprotocol');
 const toast = require('../toast');
+const pref = require('../pref');
 
 let _isRestarting = false;
 
 function registerShortcut() {
-  globalShortcut.register('alt+space', () => {
+  const shortcut = pref.get().shortcut;
+  globalShortcut.register(shortcut, () => {
     if (_isRestarting)
       return;
     if (mainWindow.isContentLoading()) {
@@ -94,4 +97,8 @@ function quit() {
   electronApp.quit();
 }
 
-module.exports = { launch, close, restart, quit };
+function openPreferences() {
+  prefWindow.show();
+}
+
+module.exports = { launch, close, restart, quit, openPreferences };

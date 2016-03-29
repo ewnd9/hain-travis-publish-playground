@@ -1,6 +1,5 @@
 'use strict';
 
-const assert = require('assert');
 const ipc = require('electron').ipcMain;
 const co = require('co');
 const logger = require('../utils/logger');
@@ -39,7 +38,7 @@ function startProcessingQueue() {
         client.send(item.channel, item.msg);
       }
     }
-  }, 10);
+  }, 5);
 }
 
 ipc.on('__connect', (evt, msg) => {

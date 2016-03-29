@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "customFolders": {
+      "type": "array",
+      "title": "Additional Folders (requires restart)",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
