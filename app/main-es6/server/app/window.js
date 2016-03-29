@@ -81,6 +81,18 @@ module.exports = (context) => {
     mainWindow.show();
   }
 
+  function toggleWindow() {
+    if (mainWindow === null) {
+      return;
+    }
+
+    if (mainWindow.isVisible()) {
+      hideAndRefreshWindow();
+    } else {
+      showWindowOnCenter();
+    }
+  }
+
   function hideAndRefreshWindow(dontRestoreFocus) {
     if (mainWindow === null) {
       return;
@@ -137,6 +149,7 @@ module.exports = (context) => {
   return {
     createWindow,
     showWindowOnCenter,
+    toggleWindow,
     hideAndRefreshWindow,
     createTray: co.wrap(createTray),
     isContentLoading,
