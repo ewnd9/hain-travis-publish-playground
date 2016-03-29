@@ -19,6 +19,7 @@
 * [hain-plugin-money](https://github.com/Metrakit/hain-plugin-money)
 * [hain-plugin-movie](https://github.com/Metrakit/hain-plugin-movie)
 * [hain-plugin-trello](https://github.com/Metrakit/hain-plugin-trello)
+* [hain-plugin-devdocs](https://github.com/Braunson/hain-plugin-devdocs)
 
 ## Guides
 
