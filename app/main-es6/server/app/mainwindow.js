@@ -65,10 +65,8 @@ function _centerWindowOnSelectedScreen(window) {
 }
 
 function showWindowOnCenter() {
-  if (browserWindow === null) {
-    console.log('no window');
+  if (browserWindow === null)
     return;
-  }
 
   platformUtil.saveFocus();
   _centerWindowOnSelectedScreen(browserWindow);
@@ -87,6 +85,17 @@ function hideAndRefreshWindow(dontRestoreFocus) {
   }
 }
 
+function toggleWindow() {
+  if (browserWindow === null)
+    return;
+
+  if (browserWindow.isVisible()) {
+    hideAndRefreshWindow();
+  } else {
+    showWindowOnCenter();
+  }
+}
+
 function isContentLoading() {
   return browserWindow.webContents.isLoading();
 }
@@ -95,5 +104,6 @@ module.exports = {
   createWindow,
   showWindowOnCenter,
   hideAndRefreshWindow,
+  toggleWindow,
   isContentLoading
 };

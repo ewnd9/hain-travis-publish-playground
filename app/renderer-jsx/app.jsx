@@ -75,9 +75,8 @@ class AppContainer extends React.Component {
     rpc.on('on-log', (evt, msg) => {
       console.log(msg);
     });
-    rpc.on('set-input', (evt, msg) => {
-      this.setState({ input: msg, selectionIndex: 0 });
-      this.search(msg);
+    rpc.on('set-input', (evt, args) => {
+      this.setInput(args);
     });
     rpc.on('on-result', (evt, msg) => {
       const { ticket, type, payload } = msg;
@@ -118,6 +117,12 @@ class AppContainer extends React.Component {
     });
     setInterval(this.processToast.bind(this), 200);
     this.search('');
+  }
+
+  setInput(args) {
+    this.setState({ input: args, selectionIndex: 0 });
+    this.refs.input.focus();
+    this.search(args);
   }
 
   scrollTo(selectionIndex) {
@@ -207,9 +212,7 @@ class AppContainer extends React.Component {
     if (item === undefined)
       return;
     if (item.redirect) {
-      const newInput = item.redirect;
-      this.setState({ input: newInput, selectionIndex: 0 });
-      this.search(newInput);
+      this.setInput(item.redirect);
       return;
     }
 

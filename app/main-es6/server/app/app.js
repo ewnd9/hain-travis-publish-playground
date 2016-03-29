@@ -29,7 +29,7 @@ function registerShortcut() {
       logger.log('please wait a seconds, you can use shortcut after loaded');
       return;
     }
-    mainWindow.showWindowOnCenter();
+    mainWindow.toggleWindow();
   });
 }
 

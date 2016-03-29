@@ -1,5 +1,6 @@
 'use strict';
 
+const pkg = require('../../../package.json');
 const COMMANDS = ['/restart', '/quit', '/about', '/preferences'];
 const NAME = 'hain-commands';
 
@@ -20,7 +21,7 @@ module.exports = (context) => {
     if (query_lower === '/about') {
       return res.add({
         id: 'about',
-        title: 'Hain by Heejin Lee &lt;monster@teamappetizer.com&gt;',
+        title: `Hain v${pkg.version} by Heejin Lee &lt;monster@teamappetizer.com&gt;`,
         desc: NAME
       });
     }
