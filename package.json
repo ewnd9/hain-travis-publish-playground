@@ -1,7 +1,10 @@
 {
   "name": "hain",
   "main": "app/main-es6/main.js",
-  "scripts": {},
+  "scripts": {
+    "dev": "gulp && electron .",
+    "build": "gulp build-all"
+  },
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
   "devDependencies": {
