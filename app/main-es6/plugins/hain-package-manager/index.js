@@ -107,7 +107,6 @@ module.exports = (context) => {
   }
 
   function parseCommands(query) {
-    // install
     const parsed = COMMANDS_RE.exec(query.toLowerCase());
     if (!parsed) {
       return _makeCommandsHelp(query);
@@ -115,13 +114,17 @@ module.exports = (context) => {
     const command = parsed[1];
     const arg = parsed[2];
     if (command === 'install') {
+      const installedPackages = pm.listPackages();
+      const packages = availablePackages.filter(x => {
+        return !_.some(installedPackages, { 'name': x.name });
+      });
       if (arg) {
-        return matchutil.fuzzy(availablePackages, arg.trim(), x => x.name).map(x => {
+        return matchutil.fuzzy(packages, arg.trim(), x => x.name).map(x => {
           const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
           return _toSearchResult('install', x.elem, m);
         });
       }
-      return availablePackages.map(x => _toSearchResult('install', x));
+      return packages.map(x => _toSearchResult('install', x));
     }
     if (command === 'uninstall') {
       const packages = pm.listPackages();
