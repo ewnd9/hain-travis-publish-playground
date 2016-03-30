@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
 const iconFmt = require('./icon-fmt');
 const conf = require('../conf');
 const prefStore = require('./pref-store');
-const jsonSchemaDefaults = require('json-schema-defaults');
+const schemaDefaults = require('../../utils/schema-defaults');
 
 module.exports = (workerContext) => {
   function ensurePluginRepos() {
@@ -107,7 +107,7 @@ module.exports = (workerContext) => {
         continue;
 
       if (pluginConfig.prefSchema !== null) {
-        const defaults = jsonSchemaDefaults(pluginConfig.prefSchema);
+        const defaults = schemaDefaults(pluginConfig.prefSchema);
         if (prefStore.has(pluginId) === false) {
           prefStore.set(pluginId, defaults);
         }

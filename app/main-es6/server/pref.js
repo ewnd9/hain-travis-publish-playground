@@ -1,6 +1,6 @@
 'use strict';
 
-const jsonSchemaDefaults = require('json-schema-defaults');
+const schemaDefaults = require('../../utils/schema-defaults');
 
 const conf = require('../conf');
 const schema = require('./preferences.json');
@@ -23,7 +23,7 @@ function update(model) {
 }
 
 function reset() {
-  const defaults = jsonSchemaDefaults(schema);
+  const defaults = schemaDefaults(schema);
   prefStore.set(PREF_KEY, defaults);
   return defaults;
 }

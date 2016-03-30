@@ -3,7 +3,7 @@
 
 const _ = require('lodash');
 
-const jsonSchemaDefaults = require('json-schema-defaults');
+const schemaDefaults = require('../../utils/schema-defaults');
 
 const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
@@ -209,9 +209,8 @@ module.exports = (workerContext) => {
 
   function resetPreferences(prefId) {
     const prefSchema = pluginConfigs[prefId].prefSchema;
-    const model = jsonSchemaDefaults(prefSchema);
+    const model = schemaDefaults(prefSchema);
     updatePreferences(prefId, model);
-    console.log(model);
     return getPreferences(prefId);
   }
 

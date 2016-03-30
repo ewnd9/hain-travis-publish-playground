@@ -7,9 +7,8 @@ const ReactDOM = require('react-dom');
 
 import { LeftNav, List, ListItem, Subheader, RaisedButton } from 'material-ui';
 import { SelectableContainerEnhance } from 'material-ui/lib/hoc/selectable-enhance';
-import { SchemaForm } from 'react-schema-form';
+import SchemaForm from './schema-form/schema-form';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import utils from 'react-schema-form/lib/utils';
 
 injectTapEventPlugin();
 const SelectableList = SelectableContainerEnhance(List);
@@ -30,9 +29,7 @@ class Preferences extends React.Component {
     this.commitTimers = {};
   }
 
-  onModelChange(key, val) {
-    const newModel = this.state.model;
-    utils.selectOrSet(key, newModel, val);
+  onModelChange(newModel) {
     // Do not commit if nothing changed
     if (_.isEqual(newModel, this.state.modelCopy))
       return;
@@ -67,8 +64,7 @@ class Preferences extends React.Component {
         selectedPrefId: msg.prefId,
         schema: JSON.parse(msg.schema),
         model: msg.model,
-        modelCopy: _.cloneDeep(msg.model),
-        formKey: Math.random()
+        modelCopy: _.cloneDeep(msg.model)
       });
     });
     rpc.send('getPrefItems');
@@ -112,8 +108,8 @@ class Preferences extends React.Component {
     let schemaForm = null;
     if (this.state.schema) {
       schemaForm = (
-        <SchemaForm key={this.state.formKey} schema={this.state.schema} form={['*']}
-              model={this.state.model} onModelChange={this.onModelChange.bind(this)} />
+        <SchemaForm schema={this.state.schema} model={this.state.model} title={selectedPrefId}
+                    onChange={this.onModelChange.bind(this)} />
       );
     }
 
@@ -125,7 +121,6 @@ class Preferences extends React.Component {
         </SelectableList>
         </LeftNav>
         <div style={{ paddingLeft: '265px', paddingTop: '5px' }}>
-          <h1>{selectedPrefId}</h1>
           <div style={{ padding: '5px', paddingTop: '0px' }}>
             {schemaForm}
             <br />

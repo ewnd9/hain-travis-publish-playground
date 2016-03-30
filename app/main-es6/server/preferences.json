@@ -4,14 +4,22 @@
     "shortcut": {
       "type": "string",
       "title": "Quick-Open Shorcut (requires restart)",
-      "default": "alt+space"
+      "default": "alt+space",
+      "minLength": 3
     },
     "proxy": {
       "type": "object",
-      "title": "Global Proxy Settings",
+      "title": "Global Proxy Settings (not working)",
       "properties": {
-        "proxyUrl": {
+        "url": {
           "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "use": {
+          "type": "boolean",
+          "title": "Use Proxy"
         }
       }
     }
