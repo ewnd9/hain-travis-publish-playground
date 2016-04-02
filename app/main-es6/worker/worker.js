@@ -2,6 +2,7 @@
 'use strict';
 
 const logger = require('../utils/logger');
+const PrefObj = require('./pref-obj');
 
 function send(type, payload) {
   process.send({ type, payload });
@@ -41,16 +42,56 @@ const loggerProxy = {
   log: (msg) => proxyFunc('logger', 'log', msg)
 };
 
+const globalPrefObj = new PrefObj({});
+
 const workerContext = {
   app: appProxy,
   toast: toastProxy,
   shell: shellProxy,
-  logger: loggerProxy
+  logger: loggerProxy,
+  globalPreferences: globalPrefObj
 };
 
 let plugins = null;
 
+function handleProcessMessage(msg) {
+  try {
+    const { type, payload } = msg;
+    const msgHandler = msgHandlers[type];
+    msgHandler(payload);
+  } catch (e) {
+    const err = e.stack || e;
+    send('error', err);
+    logger.log(err);
+  }
+}
+
+function handleExceptions() {
+  process.on('uncaughtException', (err) => {
+    logger.log(err);
+  });
+}
+
+function initialize(initialGlobalPref) {
+  try {
+    handleExceptions();
+    globalPrefObj.update(initialGlobalPref);
+
+    plugins = require('./plugins')(workerContext);
+    plugins.initialize();
+    send('ready');
+  } catch (e) {
+    const err = e.stack || e;
+    send('error', err);
+    logger.log(err);
+  }
+}
+
 const msgHandlers = {
+  initialize: (payload) => {
+    const { initialGlobalPref } = payload;
+    initialize(initialGlobalPref);
+  },
   searchAll: (payload) => {
     const { query, ticket } = payload;
     const res = (obj) => {
@@ -80,44 +121,18 @@ const msgHandlers = {
     const { prefId, model } = payload;
     plugins.updatePreferences(prefId, model);
   },
+  commitPreferences: (payload) => {
+    plugins.commitPreferences();
+  },
   resetPreferences: (payload) => {
     const prefId = payload;
     const pref = plugins.resetPreferences(prefId);
     send('on-get-preferences', pref);
+  },
+  updateGlobalPreferences: (payload) => {
+    const model = payload;
+    globalPrefObj.update(model);
   }
 };
 
-function handleProcessMessage(msg) {
-  if (plugins === null)
-    return;
-
-  try {
-    const { type, payload } = msg;
-    const msgHandler = msgHandlers[type];
-    msgHandler(payload);
-  } catch (e) {
-    const err = e.stack || e;
-    send('error', err);
-    logger.log(err);
-  }
-}
-
-function handleExceptions() {
-  process.on('uncaughtException', (err) => {
-    logger.log(err);
-  });
-}
-
-try {
-  handleExceptions();
-
-  plugins = require('./plugins')(workerContext);
-  plugins.initialize();
-
-  process.on('message', handleProcessMessage);
-  send('ready');
-} catch (e) {
-  const err = e.stack || e;
-  send('error', err);
-  logger.log(err);
-}
+process.on('message', handleProcessMessage);

@@ -39,6 +39,23 @@ function handleWorkerMessage(msg) {
   handler(msg.payload);
 }
 
+const msgQueue = [];
+
+function startProcessingQueue() {
+  setInterval(() => {
+    if (workerProcess === null || !workerProcess.connected)
+      return;
+    while (msgQueue.length > 0) {
+      const msg = msgQueue.shift();
+      workerProcess.send(msg);
+    }
+  }, 5);
+}
+
+function sendmsg(type, payload) {
+  msgQueue.push({ type, payload });
+}
+
 function initialize() {
   const workerPath = path.join(__dirname, '../worker/worker.js');
   if (!fs.existsSync(workerPath))
@@ -50,16 +67,17 @@ function initialize() {
   workerProcess.on('message', (msg) => {
     handleWorkerMessage(msg);
   });
+
+  const initialGlobalPref = pref.get();
+  sendmsg('initialize', { initialGlobalPref });
+  startProcessingQueue();
+
   electronApp.on('quit', () => {
     try {
       if (workerProcess)
         workerProcess.kill();
     } catch (e) { }
   });
-}
-
-function sendmsg(type, payload) {
-  workerProcess.send({ type, payload });
 }
 
 const appPrefId = 'Hain';
@@ -78,12 +96,13 @@ const workerPrefHandlers = {
     rpc.send('prefwindow', 'on-get-pref-items', prefItems);
   },
   'on-get-preferences': (payload) => {
-    // const { prefId, schema, model } = payload;
-    rpc.send('prefwindow', 'on-get-preferences', payload);
+    const { prefId, schema, model } = payload;
+    rpc.send('prefwindow', 'on-get-preferences', { prefId, schema, model });
   }
 };
 mergeWorkerHandlers(workerPrefHandlers);
 
+// Preferences
 rpc.on('getPrefItems', (evt, msg) => {
   sendmsg('getPluginPrefIds');
 });
@@ -119,6 +138,16 @@ rpc.on('resetPreferences', (evt, msg) => {
   sendmsg('resetPreferences', prefId);
 });
 
+function commitPreferences() {
+  sendmsg('commitPreferences');
+
+  if (pref.isDirty) {
+    const globalPref = pref.get();
+    sendmsg('updateGlobalPreferences', globalPref);
+    pref.commit();
+  }
+}
+
 rpc.on('search', (evt, msg) => {
   const { ticket, query } = msg;
   sendmsg('searchAll', { ticket, query });
@@ -135,5 +164,6 @@ rpc.define('close', function* () {
 
 module.exports = {
   initialize,
+  commitPreferences,
   get isLoaded() { return (workerProcess !== null && workerProcess.connected && isPluginsReady); }
 };

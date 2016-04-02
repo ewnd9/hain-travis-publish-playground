@@ -54,7 +54,7 @@ module.exports = (context) => {
       app.setInput('');
     } else if (id === 'preferences') {
       app.openPreferences();
-      app.close();
+      app.close(true);
     }
   }
 

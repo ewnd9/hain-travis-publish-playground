@@ -9,15 +9,15 @@
     },
     "proxy": {
       "type": "object",
-      "title": "Global Proxy Settings (not working)",
+      "title": "Global Proxy Settings",
       "properties": {
-        "url": {
+        "addr": {
           "type": "string"
         },
         "port": {
           "type": "integer"
         },
-        "use": {
+        "useProxy": {
           "type": "boolean",
           "title": "Use Proxy"
         }

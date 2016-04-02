@@ -16,7 +16,12 @@ function show() {
     maximizable: false
   });
   browserWindow.loadURL(`file://${__dirname}/../../../dist/preferences.html`);
-  browserWindow.on('close', () => (browserWindow = null));
+  browserWindow.on('close', () => {
+    browserWindow = null;
+
+    const server = require('../server');
+    server.commitPreferences();
+  });
   browserWindow.setMenuBarVisibility(false);
   browserWindow.show();
 }

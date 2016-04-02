@@ -8,6 +8,8 @@ const schemaDefaults = require('../../utils/schema-defaults');
 const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
 const prefStore = require('./pref-store');
+const PrefObj = require('./pref-obj');
+const storages = require('./storages');
 
 const conf = require('../conf');
 
@@ -94,7 +96,7 @@ module.exports = (workerContext) => {
   let pluginConfigs = null;
   let pluginPrefIds = null;
 
-  const pluginContext = {
+  const pluginContextBase = {
     PLUGIN_API_VERSION: 'hain0',
     MAIN_PLUGIN_REPO: conf.MAIN_PLUGIN_REPO,
     DEV_PLUGIN_REPO: conf.DEV_PLUGIN_REPO,
@@ -102,8 +104,24 @@ module.exports = (workerContext) => {
     toast: workerContext.toast,
     shell: workerContext.shell,
     logger: workerContext.logger,
+    globalPreferences: workerContext.globalPreferences,
     matchutil
   };
+
+  function generatePluginContext(pluginId, pluginConfig) {
+    const localStorage = storages.createPluginLocalStorage(pluginId);
+    let preferences = undefined;
+
+    const hasPreferences = (pluginConfig.prefSchema !== null);
+    if (hasPreferences) {
+      const defaults = schemaDefaults(pluginConfig.prefSchema);
+      if (prefStore.has(pluginId) === false)
+        prefStore.set(pluginId, defaults);
+      const initialPref = prefStore.get(pluginId);
+      preferences = new PrefObj(initialPref);
+    }
+    return _.assign({}, pluginContextBase, { localStorage, preferences });
+  }
 
   function _startup() {
     logger.log('startup: begin');
@@ -126,7 +144,7 @@ module.exports = (workerContext) => {
   }
 
   function initialize() {
-    const ret = pluginLoader.loadPlugins(pluginContext);
+    const ret = pluginLoader.loadPlugins(generatePluginContext);
     plugins = ret.plugins;
     pluginConfigs = ret.pluginConfigs;
     pluginPrefIds = _.reject(_.keys(pluginConfigs), x => pluginConfigs[x].prefSchema === null);
@@ -195,23 +213,37 @@ module.exports = (workerContext) => {
     return pluginPrefIds;
   }
 
+  let tempPrefs = {};
   function getPreferences(prefId) {
     const prefSchema = pluginConfigs[prefId].prefSchema;
+    const tempPref = tempPrefs[prefId];
     return {
       prefId,
       schema: JSON.stringify(prefSchema),
-      model: prefStore.get(prefId)
+      model: tempPref || prefStore.get(prefId)
     };
   }
 
-  function updatePreferences(prefId, model) {
-    prefStore.set(prefId, model);
+  function updatePreferences(prefId, prefModel) {
+    tempPrefs[prefId] = prefModel;
+  }
+
+  function commitPreferences() {
+    for (const prefId in tempPrefs) {
+      const prefModel = tempPrefs[prefId];
+      const pluginInstance = plugins[prefId];
+      const pluginContext = pluginInstance.__pluginContext;
+
+      pluginContext.preferences.update(prefModel);
+      prefStore.set(prefId, prefModel);
+    }
+    tempPrefs = {};
   }
 
   function resetPreferences(prefId) {
     const prefSchema = pluginConfigs[prefId].prefSchema;
-    const model = schemaDefaults(prefSchema);
-    updatePreferences(prefId, model);
+    const pref = schemaDefaults(prefSchema);
+    updatePreferences(prefId, pref);
     return getPreferences(prefId);
   }
 
@@ -222,6 +254,7 @@ module.exports = (workerContext) => {
     getPrefIds,
     getPreferences,
     updatePreferences,
+    commitPreferences,
     resetPreferences
   };
 };
