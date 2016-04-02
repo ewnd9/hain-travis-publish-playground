@@ -13,7 +13,7 @@ const COMMANDS = [`${PREFIX} install `, `${PREFIX} uninstall `, `${PREFIX} list 
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 
 module.exports = (context) => {
-  const pm = new Packman(context.MAIN_PLUGIN_REPO, './_temp');
+  const pm = new Packman(context.MAIN_PLUGIN_REPO, context.INTERNAL_PLUGIN_REPO, './_temp');
   const toast = context.toast;
   const logger = context.logger;
   const shell = context.shell;
@@ -93,18 +93,20 @@ module.exports = (context) => {
     res.add(parseCommands(query));
   }
 
-  function _toSearchResult(cmdType, pkgInfo, customName, payload) {
+  function _toSearchResult(cmdType, pkgInfo, customName, group) {
     return {
       id: pkgInfo.name,
-      payload: payload || cmdType,
+      payload: cmdType,
       title: `${customName || pkgInfo.name} ` +
-             ` <span style='font-size: 9pt'>${pkgInfo.version} by <b>${pkgInfo.author}</b></span>`,
-      desc: `${pkgInfo.desc}`
+             ` <span style='font-size: 9pt'>${pkgInfo.version}` +
+             `${!pkgInfo.internal ? ` by <b>${pkgInfo.author}</b>` : ''}` +
+             `</span>`,
+      desc: `${pkgInfo.desc}`,
+      group
     };
   }
 
   function parseCommands(query) {
-    // install
     const parsed = COMMANDS_RE.exec(query.toLowerCase());
     if (!parsed) {
       return _makeCommandsHelp(query);
@@ -112,22 +114,27 @@ module.exports = (context) => {
     const command = parsed[1];
     const arg = parsed[2];
     if (command === 'install') {
+      const installedPackages = pm.listPackages();
+      const packages = availablePackages.filter(x => {
+        return !_.some(installedPackages, { 'name': x.name });
+      });
       if (arg) {
-        return matchutil.fuzzy(availablePackages, arg.trim(), x => x.name).map(x => {
+        return matchutil.fuzzy(packages, arg.trim(), x => x.name).map(x => {
           const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
           return _toSearchResult('install', x.elem, m);
         });
       }
-      return availablePackages.map(x => _toSearchResult('install', x));
+      return packages.map(x => _toSearchResult('install', x));
     }
     if (command === 'uninstall') {
       const packages = pm.listPackages();
       return packages.map((x) => _toSearchResult('uninstall', x));
     }
-    // list
     if (command === 'list') {
       const packages = pm.listPackages();
-      return packages.map((x) => _toSearchResult('', x, null, 'list'));
+      const internalPackages = pm.listInternalPackages();
+      return packages.map((x) => _toSearchResult('list', x))
+        .concat(internalPackages.map((x) => _toSearchResult('list', x, null, 'Internal packages')));
     }
     return _makeCommandsHelp(query);
   }
