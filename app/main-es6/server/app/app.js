@@ -73,8 +73,8 @@ function launch() {
   iconProtocol.register();
 }
 
-function close() {
-  mainWindow.hideAndRefreshWindow();
+function close(dontRestoreFocus) {
+  mainWindow.hideAndRefreshWindow(dontRestoreFocus);
 }
 
 function restart() {

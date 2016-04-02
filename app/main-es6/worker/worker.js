@@ -22,7 +22,7 @@ function ipcPipe(target, channel, msg) {
 const appProxy = {
   restart: () => proxyFunc('app', 'restart'),
   quit: () => proxyFunc('app', 'quit'),
-  close: () => proxyFunc('app', 'close'),
+  close: (dontRestoreFocus) => proxyFunc('app', 'close', dontRestoreFocus),
   setInput: (text) => proxyFunc('app', 'setInput', text),
   openPreferences: () => proxyFunc('app', 'openPreferences')
 };
