@@ -47,13 +47,13 @@ npm install -g --arch=ia32 electron-prebuilt
 
 >**Note:** this project uses Electron 32bit version
 
-### Run from source
+### Run from Source
 
 ```shell
 npm run dev
 ```
 
-### Build from source
+### Build from Source
 
 ```shell
 npm run build
