@@ -33,7 +33,7 @@ Run and press `alt+space` anywhere
 
 See [Plugin Documentation](docs/plugin-docs.md)
 
-## Install/Build from source
+## Install/Build from Source
 
 ```shell
 # Clone this repo
