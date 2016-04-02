@@ -20,6 +20,8 @@
 * [hain-plugin-movie](https://github.com/Metrakit/hain-plugin-movie)
 * [hain-plugin-trello](https://github.com/Metrakit/hain-plugin-trello)
 * [hain-plugin-devdocs](https://github.com/Braunson/hain-plugin-devdocs)
+* [hain-plugin-amazn](https://github.com/TheBuzzDee/hain-plugin-amzn)
+* [hain-plugin-buzzpics](https://github.com/TheBuzzDee/hain-plugin-buzzpics)
 
 ## Guides
 
