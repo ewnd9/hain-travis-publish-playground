@@ -1,7 +1,5 @@
 'use strict';
 
-require('babel-polyfill');
-
 ((function startup() {
   if (require('electron-squirrel-startup')) return;
 
@@ -22,24 +20,10 @@ require('babel-polyfill');
     dialog.showErrorBox('Hain', `Unhandled Error: ${err.stack || err}`);
   });
 
-  const appContext = {
-    app: null,
-    plugins: null,
-    server: null,
-    toast: null,
-    rpc: null,
-    clientLogger: null
-  };
-
   co(function* () {
-    appContext.rpc = require('./server/rpc-server');
-
-    appContext.toast = require('./server/toast')(appContext);
-    appContext.clientLogger = require('./server/client-logger')(appContext);
-    appContext.app = require('./server/app/app')(appContext);
-    appContext.server = require('./server/server')(appContext);
-
-    appContext.server.initialize();
+    require('./server/app/app').launch();
+    require('./server/server').initialize();
+    require('./server/rpc-server').startProcessingQueue();
   }).catch((err) => {
     dialog.showErrorBox('Hain', `Unhandled Error: ${err.stack || err}`);
     electronApp.quit();

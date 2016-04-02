@@ -2,41 +2,52 @@
 
 const ipc = require('electron').ipcMain;
 const co = require('co');
+const logger = require('../utils/logger');
 
-const self = {};
 const funcs = {};
-const msgQueue = [];
-let connectedClient = null;
+const clients = {};
+const msgQueuePerClients = {};
 
-self.define = (funcName, func) => {
+function define(funcName, func) {
   funcs[funcName] = func;
-};
+}
 
-self.send = (channel, msg) => {
-  msgQueue.push({ channel, msg });
-};
-
-setInterval(() => {
-  if (connectedClient === null)
-    return;
-  while (msgQueue.length > 0) {
-    const item = msgQueue.shift();
-    connectedClient.send(item.channel, item.msg);
+function send(clientName, channel, msg) {
+  let msgQueue = msgQueuePerClients[clientName];
+  if (msgQueue === undefined) {
+    msgQueue = [];
+    msgQueuePerClients[clientName] = msgQueue;
   }
-}, 10);
+  msgQueue.push({ clientName, channel, msg });
+}
 
-self.on = (channel, func) => {
+function on(channel, func) {
   ipc.on(channel, func);
-};
+}
 
-ipc.on('__connect', (evt, args) => {
-  connectedClient = evt.sender;
+function startProcessingQueue() {
+  setInterval(() => {
+    for (const clientName in msgQueuePerClients) {
+      const client = clients[clientName];
+      if (client === undefined)
+        continue;
+
+      const msgQueue = msgQueuePerClients[clientName];
+      while (msgQueue.length > 0) {
+        const item = msgQueue.shift();
+        client.send(item.channel, item.msg);
+      }
+    }
+  }, 5);
+}
+
+ipc.on('__connect', (evt, msg) => {
+  const clientName = msg;
+  clients[clientName] = evt.sender;
 });
 
-ipc.on('__rpc_call', (evt, args) => {
-  const funcName = args.funcName;
-  const id = args.id;
-  const params = args.params;
+ipc.on('__rpc_call', (evt, msg) => {
+  const { funcName, id, params } = msg;
   const replyChannel = `__rpc_${id}`;
 
   const generator = funcs[funcName];
@@ -48,8 +59,11 @@ ipc.on('__rpc_call', (evt, args) => {
   co(generator(params)).then((ret) => {
     evt.sender.send(replyChannel, null, ret);
   }).catch((err) => {
+    logger.log(err);
     evt.sender.send(replyChannel, err, null);
   });
 });
 
-module.exports = self;
+module.exports = {
+  define, send, on, startProcessingQueue
+};

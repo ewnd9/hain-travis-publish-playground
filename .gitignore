@@ -1,8 +1,7 @@
 node_modules
 /.vscode
-/app/main/
-/app/dist/app.bundle.js
 /_localStorage/
+/app/renderer
 
 /app/platform-util/build
 

@@ -20,7 +20,7 @@ $ git pull upstream develop
 $ git checkout develop
 $ git branch <your-feature-branch>
 $ git checkout <your-feature-branch>
-$ npm install -g electron
+$ npm install -g --arch=ia32 electron-prebuilt
 $ npm install
 $ ...make your changes...
 $ git push origin
@@ -31,7 +31,7 @@ When opening a pull request, please go by the following:
 - Please check that you are not behind, by any number of commits, the branch you are merging into.
 - Describe your pull request in as much detail as possible (what's been fixed or what has been added + usage). Include an issue reference if the pull request fixes an issue.
 - If the pull request is to fix an error/bug, please include the error message in the issue's description if possible
-- Include your system specs (OS, RAM and arch) in the issue description
+- Include your system specs (OS, etc) in the issue description
 - Check that the app can be built and ran successfully before submitting a pull request
 - Check that the ci passes successfully. Fix any bugs in your code if our ci (appveyor) fails with an error that may have somthing to do with your added code.
 

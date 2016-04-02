@@ -1,8 +1,9 @@
+<!doctype html>
 <html>
-
 <head>
-  <title>fred</title>
+  <title>Hain</title>
   <link rel="stylesheet" href="./lib/font-awesome-4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="./lib/common.css">
   <script type="text/javascript">
     window.$ = window.jQuery = require('jquery');
     // DevTools
@@ -13,16 +14,10 @@
         location.reload();
       }
     });
+    process.env.NODE_ENV = 'production';
   </script>
   <script src="./lib/jquery.scrollTo.min.js"></script>
   <style type="text/css">
-    @font-face {
-      font-family: 'Roboto';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Roboto'), local('Roboto-Regular'), url('./lib/Roboto-Regular.ttf') format('truetype');
-    }
-
     body {
       margin: 55px 12px 12px 12px;
       overflow: hidden;
@@ -31,10 +26,10 @@
     }
   </style>
 </head>
-
 <body>
   <div id="app"></div>
-  <script src="app.bundle.js"></script>
+  <script>
+    require('../renderer/app.js');
+  </script>
 </body>
-
 </html>

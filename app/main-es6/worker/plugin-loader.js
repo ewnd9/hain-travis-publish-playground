@@ -7,7 +7,9 @@ const path = require('path');
 const storage = require('node-persist');
 const logger = require('../utils/logger');
 const iconFmt = require('./icon-fmt');
-const conf = require('./conf');
+const conf = require('../conf');
+const prefStore = require('./pref-store');
+const jsonSchemaDefaults = require('json-schema-defaults');
 
 module.exports = (workerContext) => {
   function ensurePluginRepos() {
@@ -51,6 +53,11 @@ module.exports = (workerContext) => {
     let pluginConfig = {};
     try {
       const packageJson = require(path.join(pluginFile, 'package.json'));
+      const prefSchemaPath = path.join(pluginFile, 'preferences.json');
+      let prefSchema = null;
+      if (fs.existsSync(prefSchemaPath))
+        prefSchema = require(prefSchemaPath);
+
       const hainProps = packageJson.hain;
       if (hainProps) {
         pluginConfig = _.assign(pluginConfig, hainProps);
@@ -58,6 +65,7 @@ module.exports = (workerContext) => {
         pluginConfig.icon = iconFmt.parseIconUrl(pluginFile, pluginConfig.icon);
         pluginConfig.group = pluginConfig.group || pluginId;
       }
+      pluginConfig.prefSchema = prefSchema;
       pluginConfig.name = packageJson.name;
       pluginConfig.version = packageJson.version;
     } catch (e) {
@@ -98,9 +106,19 @@ module.exports = (workerContext) => {
       if (pluginConfig === null)
         continue;
 
+      if (pluginConfig.prefSchema !== null) {
+        const defaults = jsonSchemaDefaults(pluginConfig.prefSchema);
+        if (prefStore.has(pluginId) === false) {
+          prefStore.set(pluginId, defaults);
+        }
+      }
+
       const pluginLocalStorage = createPluginLocalStorage(pluginId);
       const finalPluginContext = _.assign(context, {
-        localStorage: pluginLocalStorage
+        localStorage: pluginLocalStorage,
+        get preferences() {
+          return prefStore.get(pluginId);
+        }
       });
 
       try {

@@ -1,16 +1,13 @@
 'use strict';
 
 const textutil = require('../utils/textutil');
+const rpc = require('./rpc-server');
 
-module.exports = (context) => {
-  const rpc = context.rpc;
+function enqueue(message, duration) {
+  rpc.send('mainwindow', 'on-toast', {
+    message: textutil.sanitize(message),
+    duration
+  });
+}
 
-  function enqueue(message, duration) {
-    rpc.send('on-toast', {
-      message: textutil.sanitize(message),
-      duration
-    });
-  }
-
-  return { enqueue };
-};
+module.exports = { enqueue };
