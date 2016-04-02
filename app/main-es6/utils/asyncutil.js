@@ -1,6 +1,7 @@
 'use strict';
 
 function runWhen(predicate, func, interval) {
+  const _interval = interval || 10;
   let _timer = 0;
   _timer = setInterval(() => {
     const isOk = predicate();
@@ -8,7 +9,7 @@ function runWhen(predicate, func, interval) {
       return;
     clearInterval(_timer);
     func();
-  }, interval);
+  }, _interval);
 }
 
 module.exports = { runWhen };

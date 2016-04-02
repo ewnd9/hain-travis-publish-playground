@@ -11,6 +11,7 @@ const rpc = require('./rpc-server');
 const proxyHandler = require('./server-proxyhandler');
 const app = require('./app/app');
 const pref = require('./pref');
+const asyncutil = require('../utils/asyncutil');
 
 let workerProcess = null;
 let isPluginsReady = false;
@@ -39,21 +40,25 @@ function handleWorkerMessage(msg) {
   handler(msg.payload);
 }
 
-const msgQueue = [];
+const _preMsgQueue = [];
+let _readyToSendmsg = false;
 
-function startProcessingQueue() {
-  setInterval(() => {
-    if (workerProcess === null || !workerProcess.connected)
-      return;
-    while (msgQueue.length > 0) {
-      const msg = msgQueue.shift();
+function waitForSendmsgReady() {
+  asyncutil.runWhen(() => (workerProcess !== null && workerProcess.connected), () => {
+    _readyToSendmsg = true;
+    while (_preMsgQueue.length > 0) {
+      const msg = _preMsgQueue.shift();
       workerProcess.send(msg);
     }
-  }, 5);
+  });
 }
 
 function sendmsg(type, payload) {
-  msgQueue.push({ type, payload });
+  if (!_readyToSendmsg) {
+    _preMsgQueue.push({ type, payload });
+    return;
+  }
+  workerProcess.send({ type, payload });
 }
 
 function initialize() {
@@ -70,7 +75,7 @@ function initialize() {
 
   const initialGlobalPref = pref.get();
   sendmsg('initialize', { initialGlobalPref });
-  startProcessingQueue();
+  waitForSendmsgReady();
 
   electronApp.on('quit', () => {
     try {
