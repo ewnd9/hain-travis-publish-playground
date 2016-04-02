@@ -22,6 +22,7 @@
 * [hain-plugin-devdocs](https://github.com/Braunson/hain-plugin-devdocs)
 * [hain-plugin-amazn](https://github.com/TheBuzzDee/hain-plugin-amzn)
 * [hain-plugin-buzzpics](https://github.com/TheBuzzDee/hain-plugin-buzzpics)
+* [hain-plugin-notes](https://github.com/jervant/hain-plugin-notes)
 
 ## Guides
 
