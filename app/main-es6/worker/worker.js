@@ -40,7 +40,10 @@ const shellProxy = {
 };
 
 const loggerProxy = {
-  log: (msg) => proxyFunc('logger', 'log', msg)
+  log: (msg) => {
+    logger.log(msg);
+    proxyFunc('logger', 'log', msg);
+  }
 };
 
 const globalPrefObj = new ObservableObject({});
