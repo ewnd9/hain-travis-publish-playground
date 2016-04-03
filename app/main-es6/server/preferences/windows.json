@@ -10,11 +10,12 @@
       "type": "object",
       "title": "Global Proxy Settings",
       "properties": {
-        "addr": {
+        "host": {
           "type": "string"
         },
         "port": {
-          "type": "integer"
+          "type": "integer",
+          "default": 80
         },
         "useProxy": {
           "type": "boolean",

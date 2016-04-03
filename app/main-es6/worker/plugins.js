@@ -105,6 +105,7 @@ module.exports = (workerContext) => {
     toast: workerContext.toast,
     shell: workerContext.shell,
     logger: workerContext.logger,
+    httpAgent: workerContext.httpAgent,
     globalPreferences: workerContext.globalPreferences,
     matchutil
   };

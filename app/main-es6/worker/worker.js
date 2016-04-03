@@ -3,6 +3,7 @@
 
 const logger = require('../utils/logger');
 const ObservableObject = require('../common/observable-object');
+const httpAgent = require('./http-agent');
 
 function send(type, payload) {
   process.send({ type, payload });
@@ -49,7 +50,8 @@ const workerContext = {
   toast: toastProxy,
   shell: shellProxy,
   logger: loggerProxy,
-  globalPreferences: globalPrefObj
+  globalPreferences: globalPrefObj,
+  httpAgent
 };
 
 let plugins = null;
@@ -76,6 +78,8 @@ function initialize(initialGlobalPref) {
   try {
     handleExceptions();
     globalPrefObj.update(initialGlobalPref);
+
+    httpAgent.initialize(globalPrefObj);
 
     plugins = require('./plugins')(workerContext);
     plugins.initialize();
