@@ -1,9 +1,12 @@
 'use strict';
 
 import React from 'react';
-import { Card, CardTitle, CardText, TextField, RaisedButton, Checkbox } from 'material-ui';
+import { Card, CardTitle, CardText, TextField,
+         RaisedButton, Checkbox, IconButton, FontIcon } from 'material-ui';
+
 import { Validator } from 'jsonschema';
 import _ from 'lodash';
+
 import schemaDefaults from '../../utils/schema-defaults';
 
 const validator = new Validator();
@@ -18,7 +21,6 @@ function findErrorMessage(errors, path) {
 }
 
 class BooleanComponent extends React.Component {
-
   handleCheck(obj, val) {
     const { onChange, path } = this.props;
     onChange(path, val);
@@ -35,11 +37,9 @@ class BooleanComponent extends React.Component {
       </div>
     );
   }
-
 }
 
 class NumberComponent extends React.Component {
-
   constructor(props) {
     super();
     this.state = {
@@ -90,11 +90,9 @@ class NumberComponent extends React.Component {
       </div>
     );
   }
-
 }
 
 class TextComponent extends React.Component {
-
   handleChange(evt, val) {
     const { onChange, path } = this.props;
     onChange(path, val);
@@ -113,12 +111,10 @@ class TextComponent extends React.Component {
       </div>
     );
   }
-
 }
 
 class ArrayComponent extends React.Component {
-
-  handleRemove() {
+  handleRemove(index) {
     const { path, model, onChange } = this.props;
     const arr = model || [];
     arr.pop();
@@ -168,6 +164,9 @@ class ArrayComponent extends React.Component {
           <Card>
             <CardText>
               {childComponent}
+              <IconButton iconClassName="fa fa-remove" iconStyle={{ fontSize: '12px' }}
+                style={{ width: '38px', height: '38px' }}
+                onTouchTap={this.handleRemove.bind(this, i)} />
             </CardText>
           </Card>
           <br />
@@ -176,7 +175,15 @@ class ArrayComponent extends React.Component {
       } else {
         wrappedComponent = (
           <div>
-            {childComponent}
+            <table width="100%">
+              <tr>
+                <td>{childComponent}</td>
+                <td width="48px">
+                  <IconButton iconClassName="fa fa-remove" iconStyle={{ fontSize: '15px' }}
+                      onTouchTap={this.handleRemove.bind(this, i)} />
+                </td>
+              </tr>
+            </table>
           </div>
         );
       }
@@ -187,19 +194,19 @@ class ArrayComponent extends React.Component {
       <div>
         {titleComponent}
         {childComponents}
-        <RaisedButton label="-" secondary={true}
-                      onTouchTap={this.handleRemove.bind(this)} style={{ minWidth: 50 }} />
         &nbsp;
-        <RaisedButton label="+" primary={true}
-                      onTouchTap={this.handleAdd.bind(this)} style={{ minWidth: 50 }} />
+        <div style={{ textAlign: 'left' }}>
+          <RaisedButton primary={true}
+                        onTouchTap={this.handleAdd.bind(this)} style={{ minWidth: 50 }}>
+            <FontIcon className="fa fa-plus" style={{ fontSize: '15px', color: 'white' }}/>
+          </RaisedButton>
+        </div>
       </div>
     );
   }
-
 }
 
 class ObjectComponent extends React.Component {
-
   render() {
     const { schema, model, name, path, onChange, errors } = this.props;
     const title = schema.title || name;
@@ -240,7 +247,6 @@ class ObjectComponent extends React.Component {
       </div>
     );
   }
-
 }
 
 const components = {
@@ -260,7 +266,6 @@ function selectComponent(type) {
 }
 
 class SchemaForm extends React.Component {
-
   constructor(props) {
     super();
     this.state = this.convertToState(props);
@@ -301,13 +306,12 @@ class SchemaForm extends React.Component {
         {headerComponent}
         <CardText>
           <FormComponent path="" title={title} schema={schema} model={model}
-                         onChange={this.handleChange.bind(this)}
-                         errors={errors} />
+                        onChange={this.handleChange.bind(this)}
+                        errors={errors} />
         </CardText>
       </div>
     );
   }
-
 }
 
 module.exports = SchemaForm;

@@ -125,7 +125,7 @@ class Preferences extends React.Component {
             {schemaForm}
             <br />
             <div style={{ textAlign: 'right' }}>
-              <RaisedButton label="Reset All" secondary={true} onTouchTap={this.handleResetAll.bind(this)} /><br />
+              <RaisedButton label="Reset to Default" secondary={true} onTouchTap={this.handleResetAll.bind(this)} /><br />
             </div>
           </div>
         </div>
