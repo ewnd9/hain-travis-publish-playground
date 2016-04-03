@@ -2,7 +2,7 @@
 'use strict';
 
 const logger = require('../utils/logger');
-const PrefObj = require('./pref-obj');
+const ObservableObject = require('../common/observable-object');
 
 function send(type, payload) {
   process.send({ type, payload });
@@ -42,7 +42,7 @@ const loggerProxy = {
   log: (msg) => proxyFunc('logger', 'log', msg)
 };
 
-const globalPrefObj = new PrefObj({});
+const globalPrefObj = new ObservableObject({});
 
 const workerContext = {
   app: appProxy,

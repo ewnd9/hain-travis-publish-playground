@@ -8,7 +8,7 @@ const schemaDefaults = require('../../utils/schema-defaults');
 const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
 const prefStore = require('./pref-store');
-const PrefObj = require('./pref-obj');
+const ObservableObject = require('../common/observable-object');
 const storages = require('./storages');
 
 const conf = require('../conf');
@@ -119,7 +119,7 @@ module.exports = (workerContext) => {
       if (prefStore.has(pluginId) === false)
         prefStore.set(pluginId, defaults);
       const initialPref = prefStore.get(pluginId);
-      preferences = new PrefObj(initialPref);
+      preferences = new ObservableObject(initialPref);
     }
     return _.assign({}, pluginContextBase, { localStorage, preferences });
   }
