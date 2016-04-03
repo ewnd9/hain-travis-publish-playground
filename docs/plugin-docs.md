@@ -22,6 +22,8 @@
 * [hain-plugin-amzn](https://github.com/TheBuzzDee/hain-plugin-amzn)
 * [hain-plugin-buzzpics](https://github.com/TheBuzzDee/hain-plugin-buzzpics)
 * [hain-plugin-notes](https://github.com/jervant/hain-plugin-notes)
+* [hain-plugin-steam](https://github.com/KennethWussmann/hain-plugin-steam)
+* [hain-plugin-pc](https://github.com/KennethWussmann/hain-plugin-pc)
 
 ## Guides
 
