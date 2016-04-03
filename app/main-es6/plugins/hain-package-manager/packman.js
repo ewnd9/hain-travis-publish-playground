@@ -75,8 +75,12 @@ class Packman {
     return this.internalPackages;
   }
 
+  getPackage(packageName) {
+    return _.find(this.packages, (x) => x.name === packageName);
+  }
+
   hasPackage(packageName) {
-    return (_.findIndex(this.packages, x => x.name === packageName) >= 0);
+    return (this.getPackage(packageName) !== undefined);
   }
 
   installPackage(packageName, versionRange, proxyAgent) {
@@ -93,14 +97,11 @@ class Packman {
   }
 
   removePackage(packageName) {
-    const self = this;
-    return co(function* () {
-      if (!self.hasPackage(packageName))
-        throw `Can't find a package: ${packageName}`;
+    if (!this.hasPackage(packageName))
+      throw `Can't find a package: ${packageName}`;
 
-      fs.appendFileSync(self.uninstallFile, `${packageName}\n`);
-      _.remove(self.packages, x => x.name === packageName);
-    });
+    fs.appendFileSync(this.uninstallFile, `${packageName}\n`);
+    _.remove(this.packages, x => x.name === packageName);
   }
 
 }

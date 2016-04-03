@@ -4,14 +4,15 @@ const _ = require('lodash');
 const co = require('co');
 const got = require('got');
 const path = require('path');
+const semver = require('semver');
 
 const Packman = require('./packman');
 
-const COMMANDS_RE = / (install|uninstall|list)(\s+([^\s]+))?/i;
+const COMMANDS_RE = / (install|update|uninstall|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
 const PREFIX = '/hpm';
 
-const COMMANDS = [`${PREFIX} install `, `${PREFIX} uninstall `, `${PREFIX} list `];
+const COMMANDS = [`${PREFIX} install `, `${PREFIX} update `, `${PREFIX} uninstall `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 const QUERY_LIMIT = 500;
 
@@ -115,13 +116,22 @@ module.exports = (context) => {
     };
   }
 
+  function _fuzzy(cmdType, packages, keyword) {
+    if (keyword.length <= 0)
+      return packages.map(x => _toSearchResult(cmdType, x));
+    return matchutil.fuzzy(packages, keyword.trim(), x => x.name).map(x => {
+      const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
+      return _toSearchResult(cmdType, x.elem, m);
+    });
+  }
+
   function parseCommands(query) {
     const parsed = COMMANDS_RE.exec(query.toLowerCase());
     if (!parsed) {
       return _makeCommandsHelp(query);
     }
     const command = parsed[1];
-    const arg = parsed[2];
+    const arg = parsed[2] || '';
     if (command === 'install') {
       if (availablePackages.length <= 0) {
         return {
@@ -130,21 +140,28 @@ module.exports = (context) => {
           icon: '#fa fa-spinner fa-spin'
         };
       }
-      const installedPackages = pm.listPackages();
       const packages = availablePackages.filter(x => {
-        return !_.some(installedPackages, { 'name': x.name });
+        return !pm.hasPackage(x.name);
       });
-      if (arg) {
-        return matchutil.fuzzy(packages, arg.trim(), x => x.name).map(x => {
-          const m = matchutil.makeStringBoldHtml(x.elem.name, x.matches);
-          return _toSearchResult('install', x.elem, m);
-        });
-      }
-      return packages.map(x => _toSearchResult('install', x));
+      return _fuzzy('install', packages, arg);
+    }
+    if (command === 'update') {
+      const packages = availablePackages.filter(x => {
+        const installedPackage = pm.getPackage(x.name);
+        if (installedPackage === undefined)
+          return false;
+        return semver.gt(x.version, installedPackage.version);
+      }).map(x => {
+        const org = pm.getPackage(x.name);
+        const _x = x;
+        _x.version = `${org.version} => ${_x.version}`;
+        return _x;
+      });
+      return _fuzzy('update', packages, arg);
     }
     if (command === 'uninstall') {
       const packages = pm.listPackages();
-      return packages.map((x) => _toSearchResult('uninstall', x));
+      return _fuzzy('uninstall', packages, arg);
     }
     if (command === 'list') {
       const packages = pm.listPackages();
@@ -166,13 +183,20 @@ module.exports = (context) => {
     return ret;
   }
 
+  function resetInput() {
+    app.setInput(`${PREFIX} `);
+  }
+
   function execute(id, payload) {
     if (payload === 'install') {
-      co(installPackage(id, 'latest'));
-      app.setInput(`${PREFIX} `);
+      installPackage(id);
+      resetInput();
+    } else if (payload === 'update') {
+      updatePackage(id);
+      resetInput();
     } else if (payload === 'uninstall') {
-      co(uninstallPackage(id));
-      app.setInput(`${PREFIX} `);
+      uninstallPackage(id);
+      resetInput();
     } else if (payload === 'list') {
       const pkgInfo = getPackageInfo(id);
       if (pkgInfo.homepage)
@@ -180,32 +204,50 @@ module.exports = (context) => {
     }
   }
 
-  function* uninstallPackage(packageName) {
-    currentStatus = `Uninstalling <b>${packageName}`;
+  function uninstallPackage(packageName) {
     try {
-      yield pm.removePackage(packageName);
+      pm.removePackage(packageName);
       toast.enqueue(`${packageName} has uninstalled, <b>Restart</b> Hain to take effect`, 3000);
     } catch (e) {
       toast.enqueue(e.toString());
-    } finally {
-      currentStatus = null;
     }
   }
 
-  function* installPackage(packageName, versionRange) {
-    logger.log(`Installing ${packageName}`);
-    currentStatus = `Installing <b>${packageName}</b>`;
-    try {
-      yield pm.installPackage(packageName, versionRange);
-      toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
-      logger.log(`${packageName} has pre-installed`);
-    } catch (e) {
-      toast.enqueue(e.toString());
-      logger.log(`${packageName} ${e}`);
-      throw e;
-    } finally {
-      currentStatus = null;
-    }
+  function installPackage(packageName) {
+    co(function* () {
+      logger.log(`Installing ${packageName}`);
+      currentStatus = `Installing <b>${packageName}</b>`;
+      try {
+        yield pm.installPackage(packageName, 'latest');
+        toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
+        logger.log(`${packageName} has pre-installed`);
+      } catch (e) {
+        toast.enqueue(e.toString());
+        logger.log(`${packageName} ${e}`);
+        throw e;
+      } finally {
+        currentStatus = null;
+      }
+    });
+  }
+
+  function updatePackage(packageName) {
+    co(function* () {
+      logger.log(`Updating ${packageName}`);
+      currentStatus = `Updating <b>${packageName}</b>`;
+      try {
+        pm.removePackage(packageName);
+        yield pm.installPackage(packageName, 'latest');
+        toast.enqueue(`${packageName} has updated, <b>Restart</b> Hain to take effect`, 3000);
+        logger.log(`${packageName} has pre-installed (for update)`);
+      } catch (e) {
+        toast.enqueue(e.toString());
+        logger.log(`${packageName} ${e}`);
+        throw e;
+      } finally {
+        currentStatus = null;
+      }
+    });
   }
 
   return { startup, search, execute };
