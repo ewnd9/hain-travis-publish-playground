@@ -8,7 +8,7 @@
   "license": "MIT",
   "hain": {
     "prefix": null,
-    "usage": "/about, /restart, /quit",
+    "usage": "/about, /preferences, /restart, /quit",
     "icon": "#fa fa-gear",
     "group": "Hain Operation Commands"
   }
