@@ -65,9 +65,7 @@ module.exports = (context) => {
       return;
     lastUpdatedTime = Date.now();
     return co(function* () {
-      currentStatus = 'fetching available packages...';
       availablePackages = yield searchPackages('hain-plugin');
-      currentStatus = null;
     });
   }
 
@@ -125,6 +123,13 @@ module.exports = (context) => {
     const command = parsed[1];
     const arg = parsed[2];
     if (command === 'install') {
+      if (availablePackages.length <= 0) {
+        return {
+          title: 'Sorry, fetching available packages...',
+          desc: NAME,
+          icon: '#fa fa-spinner fa-spin'
+        };
+      }
       const installedPackages = pm.listPackages();
       const packages = availablePackages.filter(x => {
         return !_.some(installedPackages, { 'name': x.name });
