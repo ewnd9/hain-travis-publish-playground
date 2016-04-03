@@ -6,6 +6,7 @@ const cp = require('child_process');
 const electron = require('electron');
 const electronApp = electron.app;
 const globalShortcut = electron.globalShortcut;
+const dialog = electron.dialog;
 
 const asyncutil = require('../../utils/asyncutil');
 const logger = require('../../utils/logger');
@@ -22,15 +23,19 @@ let _isRestarting = false;
 
 function registerShortcut() {
   const shortcut = pref.get().shortcut;
-  globalShortcut.register(shortcut, () => {
-    if (_isRestarting)
-      return;
-    if (mainWindow.isContentLoading()) {
-      logger.log('please wait a seconds, you can use shortcut after loaded');
-      return;
-    }
-    mainWindow.toggleWindow();
-  });
+  try {
+    globalShortcut.register(shortcut, () => {
+      if (_isRestarting)
+        return;
+      if (mainWindow.isContentLoading()) {
+        logger.log('please wait a seconds, you can use shortcut after loaded');
+        return;
+      }
+      mainWindow.toggleWindow();
+    });
+  } catch (e) {
+    dialog.showErrorBox('Hain', `Failed to register shortcut: ${shortcut}`);
+  }
 }
 
 function launch() {
