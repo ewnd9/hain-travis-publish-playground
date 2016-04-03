@@ -1,31 +1,67 @@
 'use strict';
 
-const jsonSchemaDefaults = require('json-schema-defaults');
+const _ = require('lodash');
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
+
+const schemaDefaults = require('../../utils/schema-defaults');
 
 const conf = require('../conf');
-const schema = require('./preferences.json');
+const appPrefSchema = require('./app-pref-schema');
 
 const SimpleStore = require('../utils/simple-store');
 const prefStore = SimpleStore(conf.APP_PREF_DIR);
 
 const PREF_KEY = 'hain';
 
-if (!prefStore.has(PREF_KEY)) {
-  reset();
+let tempPref = {};
+let _isDirty = false;
+
+function get(path) {
+  if (path === undefined)
+    return tempPref;
+  return _.get(tempPref, path);
 }
 
-function get() {
-  return prefStore.get(PREF_KEY);
-}
-
-function update(model) {
-  prefStore.set(PREF_KEY, model);
+function update(pref) {
+  if (_.isEqual(tempPref, pref))
+    return;
+  tempPref = pref;
+  _isDirty = true;
 }
 
 function reset() {
-  const defaults = jsonSchemaDefaults(schema);
-  prefStore.set(PREF_KEY, defaults);
+  const defaults = schemaDefaults(appPrefSchema);
+  update(defaults);
   return defaults;
 }
 
-module.exports = { get, update, reset, schema };
+function commit() {
+  prefStore.set(PREF_KEY, tempPref);
+
+  const copy = _.assign({}, tempPref);
+  emitter.emit('update', copy);
+
+  _isDirty = false;
+}
+
+function on(eventName, listener) {
+  emitter.on(eventName, listener);
+}
+
+const defaults = schemaDefaults(appPrefSchema);
+tempPref = _.assign(defaults, prefStore.get(PREF_KEY));
+
+module.exports = {
+  get schema() {
+    return appPrefSchema;
+  },
+  get,
+  update,
+  reset,
+  commit,
+  on,
+  get isDirty() {
+    return _isDirty;
+  }
+};

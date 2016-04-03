@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "shortcut": {
+      "type": "string",
+      "title": "Quick-Open Shorcut",
+      "default": "alt+space"
+    },
+    "clearQuery": {
+      "type": "boolean",
+      "title": "Clear query after closing",
+      "default": true
+    },
+    "proxy": {
+      "type": "object",
+      "title": "Global Proxy Settings",
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "default": 80
+        },
+        "useProxy": {
+          "type": "boolean",
+          "title": "Use Proxy"
+        }
+      }
+    }
+  }
+}

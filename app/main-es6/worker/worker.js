@@ -1,7 +1,10 @@
 /* global process */
 'use strict';
 
+const co = require('co');
 const logger = require('../utils/logger');
+const ObservableObject = require('../common/observable-object');
+const globalProxyAgent = require('./global-proxy-agent');
 
 function send(type, payload) {
   process.send({ type, payload });
@@ -22,7 +25,7 @@ function ipcPipe(target, channel, msg) {
 const appProxy = {
   restart: () => proxyFunc('app', 'restart'),
   quit: () => proxyFunc('app', 'quit'),
-  close: () => proxyFunc('app', 'close'),
+  close: (dontRestoreFocus) => proxyFunc('app', 'close', dontRestoreFocus),
   setInput: (text) => proxyFunc('app', 'setInput', text),
   openPreferences: () => proxyFunc('app', 'openPreferences')
 };
@@ -38,19 +41,64 @@ const shellProxy = {
 };
 
 const loggerProxy = {
-  log: (msg) => proxyFunc('logger', 'log', msg)
+  log: (msg) => {
+    logger.log(msg);
+    proxyFunc('logger', 'log', msg);
+  }
 };
+
+const globalPrefObj = new ObservableObject({});
 
 const workerContext = {
   app: appProxy,
   toast: toastProxy,
   shell: shellProxy,
-  logger: loggerProxy
+  logger: loggerProxy,
+  globalPreferences: globalPrefObj
 };
 
 let plugins = null;
 
+function handleProcessMessage(msg) {
+  try {
+    const { type, payload } = msg;
+    const msgHandler = msgHandlers[type];
+    msgHandler(payload);
+  } catch (e) {
+    const err = e.stack || e;
+    send('error', err);
+    logger.log(err);
+  }
+}
+
+function handleExceptions() {
+  process.on('uncaughtException', (err) => {
+    logger.log(err);
+  });
+}
+
+function initialize(initialGlobalPref) {
+  co(function* () {
+    handleExceptions();
+    globalPrefObj.update(initialGlobalPref);
+
+    globalProxyAgent.initialize(globalPrefObj);
+
+    plugins = require('./plugins')(workerContext);
+    yield* plugins.initialize();
+    send('ready');
+  }).catch((e) => {
+    const err = e.stack || e;
+    send('error', err);
+    logger.log(err);
+  });
+}
+
 const msgHandlers = {
+  initialize: (payload) => {
+    const { initialGlobalPref } = payload;
+    initialize(initialGlobalPref);
+  },
   searchAll: (payload) => {
     const { query, ticket } = payload;
     const res = (obj) => {
@@ -80,44 +128,18 @@ const msgHandlers = {
     const { prefId, model } = payload;
     plugins.updatePreferences(prefId, model);
   },
+  commitPreferences: (payload) => {
+    plugins.commitPreferences();
+  },
   resetPreferences: (payload) => {
     const prefId = payload;
     const pref = plugins.resetPreferences(prefId);
     send('on-get-preferences', pref);
+  },
+  updateGlobalPreferences: (payload) => {
+    const model = payload;
+    globalPrefObj.update(model);
   }
 };
 
-function handleProcessMessage(msg) {
-  if (plugins === null)
-    return;
-
-  try {
-    const { type, payload } = msg;
-    const msgHandler = msgHandlers[type];
-    msgHandler(payload);
-  } catch (e) {
-    const err = e.stack || e;
-    send('error', err);
-    logger.log(err);
-  }
-}
-
-function handleExceptions() {
-  process.on('uncaughtException', (err) => {
-    logger.log(err);
-  });
-}
-
-try {
-  handleExceptions();
-
-  plugins = require('./plugins')(workerContext);
-  plugins.initialize();
-
-  process.on('message', handleProcessMessage);
-  send('ready');
-} catch (e) {
-  const err = e.stack || e;
-  send('error', err);
-  logger.log(err);
-}
+process.on('message', handleProcessMessage);

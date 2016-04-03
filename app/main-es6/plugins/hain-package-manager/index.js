@@ -2,8 +2,10 @@
 
 const _ = require('lodash');
 const co = require('co');
-const Packman = require('./packman');
 const got = require('got');
+const path = require('path');
+
+const Packman = require('./packman');
 
 const COMMANDS_RE = / (install|uninstall|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
@@ -11,9 +13,17 @@ const PREFIX = '/hpm';
 
 const COMMANDS = [`${PREFIX} install `, `${PREFIX} uninstall `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
+const QUERY_LIMIT = 500;
 
 module.exports = (context) => {
-  const pm = new Packman(context.MAIN_PLUGIN_REPO, context.INTERNAL_PLUGIN_REPO, './_temp');
+  const packmanOpts = {
+    mainRepo: context.MAIN_PLUGIN_REPO,
+    internalRepo: context.INTERNAL_PLUGIN_REPO,
+    tempDir: path.resolve('./_temp'),
+    installDir: context.__PLUGIN_PREINSTALL_DIR,
+    uninstallFile: context.__PLUGIN_PREUNINSTALL_FILE
+  };
+  const pm = new Packman(packmanOpts);
   const toast = context.toast;
   const logger = context.logger;
   const shell = context.shell;
@@ -26,10 +36,15 @@ module.exports = (context) => {
   let lastUpdatedTime = 0;
   let availablePackages = [];
 
+  function getBackendUrl() {
+    return context.preferences.get('backendUrl') || 'http://npmsearch.com';
+  }
+
   function* searchPackages(query) {
+    const backendUrl = getBackendUrl();
     const query_enc = query;
     const fields = 'name,rating,version,description,keywords,author';
-    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=50`;
+    const url = `${backendUrl}/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=${QUERY_LIMIT}`;
     const res = yield got(url, { json: true });
     const packages = _.filter(res.body.results, x => {
       return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
@@ -50,9 +65,7 @@ module.exports = (context) => {
       return;
     lastUpdatedTime = Date.now();
     return co(function* () {
-      currentStatus = 'fetching available packages...';
       availablePackages = yield searchPackages('hain-plugin');
-      currentStatus = null;
     });
   }
 
@@ -61,18 +74,14 @@ module.exports = (context) => {
   }
 
   function startup() {
-    co(function* () {
-      pm.readPackages();
-      checkAvailablePackages();
-    }).catch((err) => {
-      logger.log(err);
-    });
+    pm.readPackages();
+    checkAvailablePackages();
   }
 
   function search(query, res) {
-    if (currentStatus === null) {
+    if (currentStatus === null)
       checkAvailablePackages();
-    }
+
     clearTimeout(progressTimer);
     if (currentStatus) {
       res.add({
@@ -114,6 +123,13 @@ module.exports = (context) => {
     const command = parsed[1];
     const arg = parsed[2];
     if (command === 'install') {
+      if (availablePackages.length <= 0) {
+        return {
+          title: 'Sorry, fetching available packages...',
+          desc: NAME,
+          icon: '#fa fa-spinner fa-spin'
+        };
+      }
       const installedPackages = pm.listPackages();
       const packages = availablePackages.filter(x => {
         return !_.some(installedPackages, { 'name': x.name });
@@ -182,7 +198,7 @@ module.exports = (context) => {
     try {
       yield pm.installPackage(packageName, versionRange);
       toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
-      logger.log(`${packageName} installed`);
+      logger.log(`${packageName} has pre-installed`);
     } catch (e) {
       toast.enqueue(e.toString());
       logger.log(`${packageName} ${e}`);

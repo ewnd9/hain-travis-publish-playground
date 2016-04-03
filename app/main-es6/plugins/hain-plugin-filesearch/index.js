@@ -13,22 +13,34 @@ const matchFunc = (filePath, stats) => {
   return (ext === '.exe' || ext === '.lnk');
 };
 
+function injectEnvVariable(dirPath) {
+  let _path = dirPath;
+  for (const envVar in process.env) {
+    const value = process.env[envVar];
+    _path = _path.replace(`\${${envVar}}`, value);
+  }
+  return _path;
+}
+
+function injectEnvVariables(dirArr) {
+  const newArr = [];
+  for (let i = 0; i < dirArr.length; ++i) {
+    const dirPath = dirArr[i];
+    newArr.push(injectEnvVariable(dirPath));
+  }
+  return newArr;
+}
+
 module.exports = (context) => {
   const matchutil = context.matchutil;
   const logger = context.logger;
   const shell = context.shell;
   const app = context.app;
+  const initialPref = context.preferences.get();
 
-  const recursiveSearchDirs = [
-    `${process.env.USERPROFILE}\\Desktop`,
-    `${process.env.ProgramData}\\Microsoft\\Windows\\Start Menu\\Programs`,
-    `${process.env.APPDATA}\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar`,
-    `${process.env.APPDATA}\\Microsoft\\Windows\\Start Menu`
-  ];
-  const flatSearchDirs = [
-    `${process.env.SystemRoot}\\System32`,
-    `${process.env.SystemRoot}`
-  ];
+  const recursiveSearchDirs = injectEnvVariables(initialPref.recursiveFolders || []);
+  const flatSearchDirs = injectEnvVariables(initialPref.flatFolders || []);
+
   const db = {};
   const lazyIndexingKeys = {};
 

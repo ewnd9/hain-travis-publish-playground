@@ -1,12 +1,29 @@
 {
   "type": "object",
   "properties": {
-    "customFolders": {
+    "recursiveFolders": {
       "type": "array",
-      "title": "Additional Folders (requires restart)",
+      "title": "Folders to search recursively (requires restart)",
       "items": {
         "type": "string"
-      }
+      },
+      "default": [
+        "${USERPROFILE}\\Desktop",
+        "${ProgramData}\\Microsoft\\Windows\\Start Menu\\Programs",
+        "${APPDATA}\\Microsoft\\Internet Explorer\\Quick Launch\\User Pinned\\TaskBar",
+        "${APPDATA}\\Microsoft\\Windows\\Start Menu"
+      ]
+    },
+    "flatFolders": {
+      "type": "array",
+      "title": "Folders to search not recursively (requires restart)",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "${SystemRoot}\\System32",
+        "${SystemRoot}"
+      ]
     }
   }
 }

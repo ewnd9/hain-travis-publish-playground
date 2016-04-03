@@ -2,12 +2,19 @@
 'use strict';
 
 const _ = require('lodash');
+const co = require('co');
+const fs = require('fs');
+const fse = require('fs-extra');
+const path = require('path');
+const fileutil = require('../utils/fileutil');
 
-const jsonSchemaDefaults = require('json-schema-defaults');
+const schemaDefaults = require('../../utils/schema-defaults');
 
 const matchutil = require('../utils/matchutil');
 const textutil = require('../utils/textutil');
 const prefStore = require('./pref-store');
+const ObservableObject = require('../common/observable-object');
+const storages = require('./storages');
 
 const conf = require('../conf');
 
@@ -94,17 +101,39 @@ module.exports = (workerContext) => {
   let pluginConfigs = null;
   let pluginPrefIds = null;
 
-  const pluginContext = {
+  const pluginContextBase = {
+    // Plugin Configurations
     PLUGIN_API_VERSION: 'hain0',
     MAIN_PLUGIN_REPO: conf.MAIN_PLUGIN_REPO,
     DEV_PLUGIN_REPO: conf.DEV_PLUGIN_REPO,
     INTERNAL_PLUGIN_REPO: conf.INTERNAL_PLUGIN_REPO,
+    __PLUGIN_PREINSTALL_DIR: conf.__PLUGIN_PREINSTALL_DIR,
+    __PLUGIN_PREUNINSTALL_FILE: conf.__PLUGIN_PREUNINSTALL_FILE,
+    // Utilities
     app: workerContext.app,
     toast: workerContext.toast,
     shell: workerContext.shell,
     logger: workerContext.logger,
-    matchutil
+    matchutil,
+    // Preferences
+    globalPreferences: workerContext.globalPreferences
   };
+
+  function generatePluginContext(pluginId, pluginConfig) {
+    const localStorage = storages.createPluginLocalStorage(pluginId);
+    let preferences = undefined;
+
+    const hasPreferences = (pluginConfig.prefSchema !== null);
+    if (hasPreferences) {
+      const defaults = schemaDefaults(pluginConfig.prefSchema);
+      const saved = prefStore.get(pluginId) || {};
+      prefStore.set(pluginId, _.assign(defaults, saved));
+
+      const initialPref = prefStore.get(pluginId);
+      preferences = new ObservableObject(initialPref);
+    }
+    return _.assign({}, pluginContextBase, { localStorage, preferences });
+  }
 
   function _startup() {
     logger.log('startup: begin');
@@ -126,8 +155,51 @@ module.exports = (workerContext) => {
     logger.log('startup: end');
   }
 
-  function initialize() {
-    const ret = pluginLoader.loadPlugins(pluginContext);
+  function removeUninstalledPlugins() {
+    const listFile = conf.__PLUGIN_PREUNINSTALL_FILE;
+    if (!fs.existsSync(listFile))
+      return;
+
+    try {
+      const contents = fs.readFileSync(listFile, { encoding: 'utf8' });
+      const targetPlugins = contents.split('\n').filter((val) => (val && val.trim().length > 0));
+      const repoDir = conf.MAIN_PLUGIN_REPO;
+
+      for (const packageName of targetPlugins) {
+        const packageDir = path.join(repoDir, packageName);
+        fse.removeSync(packageDir);
+        logger.log(`${packageName} has uninstalled successfully`);
+      }
+      fse.removeSync(listFile);
+    } catch (e) {
+      logger.log(`plugin uninstall error: ${e.stack || e}`);
+    }
+  }
+
+  function movePreinstalledPlugins() {
+    return co(function* () {
+      const preinstallDir = conf.__PLUGIN_PREINSTALL_DIR;
+      if (!fs.existsSync(preinstallDir))
+        return;
+
+      const packageDirs = fs.readdirSync(preinstallDir);
+      const repoDir = conf.MAIN_PLUGIN_REPO;
+      for (const packageName of packageDirs) {
+        const srcPath = path.join(preinstallDir, packageName);
+        const destPath = path.join(repoDir, packageName);
+        yield fileutil.move(srcPath, destPath);
+        logger.log(`${packageName} has installed successfully`);
+      }
+    }).catch((err) => {
+      logger.log(`plugin uninstall error: ${err.stack || err}`);
+    });
+  }
+
+  function* initialize() {
+    removeUninstalledPlugins();
+    yield movePreinstalledPlugins();
+
+    const ret = pluginLoader.loadPlugins(generatePluginContext);
     plugins = ret.plugins;
     pluginConfigs = ret.pluginConfigs;
     pluginPrefIds = _.reject(_.keys(pluginConfigs), x => pluginConfigs[x].prefSchema === null);
@@ -196,24 +268,37 @@ module.exports = (workerContext) => {
     return pluginPrefIds;
   }
 
+  let tempPrefs = {};
   function getPreferences(prefId) {
     const prefSchema = pluginConfigs[prefId].prefSchema;
+    const tempPref = tempPrefs[prefId];
     return {
       prefId,
       schema: JSON.stringify(prefSchema),
-      model: prefStore.get(prefId)
+      model: tempPref || prefStore.get(prefId)
     };
   }
 
-  function updatePreferences(prefId, model) {
-    prefStore.set(prefId, model);
+  function updatePreferences(prefId, prefModel) {
+    tempPrefs[prefId] = prefModel;
+  }
+
+  function commitPreferences() {
+    for (const prefId in tempPrefs) {
+      const prefModel = tempPrefs[prefId];
+      const pluginInstance = plugins[prefId];
+      const pluginContext = pluginInstance.__pluginContext;
+
+      pluginContext.preferences.update(prefModel);
+      prefStore.set(prefId, prefModel);
+    }
+    tempPrefs = {};
   }
 
   function resetPreferences(prefId) {
     const prefSchema = pluginConfigs[prefId].prefSchema;
-    const model = jsonSchemaDefaults(prefSchema);
-    updatePreferences(prefId, model);
-    console.log(model);
+    const pref = schemaDefaults(prefSchema);
+    updatePreferences(prefId, pref);
     return getPreferences(prefId);
   }
 
@@ -224,6 +309,7 @@ module.exports = (workerContext) => {
     getPrefIds,
     getPreferences,
     updatePreferences,
+    commitPreferences,
     resetPreferences
   };
 };
