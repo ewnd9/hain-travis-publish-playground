@@ -45,7 +45,10 @@ function launch() {
     mainWindow.createWindow(() => {
       if (!silentLaunch || isRestarted) {
         asyncutil.runWhen(() => (!mainWindow.isContentLoading() && server.isLoaded),
-          () => mainWindow.showWindowOnCenter(), 100);
+          () => {
+            mainWindow.clearQuery();
+            mainWindow.showWindowOnCenter();
+          }, 100);
       }
       if (isRestarted)
         toast.enqueue('Restarted');

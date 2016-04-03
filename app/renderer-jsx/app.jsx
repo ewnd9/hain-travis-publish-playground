@@ -116,7 +116,6 @@ class AppContainer extends React.Component {
       this.setState({ results, selectionIndex });
     });
     setInterval(this.processToast.bind(this), 200);
-    this.search('');
   }
 
   setInput(args) {

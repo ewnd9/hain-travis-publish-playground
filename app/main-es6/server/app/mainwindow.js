@@ -74,15 +74,19 @@ function showWindowOnCenter() {
   browserWindow.show();
 }
 
+function clearQuery() {
+  browserWindow.webContents.executeJavaScript('clearQuery()');
+}
+
 function hideAndRefreshWindow(dontRestoreFocus) {
   if (browserWindow === null)
     return;
 
   browserWindow.hide();
 
-  const clearQuery = pref.get('clearQuery');
-  if (clearQuery)
-    browserWindow.webContents.executeJavaScript('clearQuery()');
+  const doClearQuery = pref.get('clearQuery');
+  if (doClearQuery)
+    clearQuery();
 
   if (!dontRestoreFocus) {
     platformUtil.restoreFocus();
@@ -107,6 +111,7 @@ function isContentLoading() {
 module.exports = {
   createWindow,
   showWindowOnCenter,
+  clearQuery,
   hideAndRefreshWindow,
   toggleWindow,
   isContentLoading
