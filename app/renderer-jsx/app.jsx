@@ -159,6 +159,22 @@ class AppContainer extends React.Component {
     }, 250);
   }
 
+  execute(item) {
+    if (item === undefined)
+      return;
+    if (item.redirect) {
+      this.setInput(item.redirect);
+      return;
+    }
+
+    const params = {
+      pluginId: item.pluginId,
+      id: item.id,
+      payload: item.payload
+    };
+    rpc.call('execute', params);
+  }
+
   handleSelection(selectionDelta) {
     const results = this.state.results;
     const upperSelectionIndex = results.length - 1;
@@ -180,6 +196,14 @@ class AppContainer extends React.Component {
     this.execute(results[selectionIndex]);
   }
 
+  handleTab() {
+    const results = this.state.results;
+    const selectionIndex = this.state.selectionIndex;
+    const item = results[selectionIndex];
+    if (item && item.redirect)
+      this.setInput(item.redirect);
+  }
+
   handleKeyDown(evt) {
     const key = evt.key;
     const keyHandlers = {
@@ -188,7 +212,8 @@ class AppContainer extends React.Component {
       ArrowDown: this.handleSelection.bind(this, 1),
       PageUp: this.handleSelection.bind(this, -5),
       PageDown: this.handleSelection.bind(this, 5),
-      Enter: this.handleEnter.bind(this)
+      Enter: this.handleEnter.bind(this),
+      Tab: this.handleTab.bind(this)
     };
     const selectedHandler = keyHandlers[key];
     if (selectedHandler !== undefined) {
@@ -202,22 +227,6 @@ class AppContainer extends React.Component {
     this.setState({ input: input });
     this.scrollTo(0);
     this.search(input);
-  }
-
-  execute(item) {
-    if (item === undefined)
-      return;
-    if (item.redirect) {
-      this.setInput(item.redirect);
-      return;
-    }
-
-    const params = {
-      pluginId: item.pluginId,
-      id: item.id,
-      payload: item.payload
-    };
-    rpc.call('execute', params);
   }
 
   handleUpdateSelectionIndex(evt, index) {
@@ -308,6 +317,6 @@ class AppContainer extends React.Component {
 
 const appContainer = ReactDOM.render(<AppContainer />, document.getElementById('app'));
 
-window.refresh = () => {
+window.clearQuery = () => {
   appContainer.clearState();
 };
