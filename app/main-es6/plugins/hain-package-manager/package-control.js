@@ -10,23 +10,13 @@ const fileutil = require('../../utils/fileutil');
 
 const REGISTRY_URL = 'https://registry.npmjs.org';
 
-let proxyHttpAgent = null;
-
-function setProxyHttpAgent(proxyAgent) {
-  proxyHttpAgent = proxyAgent;
-}
-
 function req(url, opts) {
   const _opts = opts;
-  if (proxyHttpAgent)
-    _opts.proxy = proxyHttpAgent;
   return got(url, _opts);
 }
 
 function reqStream(url) {
   const opts = {};
-  if (proxyHttpAgent)
-    opts.proxy = proxyHttpAgent;
   return got.stream(url, opts);
 }
 
@@ -130,6 +120,5 @@ function* installPackage(packageName, versionRange, destDir, tempDir) {
 }
 
 module.exports = {
-  installPackage: co.wrap(installPackage),
-  setProxyHttpAgent
+  installPackage: co.wrap(installPackage)
 };

@@ -4,7 +4,7 @@
 const co = require('co');
 const logger = require('../utils/logger');
 const ObservableObject = require('../common/observable-object');
-const httpAgent = require('./http-agent');
+const globalProxyAgent = require('./global-proxy-agent');
 
 function send(type, payload) {
   process.send({ type, payload });
@@ -54,8 +54,7 @@ const workerContext = {
   toast: toastProxy,
   shell: shellProxy,
   logger: loggerProxy,
-  globalPreferences: globalPrefObj,
-  httpAgent
+  globalPreferences: globalPrefObj
 };
 
 let plugins = null;
@@ -83,7 +82,7 @@ function initialize(initialGlobalPref) {
     handleExceptions();
     globalPrefObj.update(initialGlobalPref);
 
-    httpAgent.initialize(globalPrefObj);
+    globalProxyAgent.initialize(globalPrefObj);
 
     plugins = require('./plugins')(workerContext);
     yield* plugins.initialize();

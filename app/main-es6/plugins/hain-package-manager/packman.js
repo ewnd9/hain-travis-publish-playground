@@ -86,8 +86,6 @@ class Packman {
         throw `Installed package: ${packageName}`;
 
       const saveDir = path.join(self.installDir, packageName);
-
-      packageControl.setProxyHttpAgent(proxyAgent);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
 
       self.packages.push(_createPackegeInfo(packageName, data));

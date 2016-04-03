@@ -29,8 +29,6 @@ module.exports = (context) => {
   const shell = context.shell;
   const matchutil = context.matchutil;
   const app = context.app;
-  const httpAgent = context.httpAgent;
-
   const PLUGIN_API_VERSION = context.PLUGIN_API_VERSION;
 
   let currentStatus = null;
@@ -47,13 +45,7 @@ module.exports = (context) => {
     const query_enc = query;
     const fields = 'name,rating,version,description,keywords,author';
     const url = `${backendUrl}/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=${QUERY_LIMIT}`;
-    const opts = { json: true };
-
-    const proxyAgent = httpAgent.getHttpProxyAgent();
-    if (proxyAgent)
-      opts.proxy = proxyAgent;
-
-    const res = yield got(url, opts);
+    const res = yield got(url, { json: true });
     const packages = _.filter(res.body.results, x => {
       return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
     });
@@ -89,9 +81,9 @@ module.exports = (context) => {
   }
 
   function search(query, res) {
-    if (currentStatus === null) {
+    if (currentStatus === null)
       checkAvailablePackages();
-    }
+
     clearTimeout(progressTimer);
     if (currentStatus) {
       res.add({
@@ -199,8 +191,7 @@ module.exports = (context) => {
     logger.log(`Installing ${packageName}`);
     currentStatus = `Installing <b>${packageName}</b>`;
     try {
-      const proxyAgent = httpAgent.getHttpProxyAgent();
-      yield pm.installPackage(packageName, versionRange, proxyAgent);
+      yield pm.installPackage(packageName, versionRange);
       toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
       logger.log(`${packageName} has pre-installed`);
     } catch (e) {
