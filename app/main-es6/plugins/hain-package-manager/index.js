@@ -157,6 +157,12 @@ module.exports = (context) => {
         _x.version = `${org.version} => ${_x.version}`;
         return _x;
       });
+      if (packages.length <= 0) {
+        return {
+          title: 'Everthing is up-to-date',
+          desc: NAME
+        };
+      }
       return _fuzzy('update', packages, arg);
     }
     if (command === 'uninstall') {
