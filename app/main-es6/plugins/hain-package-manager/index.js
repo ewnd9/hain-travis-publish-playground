@@ -67,12 +67,8 @@ module.exports = (context) => {
   }
 
   function startup() {
-    co(function* () {
-      pm.readPackages();
-      checkAvailablePackages();
-    }).catch((err) => {
-      logger.log(err);
-    });
+    pm.readPackages();
+    checkAvailablePackages();
   }
 
   function search(query, res) {
