@@ -4,6 +4,7 @@ const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 
 const platformUtil = require('../../../platform-util');
+const pref = require('../pref');
 
 let browserWindow = null;
 
@@ -78,7 +79,10 @@ function hideAndRefreshWindow(dontRestoreFocus) {
     return;
 
   browserWindow.hide();
-  browserWindow.webContents.executeJavaScript('refresh()');
+
+  const clearQuery = pref.get('clearQuery');
+  if (clearQuery)
+    browserWindow.webContents.executeJavaScript('clearQuery()');
 
   if (!dontRestoreFocus) {
     platformUtil.restoreFocus();

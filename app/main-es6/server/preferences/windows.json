@@ -6,6 +6,11 @@
       "title": "Quick-Open Shorcut",
       "default": "alt+space"
     },
+    "clearQuery": {
+      "type": "boolean",
+      "title": "Clear query after closing",
+      "default": true
+    },
     "proxy": {
       "type": "object",
       "title": "Global Proxy Settings",
