@@ -79,14 +79,17 @@ class Packman {
     return (_.findIndex(this.packages, x => x.name === packageName) >= 0);
   }
 
-  installPackage(packageName, versionRange) {
+  installPackage(packageName, versionRange, proxyAgent) {
     const self = this;
     return co(function* () {
       if (self.hasPackage(packageName))
         throw `Installed package: ${packageName}`;
 
       const saveDir = path.join(self.installDir, packageName);
+
+      packageControl.setProxyHttpAgent(proxyAgent);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
+
       self.packages.push(_createPackegeInfo(packageName, data));
     });
   }

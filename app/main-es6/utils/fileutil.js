@@ -1,23 +1,9 @@
 'use strict';
 
 const fs = require('fs-extra');
-const got = require('got');
 const tarball = require('tarball-extract');
 
 const self = {};
-
-self.downloadFile = function (url, destPath) {
-  return new Promise((resolve, reject) => {
-    const fileStream = fs.createWriteStream(destPath);
-    fileStream.on('error', (err) => {
-      reject(err);
-    });
-    fileStream.on('finish', () => {
-      resolve();
-    });
-    got.stream(url).pipe(fileStream);
-  });
-};
 
 self.extractTarball = function (filePath, destPath) {
   return new Promise((resolve, reject) => {

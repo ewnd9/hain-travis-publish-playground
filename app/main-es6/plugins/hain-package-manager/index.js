@@ -50,7 +50,7 @@ module.exports = (context) => {
     const opts = { json: true };
 
     const proxyAgent = httpAgent.getHttpProxyAgent();
-    if (proxyAgent !== null)
+    if (proxyAgent)
       opts.proxy = proxyAgent;
 
     const res = yield got(url, opts);
@@ -199,9 +199,10 @@ module.exports = (context) => {
     logger.log(`Installing ${packageName}`);
     currentStatus = `Installing <b>${packageName}</b>`;
     try {
-      yield pm.installPackage(packageName, versionRange);
+      const proxyAgent = httpAgent.getHttpProxyAgent();
+      yield pm.installPackage(packageName, versionRange, proxyAgent);
       toast.enqueue(`${packageName} has installed, <b>Restart</b> Hain to take effect`, 3000);
-      logger.log(`${packageName} installed`);
+      logger.log(`${packageName} has pre-installed`);
     } catch (e) {
       toast.enqueue(e.toString());
       logger.log(`${packageName} ${e}`);

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const fs = require('fs');
 const co = require('co');
 const got = require('got');
 const semver = require('semver');
@@ -9,9 +10,42 @@ const fileutil = require('../../utils/fileutil');
 
 const REGISTRY_URL = 'https://registry.npmjs.org';
 
+let proxyHttpAgent = null;
+
+function setProxyHttpAgent(proxyAgent) {
+  proxyHttpAgent = proxyAgent;
+}
+
+function req(url, opts) {
+  const _opts = opts;
+  if (proxyHttpAgent)
+    _opts.proxy = proxyHttpAgent;
+  return got(url, _opts);
+}
+
+function reqStream(url) {
+  const opts = {};
+  if (proxyHttpAgent)
+    opts.proxy = proxyHttpAgent;
+  return got.stream(url, opts);
+}
+
+function downloadFile(url, destPath) {
+  return new Promise((resolve, reject) => {
+    const fileStream = fs.createWriteStream(destPath);
+    fileStream.on('error', (err) => {
+      reject(err);
+    });
+    fileStream.on('finish', () => {
+      resolve();
+    });
+    reqStream(url).pipe(fileStream);
+  });
+}
+
 function* resolvePackageVersion(packageName, versionRange) {
   const url = `${REGISTRY_URL}/${packageName}`;
-  const res = yield got(url, { json: true });
+  const res = yield req(url, { json: true });
   const data = res.body;
 
   let desired = versionRange;
@@ -43,7 +77,7 @@ function* resolvePackageData(packageName, versionRange) {
   const version = yield* resolvePackageVersion(packageName, versionRange);
   const url = `${REGISTRY_URL}/${packageName}/${version}`;
 
-  const res = yield got(url, { json: true });
+  const res = yield req(url, { json: true });
   const data = res.body;
   return data;
 }
@@ -56,7 +90,7 @@ function* downloadAndExtractPackage(packageName, versionRange, destDir, tempDir)
   const downloadPath = path.join(tempDir, filename);
   const tempPackageDir = path.join(tempDir, 'package');
 
-  yield fileutil.downloadFile(distUrl, downloadPath);
+  yield downloadFile(distUrl, downloadPath);
   yield fileutil.extractTarball(downloadPath, tempDir);
   yield fileutil.move(tempPackageDir, destDir);
 
@@ -96,5 +130,6 @@ function* installPackage(packageName, versionRange, destDir, tempDir) {
 }
 
 module.exports = {
-  installPackage: co.wrap(installPackage)
+  installPackage: co.wrap(installPackage),
+  setProxyHttpAgent
 };
