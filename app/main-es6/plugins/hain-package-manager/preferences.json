@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "backendUrl": {
+      "type": "string",
+      "title": "Search Backend URL",
+      "default": "http://npmsearch.com"
+    }
+  }
+}

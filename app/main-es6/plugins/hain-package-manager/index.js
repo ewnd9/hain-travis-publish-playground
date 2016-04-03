@@ -11,6 +11,7 @@ const PREFIX = '/hpm';
 
 const COMMANDS = [`${PREFIX} install `, `${PREFIX} uninstall `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
+const QUERY_LIMIT = 500;
 
 module.exports = (context) => {
   const pm = new Packman(context.MAIN_PLUGIN_REPO, './_temp');
@@ -26,10 +27,15 @@ module.exports = (context) => {
   let lastUpdatedTime = 0;
   let availablePackages = [];
 
+  function getBackendUrl() {
+    return context.preferences.get('backendUrl') || 'http://npmsearch.com';
+  }
+
   function* searchPackages(query) {
+    const backendUrl = getBackendUrl();
     const query_enc = query;
     const fields = 'name,rating,version,description,keywords,author';
-    const url = `http://npmsearch.com/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=50`;
+    const url = `${backendUrl}/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=${QUERY_LIMIT}`;
     const res = yield got(url, { json: true });
     const packages = _.filter(res.body.results, x => {
       return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
