@@ -9,6 +9,6 @@
     "prefix": "=",
     "usage": "type something to calculate (e.g. =1+1)",
     "icon": "#fa fa-calculator",
-    "redirect": "= "
+    "redirect": "="
   }
 }
