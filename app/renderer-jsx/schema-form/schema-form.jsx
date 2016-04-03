@@ -117,7 +117,9 @@ class ArrayComponent extends React.Component {
   handleRemove(index) {
     const { path, model, onChange } = this.props;
     const arr = model || [];
-    arr.pop();
+    if (arr.length <= 0)
+      return;
+    arr.splice(index, 1);
     onChange(path, arr);
   }
 
@@ -174,8 +176,9 @@ class ArrayComponent extends React.Component {
         );
       } else {
         wrappedComponent = (
-          <div>
+          <div key={i}>
             <table width="100%">
+              <tbody>
               <tr>
                 <td>{childComponent}</td>
                 <td width="48px">
@@ -183,6 +186,7 @@ class ArrayComponent extends React.Component {
                       onTouchTap={this.handleRemove.bind(this, i)} />
                 </td>
               </tr>
+              </tbody>
             </table>
           </div>
         );
@@ -231,7 +235,7 @@ class ObjectComponent extends React.Component {
       const childPath = `${path}.${childName}`;
 
       childComponents.push(
-        <div>
+        <div key={childName}>
           <Component key={childName} name={childName} path={childPath}
                    schema={property} model={childModel}
                    onChange={onChange} errors={errors} />
