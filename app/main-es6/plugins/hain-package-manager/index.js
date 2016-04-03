@@ -2,8 +2,10 @@
 
 const _ = require('lodash');
 const co = require('co');
-const Packman = require('./packman');
 const got = require('got');
+const path = require('path');
+
+const Packman = require('./packman');
 
 const COMMANDS_RE = / (install|uninstall|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
@@ -14,7 +16,14 @@ const CACHE_DURATION_SEC = 5 * 60; // 5 mins
 const QUERY_LIMIT = 500;
 
 module.exports = (context) => {
-  const pm = new Packman(context.MAIN_PLUGIN_REPO, context.INTERNAL_PLUGIN_REPO, './_temp');
+  const packmanOpts = {
+    mainRepo: context.MAIN_PLUGIN_REPO,
+    internalRepo: context.INTERNAL_PLUGIN_REPO,
+    tempDir: path.resolve('./_temp'),
+    installDir: context.__PLUGIN_PREINSTALL_DIR,
+    uninstallFile: context.__PLUGIN_PREUNINSTALL_FILE
+  };
+  const pm = new Packman(packmanOpts);
   const toast = context.toast;
   const logger = context.logger;
   const shell = context.shell;

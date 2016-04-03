@@ -5,7 +5,7 @@ const co = require('co');
 const got = require('got');
 const semver = require('semver');
 const path = require('path');
-const fileutil = require('./fileutil');
+const fileutil = require('../../utils/fileutil');
 
 const REGISTRY_URL = 'https://registry.npmjs.org';
 

@@ -1,6 +1,7 @@
 /* global process */
 'use strict';
 
+const co = require('co');
 const logger = require('../utils/logger');
 const ObservableObject = require('../common/observable-object');
 const httpAgent = require('./http-agent');
@@ -78,20 +79,20 @@ function handleExceptions() {
 }
 
 function initialize(initialGlobalPref) {
-  try {
+  co(function* () {
     handleExceptions();
     globalPrefObj.update(initialGlobalPref);
 
     httpAgent.initialize(globalPrefObj);
 
     plugins = require('./plugins')(workerContext);
-    plugins.initialize();
+    yield* plugins.initialize();
     send('ready');
-  } catch (e) {
+  }).catch((e) => {
     const err = e.stack || e;
     send('error', err);
     logger.log(err);
-  }
+  });
 }
 
 const msgHandlers = {

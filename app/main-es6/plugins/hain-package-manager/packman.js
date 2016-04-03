@@ -4,7 +4,8 @@ const _ = require('lodash');
 const co = require('co');
 const path = require('path');
 const packageControl = require('./package-control');
-const fileutil = require('./fileutil');
+const fileutil = require('../../utils/fileutil');
+const fs = require('fs');
 
 function _createPackegeInfo(name, data, internal) {
   return {
@@ -19,10 +20,13 @@ function _createPackegeInfo(name, data, internal) {
 
 class Packman {
 
-  constructor(repoDir, internalRepoDir, tempDir) {
-    this.repoDir = repoDir;
-    this.internalRepoDir = internalRepoDir;
-    this.tempDir = tempDir;
+  constructor(opts) {
+    this.repoDir = opts.mainRepo;
+    this.internalRepoDir = opts.internalRepo;
+    this.tempDir = opts.tempDir;
+    this.installDir = opts.installDir;
+    this.uninstallFile = opts.uninstallFile;
+
     this.packages = [];
     this.internalPackages = [];
   }
@@ -81,7 +85,7 @@ class Packman {
       if (self.hasPackage(packageName)) {
         throw `Installed package: ${packageName}`;
       }
-      const saveDir = path.join(self.repoDir, packageName);
+      const saveDir = path.join(self.installDir, packageName);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
       self.packages.push(_createPackegeInfo(packageName, data));
     });
@@ -93,8 +97,7 @@ class Packman {
       if (!self.hasPackage(packageName)) {
         throw `Can't find a package: ${packageName}`;
       }
-      const saveDir = path.join(self.repoDir, packageName);
-      yield fileutil.remove(saveDir);
+      fs.appendFileSync(self.uninstallFile, `${packageName}\n`);
       _.remove(self.packages, x => x.name === packageName);
     });
   }
