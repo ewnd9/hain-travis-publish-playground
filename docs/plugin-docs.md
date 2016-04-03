@@ -2,8 +2,7 @@
 
 ## Tutorials
 
-* Hello, World
-* Making Github Trending Plugin
+* Hello, World (...)
 
 ## Examples
 
@@ -34,6 +33,7 @@
 
 * [Plugin Skeleton (How to define a plugin module)](plugin-skeleton.md)
 * [package.json Format](package-json-format.md)
+* [preferences.json Format](preferences-json-format.md)
 * [PluginContext](plugin-context.md)
   - [App](plugin-context-app.md)
   - [Toast](plugin-context-toast.md)
@@ -41,6 +41,7 @@
   - [Logger](plugin-context-logger.md)
 * [SearchResult](search-result.md)
 * [Response (res)](response.md)
+* [PreferencesObject](preferences-object.md)
 * [Icon URL Format](icon-url-format.md)
 * [Text Format](text-format.md)
 

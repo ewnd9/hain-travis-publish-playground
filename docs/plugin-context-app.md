@@ -8,7 +8,8 @@ App object has following functions:
 
   Quit the app
   
-* **close()**
+* **close(dontRestoreFocus)**
+  - `dontRestoreFocus` Boolean - if true, Hain doesn't focus previous focused window (optional, default is `false`)
 
   Close the open window
   
@@ -16,6 +17,10 @@ App object has following functions:
   - `text` String - New input(query) (**required**)
 
   Change user input (similar with `redirect` property in `SearchResult`)
+  
+* **openPreferences()**
+  
+  Open preferences window
 
 **Example**
 ```javascript
