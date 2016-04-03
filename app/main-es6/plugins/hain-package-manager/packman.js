@@ -82,9 +82,9 @@ class Packman {
   installPackage(packageName, versionRange) {
     const self = this;
     return co(function* () {
-      if (self.hasPackage(packageName)) {
+      if (self.hasPackage(packageName))
         throw `Installed package: ${packageName}`;
-      }
+
       const saveDir = path.join(self.installDir, packageName);
       const data = yield packageControl.installPackage(packageName, versionRange, saveDir, self.tempDir);
       self.packages.push(_createPackegeInfo(packageName, data));
@@ -94,9 +94,9 @@ class Packman {
   removePackage(packageName) {
     const self = this;
     return co(function* () {
-      if (!self.hasPackage(packageName)) {
+      if (!self.hasPackage(packageName))
         throw `Can't find a package: ${packageName}`;
-      }
+
       fs.appendFileSync(self.uninstallFile, `${packageName}\n`);
       _.remove(self.packages, x => x.name === packageName);
     });
