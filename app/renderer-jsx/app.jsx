@@ -15,6 +15,9 @@ import { Notification } from 'react-notification';
 
 const SelectableList = SelectableContainerEnhance(List);
 
+const SEND_INTERVAL = 30; // ms
+const CLEAR_INTERVAL = 250; // ms
+
 let __searchTicket = 0;
 function incrTicket() {
   __searchTicket++;
@@ -149,13 +152,13 @@ class AppContainer extends React.Component {
     clearTimeout(this.lastSearchTimer);
     this.lastSearchTimer = setTimeout(() => {
       rpc.send('search', { ticket, query });
-    }, 50);
+    }, SEND_INTERVAL);
     clearTimeout(this.lastClearTimer);
     this.lastClearTimer = setTimeout(() => {
       if (this.lastResultTicket === ticket)
         return;
       this.setState({ results: [], selectionIndex: 0 });
-    }, 250);
+    }, CLEAR_INTERVAL);
   }
 
   execute(item) {
