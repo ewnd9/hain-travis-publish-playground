@@ -143,41 +143,6 @@ class AppContainer extends React.Component {
     }
   }
 
-  handleSelection(key) {
-    let selectionDelta = 0;
-    if (key === 'ArrowUp') {
-      selectionDelta = -1;
-    } else if (key === 'ArrowDown') {
-      selectionDelta = 1;
-    } else if (key === 'PageUp') {
-      selectionDelta = -5;
-    } else if (key === 'PageDown') {
-      selectionDelta = 5;
-    }
-
-    if (selectionDelta === 0) {
-      return false;
-    }
-
-    const results = this.state.results;
-    const upperSelectionIndex = results.length - 1;
-
-    let newSelectionIndex = this.state.selectionIndex + selectionDelta;
-    newSelectionIndex = _.clamp(newSelectionIndex, 0, upperSelectionIndex);
-
-    this.setState({ selectionIndex: newSelectionIndex });
-    this.scrollTo(newSelectionIndex);
-    return true;
-  }
-
-  handleEsc(key) {
-    if (key !== 'Escape') {
-      return false;
-    }
-    rpc.call('close');
-    return true;
-  }
-
   search(query) {
     const ticket = incrTicket();
     this.lastSearchTicket = ticket;
@@ -194,9 +159,40 @@ class AppContainer extends React.Component {
     }, 250);
   }
 
+  handleSelection(selectionDelta) {
+    const results = this.state.results;
+    const upperSelectionIndex = results.length - 1;
+
+    let newSelectionIndex = this.state.selectionIndex + selectionDelta;
+    newSelectionIndex = _.clamp(newSelectionIndex, 0, upperSelectionIndex);
+
+    this.setState({ selectionIndex: newSelectionIndex });
+    this.scrollTo(newSelectionIndex);
+  }
+
+  handleEsc() {
+    rpc.call('close');
+  }
+
+  handleEnter() {
+    const results = this.state.results;
+    const selectionIndex = this.state.selectionIndex;
+    this.execute(results[selectionIndex]);
+  }
+
   handleKeyDown(evt) {
     const key = evt.key;
-    if (this.handleSelection(key) || this.handleEsc(key) || this.handleEnter(key)) {
+    const keyHandlers = {
+      Escape: this.handleEsc.bind(this),
+      ArrowUp: this.handleSelection.bind(this, -1),
+      ArrowDown: this.handleSelection.bind(this, 1),
+      PageUp: this.handleSelection.bind(this, -5),
+      PageDown: this.handleSelection.bind(this, 5),
+      Enter: this.handleEnter.bind(this)
+    };
+    const selectedHandler = keyHandlers[key];
+    if (selectedHandler !== undefined) {
+      selectedHandler();
       evt.preventDefault();
     }
   }
@@ -222,16 +218,6 @@ class AppContainer extends React.Component {
       payload: item.payload
     };
     rpc.call('execute', params);
-  }
-
-  handleEnter(key) {
-    if (key !== 'Enter') {
-      return false;
-    }
-    const results = this.state.results;
-    const selectionIndex = this.state.selectionIndex;
-    this.execute(results[selectionIndex]);
-    return true;
   }
 
   handleUpdateSelectionIndex(evt, index) {
