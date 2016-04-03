@@ -100,6 +100,7 @@ module.exports = (workerContext) => {
     PLUGIN_API_VERSION: 'hain0',
     MAIN_PLUGIN_REPO: conf.MAIN_PLUGIN_REPO,
     DEV_PLUGIN_REPO: conf.DEV_PLUGIN_REPO,
+    INTERNAL_PLUGIN_REPO: conf.INTERNAL_PLUGIN_REPO,
     app: workerContext.app,
     toast: workerContext.toast,
     shell: workerContext.shell,

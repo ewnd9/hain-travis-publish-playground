@@ -1,7 +1,7 @@
 {
   "name": "hain-commands",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Hain operation commands",
   "main": "index.js",
   "scripts": {},
   "author": "Heejin Lee <monster@teamappetizer.com>",
