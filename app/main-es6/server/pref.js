@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
 
 const schemaDefaults = require('../../utils/schema-defaults');
 
@@ -34,7 +36,15 @@ function reset() {
 
 function commit() {
   prefStore.set(PREF_KEY, tempPref);
+
+  const copy = _.assign({}, tempPref);
+  emitter.emit('update', copy);
+
   _isDirty = false;
+}
+
+function on(eventName, listener) {
+  emitter.on(eventName, listener);
 }
 
 if (!prefStore.has(PREF_KEY)) {
@@ -49,6 +59,7 @@ module.exports = {
   update,
   reset,
   commit,
+  on,
   get isDirty() {
     return _isDirty;
   }

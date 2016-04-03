@@ -3,9 +3,8 @@
   "properties": {
     "shortcut": {
       "type": "string",
-      "title": "Quick-Open Shorcut (requires restart)",
-      "default": "alt+space",
-      "minLength": 3
+      "title": "Quick-Open Shorcut",
+      "default": "alt+space"
     },
     "proxy": {
       "type": "object",
