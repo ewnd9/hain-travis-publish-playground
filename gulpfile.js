@@ -10,6 +10,7 @@ const zip = require('gulp-zip');
 const electronInstaller = require('electron-winstaller');
 const fs = require('fs');
 const del = require('del');
+const appPkg = require('./app/package.json');
 
 gulp.task('deps', () => {
   return gulp.src('./app/package.json')
@@ -55,12 +56,14 @@ gulp.task('build', ['renderer', 'deps'], (done) => {
 });
 
 gulp.task('build-zip', ['build'], () => {
+  const filename = `Hain-ia32-v${appPkg.version}.zip`;
   return gulp.src('./out/Hain-win32-ia32/**/*')
-            .pipe(zip('Hain-win32-ia32.zip'))
+            .pipe(zip(filename))
             .pipe(gulp.dest('./out/'));
 });
 
 gulp.task('build-installer', ['build'], (done) => {
+  const filename = `HainSetup-ia32-v${appPkg.version}.exe`;
   electronInstaller.createWindowsInstaller({
     appDirectory: './out/Hain-win32-ia32',
     outputDirectory: './out',
@@ -71,7 +74,7 @@ gulp.task('build-installer', ['build'], (done) => {
     loadingGif: path.resolve('./build/installer.gif'),
     noMsi: true
   }).then(() => {
-    fs.renameSync('./out/Setup.exe', './out/HainSetup-ia32.exe');
+    fs.renameSync('./out/Setup.exe', `./out/${filename}`);
     done();
   }).catch((err) => done(err));
 });
