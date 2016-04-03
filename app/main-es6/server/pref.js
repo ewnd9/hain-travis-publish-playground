@@ -17,8 +17,10 @@ const PREF_KEY = 'hain';
 let tempPref = {};
 let _isDirty = false;
 
-function get() {
-  return tempPref;
+function get(path) {
+  if (path === undefined)
+    return tempPref;
+  return _.get(tempPref, path);
 }
 
 function update(pref) {
@@ -47,11 +49,8 @@ function on(eventName, listener) {
   emitter.on(eventName, listener);
 }
 
-if (!prefStore.has(PREF_KEY)) {
-  reset();
-} else {
-  tempPref = prefStore.get(PREF_KEY);
-}
+const defaults = schemaDefaults(appPrefSchema);
+tempPref = _.assign(defaults, prefStore.get(PREF_KEY));
 
 module.exports = {
   get schema() {

@@ -117,8 +117,9 @@ module.exports = (workerContext) => {
     const hasPreferences = (pluginConfig.prefSchema !== null);
     if (hasPreferences) {
       const defaults = schemaDefaults(pluginConfig.prefSchema);
-      if (prefStore.has(pluginId) === false)
-        prefStore.set(pluginId, defaults);
+      const saved = prefStore.get(pluginId) || {};
+      prefStore.set(pluginId, _.assign(defaults, saved));
+
       const initialPref = prefStore.get(pluginId);
       preferences = new ObservableObject(initialPref);
     }
