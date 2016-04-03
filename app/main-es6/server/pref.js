@@ -7,7 +7,7 @@ const emitter = new EventEmitter();
 const schemaDefaults = require('../../utils/schema-defaults');
 
 const conf = require('../conf');
-const schema = require('./preferences.json');
+const appPrefSchema = require('./app-pref-schema');
 
 const SimpleStore = require('../utils/simple-store');
 const prefStore = SimpleStore(conf.APP_PREF_DIR);
@@ -29,7 +29,7 @@ function update(pref) {
 }
 
 function reset() {
-  const defaults = schemaDefaults(schema);
+  const defaults = schemaDefaults(appPrefSchema);
   update(defaults);
   return defaults;
 }
@@ -54,7 +54,9 @@ if (!prefStore.has(PREF_KEY)) {
 }
 
 module.exports = {
-  schema,
+  get schema() {
+    return appPrefSchema;
+  },
   get,
   update,
   reset,
