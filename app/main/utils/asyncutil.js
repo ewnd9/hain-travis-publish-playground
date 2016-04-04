@@ -1,0 +1,14 @@
+'use strict';
+
+function runWhen(predicate, func, interval) {
+  var _timer = 0;
+  _timer = setInterval(function () {
+    var isOk = predicate();
+    if (!isOk) return;
+    clearInterval(_timer);
+    func();
+  }, interval);
+}
+
+module.exports = { runWhen: runWhen };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInV0aWxzL2FzeW5jdXRpbC5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7QUFFQSxTQUFTLE9BQVQsQ0FBaUIsU0FBakIsRUFBNEIsSUFBNUIsRUFBa0MsUUFBbEMsRUFBNEM7QUFDMUMsTUFBSSxTQUFTLENBQVQsQ0FEc0M7QUFFMUMsV0FBUyxZQUFZLFlBQU07QUFDekIsUUFBTSxPQUFPLFdBQVAsQ0FEbUI7QUFFekIsUUFBSSxDQUFDLElBQUQsRUFDRixPQURGO0FBRUEsa0JBQWMsTUFBZCxFQUp5QjtBQUt6QixXQUx5QjtHQUFOLEVBTWxCLFFBTk0sQ0FBVCxDQUYwQztDQUE1Qzs7QUFXQSxPQUFPLE9BQVAsR0FBaUIsRUFBRSxnQkFBRixFQUFqQiIsImZpbGUiOiJ1dGlscy9hc3luY3V0aWwuanMiLCJzb3VyY2VzQ29udGVudCI6WyIndXNlIHN0cmljdCc7XHJcblxyXG5mdW5jdGlvbiBydW5XaGVuKHByZWRpY2F0ZSwgZnVuYywgaW50ZXJ2YWwpIHtcclxuICBsZXQgX3RpbWVyID0gMDtcclxuICBfdGltZXIgPSBzZXRJbnRlcnZhbCgoKSA9PiB7XHJcbiAgICBjb25zdCBpc09rID0gcHJlZGljYXRlKCk7XHJcbiAgICBpZiAoIWlzT2spXHJcbiAgICAgIHJldHVybjtcclxuICAgIGNsZWFySW50ZXJ2YWwoX3RpbWVyKTtcclxuICAgIGZ1bmMoKTtcclxuICB9LCBpbnRlcnZhbCk7XHJcbn1cclxuXHJcbm1vZHVsZS5leHBvcnRzID0geyBydW5XaGVuIH07XHJcbiJdLCJzb3VyY2VSb290IjoiL3NvdXJjZS8ifQ==

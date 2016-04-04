@@ -1,0 +1,14 @@
+{
+  "name": "hain-plugin-math",
+  "version": "1.0.0",
+  "author": "leonardosnt",
+  "license": "MIT",
+  "description": "a hain-plugin to calculate things",
+  "main": "index.js",
+  "hain": {
+    "prefix": "=",
+    "usage": "type something to calculate (e.g. =1+1)",
+    "icon": "#fa fa-calculator",
+    "redirect": "= "
+  }
+}
