@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const co = require('co');
 const twitter = require('twitter-text');
 
 module.exports = (context) => {

@@ -5,7 +5,6 @@ const cp = require('child_process');
 
 const electron = require('electron');
 const electronApp = electron.app;
-const globalShortcut = electron.globalShortcut;
 
 const asyncutil = require('../../utils/asyncutil');
 const logger = require('../../utils/logger');
@@ -16,30 +15,16 @@ const mainWindow = require('./mainwindow');
 const prefWindow = require('./prefwindow');
 const iconProtocol = require('./iconprotocol');
 const toast = require('../toast');
-const pref = require('../pref');
+const shortcut = require('./shortcut');
 
 let _isRestarting = false;
-
-function registerShortcut() {
-  const shortcut = pref.get().shortcut;
-  globalShortcut.register(shortcut, () => {
-    if (_isRestarting)
-      return;
-    if (mainWindow.isContentLoading()) {
-      logger.log('please wait a seconds, you can use shortcut after loaded');
-      return;
-    }
-    mainWindow.toggleWindow();
-  });
-}
 
 function launch() {
   const server = require('../server');
   const tray = require('./tray');
 
-  if (firstLaunch.isFirstLaunch) {
+  if (firstLaunch.isFirstLaunch)
     autolaunch.activate();
-  }
 
   const isRestarted = (_.includes(process.argv, '--restarted'));
   const silentLaunch = (_.includes(process.argv, '--silent'));
@@ -56,11 +41,14 @@ function launch() {
 
   electronApp.on('ready', () => {
     tray.createTray(this).catch(err => logger.log(err));
-    registerShortcut();
+    shortcut.initializeAndRegisterShortcut();
     mainWindow.createWindow(() => {
       if (!silentLaunch || isRestarted) {
         asyncutil.runWhen(() => (!mainWindow.isContentLoading() && server.isLoaded),
-          () => mainWindow.showWindowOnCenter(), 100);
+          () => {
+            mainWindow.clearQuery();
+            mainWindow.showWindowOnCenter();
+          }, 100);
       }
       if (isRestarted)
         toast.enqueue('Restarted');
@@ -68,19 +56,21 @@ function launch() {
   });
 
   electronApp.on('will-quit', () => {
-    globalShortcut.unregisterAll();
+    shortcut.clearShortcut();
   });
   iconProtocol.register();
 }
 
-function close() {
-  mainWindow.hideAndRefreshWindow();
+function close(dontRestoreFocus) {
+  mainWindow.hideAndRefreshWindow(dontRestoreFocus);
 }
 
 function restart() {
   if (_isRestarting)
     return;
   _isRestarting = true;
+
+  shortcut.clearShortcut();
 
   const argv = [].concat(process.argv);
   if (!_.includes(argv, '--restarted')) {
@@ -101,4 +91,13 @@ function openPreferences() {
   prefWindow.show();
 }
 
-module.exports = { launch, close, restart, quit, openPreferences };
+module.exports = {
+  launch,
+  close,
+  restart,
+  quit,
+  openPreferences,
+  get isRestarting() {
+    return _isRestarting;
+  }
+};

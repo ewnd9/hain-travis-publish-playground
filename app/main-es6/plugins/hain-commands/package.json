@@ -1,14 +1,14 @@
 {
   "name": "hain-commands",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Hain operation commands",
   "main": "index.js",
   "scripts": {},
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
   "hain": {
     "prefix": null,
-    "usage": "/about, /restart, /quit",
+    "usage": "/about, /preferences, /restart, /quit",
     "icon": "#fa fa-gear",
     "group": "Hain Operation Commands"
   }

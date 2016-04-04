@@ -4,6 +4,7 @@ const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
 
 const platformUtil = require('../../../platform-util');
+const pref = require('../pref');
 
 let browserWindow = null;
 
@@ -73,12 +74,19 @@ function showWindowOnCenter() {
   browserWindow.show();
 }
 
+function clearQuery() {
+  browserWindow.webContents.executeJavaScript('clearQuery()');
+}
+
 function hideAndRefreshWindow(dontRestoreFocus) {
   if (browserWindow === null)
     return;
 
   browserWindow.hide();
-  browserWindow.webContents.executeJavaScript('refresh()');
+
+  const doClearQuery = pref.get('clearQuery');
+  if (doClearQuery)
+    clearQuery();
 
   if (!dontRestoreFocus) {
     platformUtil.restoreFocus();
@@ -103,6 +111,7 @@ function isContentLoading() {
 module.exports = {
   createWindow,
   showWindowOnCenter,
+  clearQuery,
   hideAndRefreshWindow,
   toggleWindow,
   isContentLoading

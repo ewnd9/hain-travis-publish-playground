@@ -11,6 +11,7 @@ const rpc = require('./rpc-server');
 const proxyHandler = require('./server-proxyhandler');
 const app = require('./app/app');
 const pref = require('./pref');
+const asyncutil = require('../utils/asyncutil');
 
 let workerProcess = null;
 let isPluginsReady = false;
@@ -39,6 +40,27 @@ function handleWorkerMessage(msg) {
   handler(msg.payload);
 }
 
+const _preMsgQueue = [];
+let _readyToSendmsg = false;
+
+function waitForSendmsgReady() {
+  asyncutil.runWhen(() => (workerProcess !== null && workerProcess.connected), () => {
+    _readyToSendmsg = true;
+    while (_preMsgQueue.length > 0) {
+      const msg = _preMsgQueue.shift();
+      workerProcess.send(msg);
+    }
+  });
+}
+
+function sendmsg(type, payload) {
+  if (!_readyToSendmsg) {
+    _preMsgQueue.push({ type, payload });
+    return;
+  }
+  workerProcess.send({ type, payload });
+}
+
 function initialize() {
   const workerPath = path.join(__dirname, '../worker/worker.js');
   if (!fs.existsSync(workerPath))
@@ -50,16 +72,17 @@ function initialize() {
   workerProcess.on('message', (msg) => {
     handleWorkerMessage(msg);
   });
+
+  const initialGlobalPref = pref.get();
+  sendmsg('initialize', { initialGlobalPref });
+  waitForSendmsgReady();
+
   electronApp.on('quit', () => {
     try {
       if (workerProcess)
         workerProcess.kill();
     } catch (e) { }
   });
-}
-
-function sendmsg(type, payload) {
-  workerProcess.send({ type, payload });
 }
 
 const appPrefId = 'Hain';
@@ -78,12 +101,13 @@ const workerPrefHandlers = {
     rpc.send('prefwindow', 'on-get-pref-items', prefItems);
   },
   'on-get-preferences': (payload) => {
-    // const { prefId, schema, model } = payload;
-    rpc.send('prefwindow', 'on-get-preferences', payload);
+    const { prefId, schema, model } = payload;
+    rpc.send('prefwindow', 'on-get-preferences', { prefId, schema, model });
   }
 };
 mergeWorkerHandlers(workerPrefHandlers);
 
+// Preferences
 rpc.on('getPrefItems', (evt, msg) => {
   sendmsg('getPluginPrefIds');
 });
@@ -119,6 +143,16 @@ rpc.on('resetPreferences', (evt, msg) => {
   sendmsg('resetPreferences', prefId);
 });
 
+function commitPreferences() {
+  sendmsg('commitPreferences');
+
+  if (pref.isDirty) {
+    const globalPref = pref.get();
+    sendmsg('updateGlobalPreferences', globalPref);
+    pref.commit();
+  }
+}
+
 rpc.on('search', (evt, msg) => {
   const { ticket, query } = msg;
   sendmsg('searchAll', { ticket, query });
@@ -135,5 +169,6 @@ rpc.define('close', function* () {
 
 module.exports = {
   initialize,
+  commitPreferences,
   get isLoaded() { return (workerProcess !== null && workerProcess.connected && isPluginsReady); }
 };

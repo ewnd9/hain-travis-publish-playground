@@ -8,7 +8,7 @@ I always dreamed an alternative to Alfred on Windows, that is made with JavaScri
 so, I made it.
 
 <p align="center">
-  <img src="docs/demo.gif" width="700"/>
+  <img src="docs/images/demo.gif" width="700"/>
 </p>
 
 ## Features
@@ -28,12 +28,13 @@ cinst Hain -pre
 
 ## Usage
 Run and press `alt+space` anywhere
-      
+
 ## How to make Plugins
 
 See [Plugin Documentation](docs/plugin-docs.md)
 
-## Running from Sources
+## Install/Build from Source
+
 ```shell
 # Clone this repo
 git clone https://github.com/appetizermonster/hain.git
@@ -42,35 +43,29 @@ cd hain
 # Install dependencies
 npm install
 npm install -g --arch=ia32 electron-prebuilt
-# Build sources
-gulp
-# Run with electron
-electron .
-```
-
-## Building
-
-```shell
-# Clone this repo
-git clone https://github.com/appetizermonster/hain.git
-# Go into the repo
-cd hain
-# Install dependencies
-npm install
-# Build installers
-gulp build-all
 ```
 
 >**Note:** this project uses Electron 32bit version
 
+### Run from Source
+
+```shell
+npm run dev
+```
+
+### Build from Source
+
+```shell
+npm run build
+```
 
 ## Contributing
-Feel free to send any pull request to `develop` branch!
+See [CONTRIBUTING.md](CONTRIBUTING.md)  
 
 ## Credits
 The name "Hain" is named by Hyunseop Lee, it means "a Servant" in Korean.  
 The app icon & gif are designed by Yunsung Lee.  
-It uses [npmsearch.com](https://github.com/solids/npmsearch) for searching modules for now  
+It uses [npmsearch.com](https://github.com/solids/npmsearch) for searching packages for now.  
 
 ## License
 MIT

@@ -1,6 +1,16 @@
 # Plugin Skeleton
 
-Your plugin module should have a layout such as:
+**Structure of Plugin Folder** 
+```
+hain-plugin-something
+├─ package.json      - nodejs package.json (required)
+├─ preferences.json  - JSONSchema preferences.json (optional)
+├─ index.js          - script code (required)
+└─ ...
+```
+ 
+
+and Your Plugin should have code such as:
 ```javascript
 'use strict';
 
@@ -30,7 +40,7 @@ you can do any preparations here.
   - `res` Response - response object, See [Response](response.md)  
 
   This function will be invoked when user changed input text.
-> **Note:** search function is ensured to be invoked once per 50ms
+> **Note:** search function is ensured to be invoked once per `30ms`
 
 * **execute(id, payload)**  
   - `id` Any - id of the selected [SearchResult](search-result.md)
@@ -69,5 +79,7 @@ module.exports = (pluginContext) => {
 ```
 
 ## Related Docs
+- [package.json Format](package-json-format.md)
+- [preferences.json Format](preferences-json-format.md)
 - [PluginContext](plugin-context.md)
 - [SearchResult](search-result.md)

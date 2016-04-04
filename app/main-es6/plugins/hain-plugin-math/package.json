@@ -1,6 +1,6 @@
 {
   "name": "hain-plugin-math",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": "leonardosnt",
   "license": "MIT",
   "description": "a hain-plugin to calculate things",
@@ -9,6 +9,6 @@
     "prefix": "=",
     "usage": "type something to calculate (e.g. =1+1)",
     "icon": "#fa fa-calculator",
-    "redirect": "= "
+    "redirect": "="
   }
 }

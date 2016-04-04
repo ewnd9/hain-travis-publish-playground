@@ -35,4 +35,5 @@ and...
 ```
 
 ## Related Docs
+* [Plugin Skeleton](plugin-skeleton.md)
 * [Icon URL Format](icon-url-format.md)

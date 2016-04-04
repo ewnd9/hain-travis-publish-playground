@@ -2,10 +2,23 @@
 
 PluginContext is a object which has following properties:
 
+**Environment Variables:**
+* `MAIN_PLUGIN_REPO` String
+* `DEV_PLUGIN_REPO` String
+* `INTERNAL_PLUGIN_REPO` String
+* `__PLUGIN_PREINSTALL_DIR` String
+* `__PLUGIN_PREUNINSTALL_FILE` String
+
+**Utility Objects:**
 * `app` [App](plugin-context-app.md) - Provides functions to control the app
 * `toast` [Toast](plugin-context-toast.md) - Provides toast functionality
 * `shell` [Shell](plugin-context-shell.md) - Provides electron's shell commands
 * `logger` [Logger](plugin-context-logger.md) - Provides logging functionality
+
+**Preference Objects:**
+* `globalPreferences` [PreferencesObject](preferences-object.md) - Contains Global preferences
+* `preferences` [PreferencesObject](preferences-object.md) - Contains Plugin's own preferences
+
 
 **Example**
 ```javascript
@@ -39,3 +52,4 @@ module.exports = (pluginContext) => {
 * [Toast](plugin-context-toast.md)
 * [Shell](plugin-context-shell.md)
 * [Logger](plugin-context-logger.md)
+* [PreferencesObject](preferences-object.md)

@@ -4,12 +4,9 @@ const _ = require('lodash');
 const fs = require('fs');
 const fse = require('fs-extra');
 const path = require('path');
-const storage = require('node-persist');
 const logger = require('../utils/logger');
 const iconFmt = require('./icon-fmt');
 const conf = require('../conf');
-const prefStore = require('./pref-store');
-const jsonSchemaDefaults = require('json-schema-defaults');
 
 module.exports = (workerContext) => {
   function ensurePluginRepos() {
@@ -75,18 +72,7 @@ module.exports = (workerContext) => {
     return pluginConfig;
   }
 
-  function createPluginLocalStorage(pluginId) {
-    const localStorageDir = `${conf.LOCAL_STORAGE_DIR}/${pluginId}`;
-    fse.ensureDirSync(localStorageDir);
-
-    const localStorage = storage.create({
-      dir: localStorageDir
-    });
-    localStorage.initSync();
-    return localStorage;
-  }
-
-  function loadPlugins(context) {
+  function loadPlugins(generateContextFunc) {
     const pluginFiles = readPluginFiles();
 
     const plugins = {};
@@ -106,28 +92,16 @@ module.exports = (workerContext) => {
       if (pluginConfig === null)
         continue;
 
-      if (pluginConfig.prefSchema !== null) {
-        const defaults = jsonSchemaDefaults(pluginConfig.prefSchema);
-        if (prefStore.has(pluginId) === false) {
-          prefStore.set(pluginId, defaults);
-        }
-      }
-
-      const pluginLocalStorage = createPluginLocalStorage(pluginId);
-      const finalPluginContext = _.assign(context, {
-        localStorage: pluginLocalStorage,
-        get preferences() {
-          return prefStore.get(pluginId);
-        }
-      });
-
       try {
-        const pluginInstance = PluginModule(finalPluginContext);
+        const pluginContext = generateContextFunc(pluginId, pluginConfig);
+        const pluginInstance = PluginModule(pluginContext);
+        pluginInstance.__pluginContext = pluginContext;
         plugins[pluginId] = pluginInstance;
         pluginConfigs[pluginId] = pluginConfig;
         logger.log(`${pluginId} loaded`);
       } catch (e) {
-        logger.log(`${pluginId} could'nt be created: ${e}`);
+        const err = e.stack || e;
+        logger.log(`${pluginId} could'nt be created: ${err}`);
       }
     }
     return { plugins, pluginConfigs };
