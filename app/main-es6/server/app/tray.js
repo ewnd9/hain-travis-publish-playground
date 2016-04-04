@@ -15,7 +15,10 @@ function* createTray() {
   const prefWindow = require('./prefwindow');
   const app = require('./app');
 
-  const iconPath = path.normalize(`${__dirname}/../../../images/tray_16.ico`);
+  const iconPath = process.platform !== 'linux' ?
+    path.normalize(`${__dirname}/../../../images/tray_16.ico`) :
+    path.normalize(`${__dirname}/../../../images/hain.png`);
+
   const autoLaunchActivated = yield autolaunch.isActivated();
   tray = new Tray(iconPath);
   const menu = Menu.buildFromTemplate([

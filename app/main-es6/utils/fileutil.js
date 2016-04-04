@@ -18,7 +18,7 @@ self.extractTarball = function (filePath, destPath) {
 
 self.move = function (src, dst) {
   return new Promise((resolve, reject) => {
-    fs.move(src, dst, (err) => {
+    fs.move(src, dst, { clobber: true }, (err) => {
       if (err) return reject(err);
       return resolve();
     });

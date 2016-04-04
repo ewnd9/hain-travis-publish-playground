@@ -1,8 +1,9 @@
 'use strict';
 
 const path = require('path');
+const applicationConfigPath = require('application-config-path');
 
-const HAIN_USER_PATH = `${process.env.LOCALAPPDATA}/hain-user`;
+const HAIN_USER_PATH = applicationConfigPath('hain-user');
 const LOCAL_STORAGE_DIR = `${HAIN_USER_PATH}/localStorages`;
 const PLUGIN_PREF_DIR = `${HAIN_USER_PATH}/prefs/plugins`;
 const APP_PREF_DIR = `${HAIN_USER_PATH}/prefs/app`;
