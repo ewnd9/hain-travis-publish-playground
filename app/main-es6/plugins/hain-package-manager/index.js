@@ -153,7 +153,7 @@ module.exports = (context) => {
         return semver.gt(x.version, installedPackage.version);
       }).map(x => {
         const org = pm.getPackage(x.name);
-        const _x = x;
+        const _x = _.assign({}, x); // clone
         _x.version = `${org.version} => ${_x.version}`;
         return _x;
       });
