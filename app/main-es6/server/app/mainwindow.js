@@ -1,6 +1,7 @@
 'use strict';
 
 const electron = require('electron');
+const shell = electron.shell;
 const BrowserWindow = electron.BrowserWindow;
 
 const platformUtil = require('../../../platform-util');
@@ -28,6 +29,10 @@ function createWindow(cb) {
     browserWindow.webContents.on('did-finish-load', cb);
   }
 
+  browserWindow.webContents.on('will-navigate', (evt, url) => {
+    shell.openExternal(url);
+    evt.preventDefault();
+  });
   browserWindow.loadURL(`file://${__dirname}/../../../dist/index.html`);
   browserWindow.on('blur', () => {
     if (browserWindow.webContents.isDevToolsOpened())
