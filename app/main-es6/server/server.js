@@ -163,6 +163,11 @@ rpc.define('execute', function* (params) {
   sendmsg('execute', { pluginId, id, payload });
 });
 
+rpc.on('renderPreview', (evt, msg) => {
+  const { ticket, pluginId, id, payload } = msg;
+  sendmsg('renderPreview', { ticket, pluginId, id, payload });
+});
+
 rpc.define('close', function* () {
   app.close();
 });

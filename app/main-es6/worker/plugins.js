@@ -26,13 +26,15 @@ function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
     const _title = textutil.sanitize(x.title);
     const _desc = textutil.sanitize(x.desc);
     const _group = x.group;
+    const _preview = x.preview;
     const sanitizedProps = {
       pluginId: pluginId,
       title: _title,
       desc: _desc,
       score: _score,
       icon: _icon || pluginConfig.icon,
-      group: _group || pluginConfig.group
+      group: _group || pluginConfig.group,
+      preview: _preview || false
     };
     return _.assign(x, sanitizedProps);
   };
@@ -258,9 +260,20 @@ module.exports = (workerContext) => {
     try {
       executeFunc(id, payload);
     } catch (e) {
-      logger.log(e);
-      if (e.stack)
-        logger.log(e.stack);
+      logger.log(e.stack || e);
+    }
+  }
+
+  function renderPreview(pluginId, id, payload, render) {
+    if (plugins[pluginId] === undefined)
+      return;
+    const renderPreviewFunc = plugins[pluginId].renderPreview;
+    if (renderPreviewFunc === undefined)
+      return;
+    try {
+      renderPreviewFunc(id, payload, render);
+    } catch (e) {
+      logger.log(e.stack || e);
     }
   }
 
@@ -306,6 +319,7 @@ module.exports = (workerContext) => {
     initialize,
     searchAll,
     execute,
+    renderPreview,
     getPrefIds,
     getPreferences,
     updatePreferences,

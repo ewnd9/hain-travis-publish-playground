@@ -115,6 +115,14 @@ const msgHandlers = {
     const { pluginId, id, payload } = _payload;
     plugins.execute(pluginId, id, payload);
   },
+  renderPreview: (_payload) => {
+    const { ticket, pluginId, id, payload } = _payload;
+    const render = (html) => {
+      const pipeMsg = { ticket, html };
+      ipcPipe('mainwindow', 'on-render-preview', pipeMsg);
+    };
+    plugins.renderPreview(pluginId, id, payload, render);
+  },
   getPluginPrefIds: (payload) => {
     const prefIds = plugins.getPrefIds();
     send('on-get-plugin-pref-ids', prefIds);

@@ -10,6 +10,10 @@ const RPCRenderer = require('./rpc-renderer');
 const rpc = new RPCRenderer('mainwindow');
 const remote = require('electron').remote;
 
+const Ticket = require('./ticket');
+const searchTicket = new Ticket();
+const previewTicket = new Ticket();
+
 import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, Subheader, FontIcon } from 'material-ui';
 import { Notification } from 'react-notification';
 
@@ -17,14 +21,6 @@ const SelectableList = SelectableContainerEnhance(List);
 
 const SEND_INTERVAL = 30; // ms
 const CLEAR_INTERVAL = 250; // ms
-
-let __searchTicket = 0;
-function incrTicket() {
-  __searchTicket++;
-  if (__searchTicket > 999999999)
-    __searchTicket = 0;
-  return __searchTicket;
-}
 
 class AppContainer extends React.Component {
   constructor() {
@@ -38,7 +34,6 @@ class AppContainer extends React.Component {
       toastOpen: false
     };
     this.toastQueue = [];
-    this.lastSearchTicket = 0;
     this.lastResultTicket = -1;
   }
 
@@ -83,7 +78,7 @@ class AppContainer extends React.Component {
     });
     rpc.on('on-result', (evt, msg) => {
       const { ticket, type, payload } = msg;
-      if (this.lastSearchTicket !== ticket)
+      if (searchTicket.current !== ticket)
         return;
 
       let results = this.state.results;
@@ -117,6 +112,15 @@ class AppContainer extends React.Component {
       }
 
       this.setState({ results, selectionIndex });
+      this.updatePreview();
+    });
+    rpc.on('on-render-preview', (evt, msg) => {
+      const { ticket, html } = msg;
+      if (previewTicket.current !== ticket)
+        return;
+      if (this.state.previewHtml == html)
+        return;
+      this.setState({ previewHtml: html });
     });
     setInterval(this.processToast.bind(this), 200);
   }
@@ -146,8 +150,7 @@ class AppContainer extends React.Component {
   }
 
   search(query) {
-    const ticket = incrTicket();
-    this.lastSearchTicket = ticket;
+    const ticket = searchTicket.newTicket();
 
     clearTimeout(this.lastSearchTimer);
     this.lastSearchTimer = setTimeout(() => {
@@ -177,6 +180,20 @@ class AppContainer extends React.Component {
     rpc.call('execute', params);
   }
 
+  updatePreview() {
+    const selectionIndex = this.state.selectionIndex;
+    const selectedResult = this.state.results[selectionIndex];
+    if (selectedResult === undefined || !selectedResult.preview)
+      return;
+
+    const ticket = previewTicket.newTicket();
+    const pluginId = selectedResult.pluginId;
+    const id = selectedResult.id;
+    const payload = selectedResult.payload;
+
+    rpc.send('renderPreview', { ticket, pluginId, id, payload });
+  }
+
   handleSelection(selectionDelta) {
     const results = this.state.results;
     const upperSelectionIndex = results.length - 1;
@@ -185,6 +202,7 @@ class AppContainer extends React.Component {
     newSelectionIndex = _.clamp(newSelectionIndex, 0, upperSelectionIndex);
 
     this.setState({ selectionIndex: newSelectionIndex });
+    this.updatePreview();
     this.scrollTo(newSelectionIndex);
   }
 
@@ -233,6 +251,7 @@ class AppContainer extends React.Component {
 
   handleUpdateSelectionIndex(evt, index) {
     this.setState({ selectionIndex: index });
+    this.updatePreview();
   }
 
   handleItemClick(i, evt) {
@@ -257,6 +276,7 @@ class AppContainer extends React.Component {
   render() {
     const results = this.state.results;
     const selectionIndex = this.state.selectionIndex;
+    const selectedResult = results[selectionIndex];
 
     const list = [];
     let lastGroup = null;
@@ -289,7 +309,24 @@ class AppContainer extends React.Component {
       );
     }
 
-    const containerStyles = { overflowX: 'hidden', overflowY: 'auto', height: '440px' };
+    const containerStyles = { overflowX: 'hidden', transition: 'width 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
+                              overflowY: 'auto', width: '100%', height: '440px' };
+    const previewStyle = { float: 'left', boxSizing: 'border-box', padding: '10px', width: '470px', height: '440px' };
+
+    let previewBox = null;
+    if (selectedResult && selectedResult.preview) {
+      containerStyles.float = 'left';
+      containerStyles.width = '300px';
+
+      previewBox = (
+        <div style={previewStyle}>
+          <div style={{ width: '100%', height: '100%',
+                        display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+               dangerouslySetInnerHTML={{ __html: this.state.previewHtml }} />
+        </div>
+      );
+    }
+
     return (
       <div>
         <div style={{ position: 'fixed', height: '40px', 'zIndex': 1000, top: 0, width: '776px' }}>
@@ -303,13 +340,14 @@ class AppContainer extends React.Component {
             onChange={this.handleChange.bind(this)}
             />
         </div>
-        <div>
-          <div ref="listContainer" style={containerStyles}>
+        <div key="containerWrapper">
+          <div key="container" ref="listContainer" style={containerStyles}>
             <SelectableList style={{ paddingTop: '0px', paddingBottom: '0px' }}
                             valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
               {list}
             </SelectableList>
           </div>
+          {previewBox}
         </div>
         <Notification isActive={this.state.toastOpen} message={<div dangerouslySetInnerHTML={{ __html: this.state.toastMessage }} />} />
       </div>
