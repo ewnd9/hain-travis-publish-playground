@@ -4,6 +4,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 class HTMLFrame extends React.Component {
+  constructor() {
+    super();
+    this.counter = 0;
+  }
+
   componentDidMount() {
     this.renderHtml();
   }
@@ -26,8 +31,11 @@ class HTMLFrame extends React.Component {
   }
 
   render() {
+    this.counter += 1;
+    if (this.counter > 10000)
+      this.counter = 0;
     return (
-      <iframe {...this.props} />
+      <iframe key={this.counter} {...this.props} />
     );
   }
 }
