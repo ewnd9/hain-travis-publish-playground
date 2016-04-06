@@ -208,7 +208,12 @@ class AppContainer extends React.Component {
   }
 
   handleEsc() {
-    rpc.call('close');
+    const input = this.state.input;
+    if (input === undefined || input.length <= 0) {
+      rpc.call('close');
+      return;
+    }
+    this.setInput('');
   }
 
   handleEnter() {
