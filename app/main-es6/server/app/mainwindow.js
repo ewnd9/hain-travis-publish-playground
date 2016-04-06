@@ -29,8 +29,8 @@ function createWindow(cb) {
     browserWindow.webContents.on('did-finish-load', cb);
   }
 
-  browserWindow.webContents.on('will-navigate', (evt, url) => {
-    shell.openExternal(url);
+  browserWindow.webContents.on('new-window', (evt, url) => {
+    shell.openExternal(encodeURI(url));
     evt.preventDefault();
   });
   browserWindow.loadURL(`file://${__dirname}/../../../dist/index.html`);
