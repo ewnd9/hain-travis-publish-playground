@@ -215,17 +215,17 @@ module.exports = (workerContext) => {
   }
 
   function searchAll(query, res) {
+    let sysResults = [];
+
     for (const prop in plugins) {
       const pluginId = prop;
       const plugin = plugins[pluginId];
       const pluginConfig = pluginConfigs[pluginId];
 
-      const sysResponse = createResponseObject(res, '*', pluginConfig);
       if (query.length === 0) {
         const help = _makeIntroHelp(pluginConfig);
-        if (help && help.length > 0) {
-          sysResponse.add(help);
-        }
+        if (help && help.length > 0)
+          sysResults = sysResults.concat(help);
         continue;
       }
 
@@ -237,9 +237,8 @@ module.exports = (workerContext) => {
         const prefix_lower = _prefix.toLowerCase();
         if (_query_lower.startsWith(prefix_lower) === false) {
           const prefixHelp = _makePrefixHelp(pluginConfig, query);
-          if (prefixHelp && prefixHelp.length > 0) {
-            sysResponse.add(prefixHelp);
-          }
+          if (prefixHelp && prefixHelp.length > 0)
+            sysResults = sysResults.concat(prefixHelp);
           continue;
         }
         _query = _query.substring(_prefix.length);
@@ -254,6 +253,10 @@ module.exports = (workerContext) => {
           logger.log(e.stack);
       }
     }
+
+    // Send System-generated Results
+    if (sysResults.length > 0)
+      res({ type: 'add', payload: sysResults });
   }
 
   function execute(pluginId, id, payload) {
