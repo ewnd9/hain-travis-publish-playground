@@ -16,6 +16,7 @@ const previewTicket = new Ticket();
 
 import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, Subheader, FontIcon } from 'material-ui';
 import { Notification } from 'react-notification';
+import HTMLFrame from './html-frame/html-frame';
 
 const SelectableList = SelectableContainerEnhance(List);
 
@@ -311,18 +312,19 @@ class AppContainer extends React.Component {
 
     const containerStyles = { overflowX: 'hidden', transition: 'width 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
                               overflowY: 'auto', width: '100%', height: '440px' };
-    const previewStyle = { float: 'left', boxSizing: 'border-box', padding: '10px', width: '470px', height: '440px' };
-
     let previewBox = null;
     if (selectedResult && selectedResult.preview) {
+      const previewStyle = { float: 'left', boxSizing: 'border-box',
+                             overflowX: 'hidden', overflowY: 'hidden',
+                             padding: '10px', paddingRight: '0px', width: '470px', height: '440px' };
       containerStyles.float = 'left';
       containerStyles.width = '300px';
 
       previewBox = (
         <div style={previewStyle}>
-          <div style={{ width: '100%', height: '100%',
-                        display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-               dangerouslySetInnerHTML={{ __html: this.state.previewHtml }} />
+          <HTMLFrame html={this.state.previewHtml}
+                     sandbox="allow-forms allow-popups allow-same-origin allow-scripts"
+                     style={{ width: '100%', height: '100%', border: '0' }} />
         </div>
       );
     }
