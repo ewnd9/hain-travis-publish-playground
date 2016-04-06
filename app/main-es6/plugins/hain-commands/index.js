@@ -63,7 +63,8 @@ module.exports = (context) => {
       return {
         redirect: x.elem,
         title: matchutil.makeStringBoldHtml(x.elem, x.matches),
-        desc: NAME
+        desc: NAME,
+        score: 0
       };
     });
     return ret;

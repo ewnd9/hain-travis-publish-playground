@@ -21,8 +21,12 @@ const conf = require('../conf');
 function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
     const defaultScore = 0.5;
+    let _score = x.score;
+    if (!_.isNumber(_score))
+      _score = defaultScore;
+    _score = Math.max(0, Math.min(_score, 1)); // clamp01(x.score)
+
     const _icon = x.icon;
-    const _score = Math.max(0, Math.min(x.score || defaultScore, 1)); // clamp01(x.score)
     const _title = textutil.sanitize(x.title);
     const _desc = textutil.sanitize(x.desc);
     const _group = x.group;
@@ -90,7 +94,8 @@ function _makePrefixHelp(pluginConfig, query) {
       title: textutil.sanitize(matchutil.makeStringBoldHtml(x.elem, x.matches)),
       desc: textutil.sanitize(pluginConfig.name),
       group: 'Plugin Commands',
-      icon: pluginConfig.icon
+      icon: pluginConfig.icon,
+      score: 0.5
     };
   });
 }
