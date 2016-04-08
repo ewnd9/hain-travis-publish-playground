@@ -26,6 +26,7 @@
 * [hain-plugin-reddit](https://github.com/sethxd/hain-plugin-reddit)
 * [hain-plugin-stocks](https://github.com/sethxd/hain-plugin-stocks)
 * [hain-plugin-producthunt](https://github.com/Braunson/hain-plugin-producthunt)
+* [hain-plugin-google-play](https://github.com/Braunson/hain-plugin-google-play)
 
 ## Guides
 
