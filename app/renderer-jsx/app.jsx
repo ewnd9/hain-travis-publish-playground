@@ -15,6 +15,8 @@ const searchTicket = new Ticket();
 const previewTicket = new Ticket();
 
 import { TextField, Avatar, SelectableContainerEnhance, List, ListItem, Subheader, FontIcon } from 'material-ui';
+import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
+import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
 import { Notification } from 'react-notification';
 import HTMLFrame from './html-frame/html-frame';
 
@@ -22,6 +24,11 @@ const SelectableList = SelectableContainerEnhance(List);
 
 const SEND_INTERVAL = 30; // ms
 const CLEAR_INTERVAL = 250; // ms
+
+// HACK to speed up rendering performance
+const muiTheme = getMuiTheme({
+  userAgent: false
+});
 
 class AppContainer extends React.Component {
   constructor() {
@@ -202,6 +209,9 @@ class AppContainer extends React.Component {
     let newSelectionIndex = this.state.selectionIndex + selectionDelta;
     newSelectionIndex = _.clamp(newSelectionIndex, 0, upperSelectionIndex);
 
+    if (this.state.selectionIndex === newSelectionIndex)
+      return;
+
     this.setState({ selectionIndex: newSelectionIndex });
     this.updatePreview();
     this.scrollTo(newSelectionIndex);
@@ -274,9 +284,9 @@ class AppContainer extends React.Component {
     }
     if (iconUrl.startsWith('#')) {
       const iconClass = iconUrl.substring(1);
-      return <Avatar icon={<FontIcon className={iconClass} />} />;
+      return <Avatar key="icon" icon={<FontIcon className={iconClass} />} />;
     }
-    return <Avatar src={iconUrl} />;
+    return <Avatar key="icon" src={iconUrl} />;
   }
 
   render() {
@@ -293,7 +303,7 @@ class AppContainer extends React.Component {
         const headerId = `header.${i}`;
         list.push(
           <div key={headerId} ref={headerId}>
-            <Subheader style={{ lineHeight: '32px', fontSize: 13 }}>{ result.group }</Subheader>
+            <Subheader key="header" style={{ lineHeight: '32px', fontSize: 13 }}>{ result.group }</Subheader>
           </div>
         );
         lastGroup = result.group;
@@ -335,9 +345,11 @@ class AppContainer extends React.Component {
     }
 
     return (
+      <MuiThemeProvider muiTheme={muiTheme}>
       <div>
-        <div style={{ position: 'fixed', height: '40px', 'zIndex': 1000, top: 0, width: '776px' }}>
+        <div key="inputWrapper" style={{ position: 'fixed', height: '40px', 'zIndex': 1000, top: 0, width: '776px' }}>
           <TextField
+            key="input"
             ref="input"
             style={{ fontSize: '20px' }}
             hintText="Enter your command!"
@@ -349,15 +361,17 @@ class AppContainer extends React.Component {
         </div>
         <div key="containerWrapper">
           <div key="container" ref="listContainer" style={containerStyles}>
-            <SelectableList style={{ paddingTop: '0px', paddingBottom: '0px' }}
+            <SelectableList key="list" style={{ paddingTop: '0px', paddingBottom: '0px' }}
                             valueLink={{ value: selectionIndex, requestChange: this.handleUpdateSelectionIndex.bind(this) }}>
               {list}
             </SelectableList>
           </div>
           {previewBox}
         </div>
-        <Notification isActive={this.state.toastOpen} message={<div dangerouslySetInnerHTML={{ __html: this.state.toastMessage }} />} />
+        <Notification key="notification" isActive={this.state.toastOpen}
+                      message={<div dangerouslySetInnerHTML={{ __html: this.state.toastMessage }} />} />
       </div>
+      </MuiThemeProvider>
     );
   }
 }
