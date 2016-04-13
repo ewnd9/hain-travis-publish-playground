@@ -98,6 +98,8 @@ module.exports = (context) => {
     const basename = path.basename(filePath).toLowerCase();
     if (ext !== '.lnk' && ext !== '.exe')
       ratio *= 0.5;
+    if (ext === '.lnk')
+      ratio *= 1.5;
     if (basename.indexOf('uninstall') >= 0 || basename.indexOf('remove') >= 0)
       ratio *= 0.9;
     return ratio;
