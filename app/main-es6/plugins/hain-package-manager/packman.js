@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_find = require('lodash.find');
+const lo_remove = require('lodash.remove');
+
 const co = require('co');
 const path = require('path');
 const packageControl = require('./package-control');
@@ -76,7 +78,7 @@ class Packman {
   }
 
   getPackage(packageName) {
-    return _.find(this.packages, (x) => x.name === packageName);
+    return lo_find(this.packages, (x) => x.name === packageName);
   }
 
   hasPackage(packageName) {
@@ -101,7 +103,7 @@ class Packman {
       throw `Can't find a package: ${packageName}`;
 
     fs.appendFileSync(this.uninstallFile, `${packageName}\n`);
-    _.remove(this.packages, x => x.name === packageName);
+    lo_remove(this.packages, x => x.name === packageName);
   }
 
 }

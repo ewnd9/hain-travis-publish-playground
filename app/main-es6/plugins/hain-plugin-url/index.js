@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_first = require('lodash.first');
 const twitter = require('twitter-text');
 
 module.exports = (context) => {
@@ -16,7 +16,7 @@ module.exports = (context) => {
     if (urls.length === 0)
       return;
 
-    const url = _.first(urls);
+    const url = lo_first(urls);
     const ratio = url.length / query_trim.length;
     if (ratio <= 0.9)
       return;

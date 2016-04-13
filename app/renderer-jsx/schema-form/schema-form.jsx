@@ -1,11 +1,12 @@
 'use strict';
 
+const lo_set = require('lodash.set');
+
 import React from 'react';
 import { Card, CardTitle, CardText, TextField,
          RaisedButton, Checkbox, IconButton, FontIcon } from 'material-ui';
 
 import { Validator } from 'jsonschema';
-import _ from 'lodash';
 
 import schemaDefaults from '../../utils/schema-defaults';
 
@@ -289,7 +290,7 @@ class SchemaForm extends React.Component {
 
   handleChange(path, val) {
     const model = this.state.model;
-    _.set(model, path, val);
+    lo_set(model, path, val);
     this.setState({ model });
     this.props.onChange(model);
   }

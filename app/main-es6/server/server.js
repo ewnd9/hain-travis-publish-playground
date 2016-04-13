@@ -1,6 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_assign = require('lodash.assign');
+
 const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -30,7 +31,7 @@ let workerHandlers = {
 };
 
 function mergeWorkerHandlers(handlers) {
-  workerHandlers = _.assign(workerHandlers, handlers);
+  workerHandlers = lo_assign(workerHandlers, handlers);
 }
 
 function handleWorkerMessage(msg) {

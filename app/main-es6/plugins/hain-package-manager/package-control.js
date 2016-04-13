@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const fs = require('fs');
 const co = require('co');
 const got = require('got');
@@ -97,7 +96,7 @@ function* installPackage(packageName, versionRange, destDir, tempDir) {
   try {
     yield* downloadAndExtractPackage(packageName, versionRange, incompleteDir, tempDir);
 
-    if (data.dependencies && (_.size(data.dependencies) > 0)) {
+    if (data.dependencies && (data.dependencies.length > 0)) {
       const modulePath = path.join(incompleteDir, 'node_modules');
       yield fileutil.ensureDir(modulePath);
 

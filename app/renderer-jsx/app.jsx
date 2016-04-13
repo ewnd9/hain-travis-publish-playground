@@ -1,7 +1,12 @@
 /* global $ */
 'use strict';
 
-const _ = require('lodash');
+const lo_orderBy = require('lodash.orderby');
+const lo_uniq = require('lodash.uniq');
+const lo_map = require('lodash.map');
+const lo_reject = require('lodash.reject');
+const lo_clamp = require('lodash.clamp');
+const lo_isString = require('lodash.isstring');
 
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -99,10 +104,10 @@ class AppContainer extends React.Component {
 
       if (type === 'add') {
         results = results.concat(payload);
-        results = _.orderBy(results, ['score'], ['desc']);
+        results = lo_orderBy(results, ['score'], ['desc']);
 
         // Grouping results
-        const groups = _.uniq(_.map(results, x => x.group));
+        const groups = lo_uniq(lo_map(results, x => x.group));
         const groupedResults = [];
         for (const x of groups) {
           for (const k of results) {
@@ -114,7 +119,7 @@ class AppContainer extends React.Component {
         results = groupedResults;
       } else if (type === 'remove') {
         const _id = payload.id;
-        results = _.reject(results, (x) => {
+        results = lo_reject(results, (x) => {
           return (x.id === _id && x.pluginId === payload.pluginId);
         });
       }
@@ -207,7 +212,7 @@ class AppContainer extends React.Component {
     const upperSelectionIndex = results.length - 1;
 
     let newSelectionIndex = this.state.selectionIndex + selectionDelta;
-    newSelectionIndex = _.clamp(newSelectionIndex, 0, upperSelectionIndex);
+    newSelectionIndex = lo_clamp(newSelectionIndex, 0, upperSelectionIndex);
 
     if (this.state.selectionIndex === newSelectionIndex)
       return;
@@ -279,7 +284,7 @@ class AppContainer extends React.Component {
   }
 
   parseIconUrl(iconUrl) {
-    if (!_.isString(iconUrl)) {
+    if (!lo_isString(iconUrl)) {
       return null;
     }
     if (iconUrl.startsWith('#')) {

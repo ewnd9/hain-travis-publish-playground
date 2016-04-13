@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_find = require('lodash.find');
+const lo_assign = require('lodash.assign');
+
 const co = require('co');
 const path = require('path');
 const semver = require('semver');
@@ -56,7 +58,7 @@ module.exports = (context) => {
   }
 
   function getPackageInfo(packageName) {
-    return _.find(pm.listPackages(), (x) => x.name === packageName);
+    return lo_find(pm.listPackages(), (x) => x.name === packageName);
   }
 
   function startup() {
@@ -138,7 +140,7 @@ module.exports = (context) => {
         return semver.gt(x.version, installedPackage.version);
       }).map(x => {
         const org = pm.getPackage(x.name);
-        const _x = _.assign({}, x); // clone
+        const _x = lo_assign({}, x); // clone
         _x.version = `${org.version} => ${_x.version}`;
         return _x;
       });

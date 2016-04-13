@@ -1,6 +1,10 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_isNumber = require('lodash.isnumber');
+const lo_isString = require('lodash.isstring');
+const lo_isObject = require('lodash.isobject');
+const lo_has = require('lodash.has');
+
 const math = require('mathjs');
 
 module.exports = ({ app }) => {
@@ -8,7 +12,7 @@ module.exports = ({ app }) => {
   function search(query, res) {
     try {
       const ans = math.eval(query);
-      if (_.isNumber(ans) || _.isString(ans) || (_.isObject(ans) && _.has(ans, 'value'))) {
+      if (lo_isNumber(ans) || lo_isString(ans) || (lo_isObject(ans) && lo_has(ans, 'value'))) {
         res.add({
           title: `${query.trim()} = ${ans.toString()}`,
           group: 'Math',

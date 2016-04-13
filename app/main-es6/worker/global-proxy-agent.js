@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_isString = require('lodash.isstring');
+const lo_assign = require('lodash.assign');
+
 const tunnel = require('tunnel');
 const http = require('http');
 const https = require('https');
@@ -28,10 +30,10 @@ function createHttpsProxyAgent(host, port) {
 function patchRequest(moduleInstance, orgReq, proxyAgent) {
   return (opts, cb) => {
     let _opts = null;
-    if (_.isString(opts)) {
+    if (lo_isString(opts)) {
       _opts = url.parse(opts);
     } else {
-      _opts = _.assign({}, opts);
+      _opts = lo_assign({}, opts);
     }
     if (_opts.agent === undefined)
       _opts.agent = proxyAgent;

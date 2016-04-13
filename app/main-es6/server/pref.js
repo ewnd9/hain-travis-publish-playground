@@ -1,6 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_get = require('lodash.get');
+const lo_isEqual = require('lodash.isequal');
+const lo_assign = require('lodash.assign');
+
 const EventEmitter = require('events');
 const emitter = new EventEmitter();
 
@@ -20,11 +23,11 @@ let _isDirty = false;
 function get(path) {
   if (path === undefined)
     return tempPref;
-  return _.get(tempPref, path);
+  return lo_get(tempPref, path);
 }
 
 function update(pref) {
-  if (_.isEqual(tempPref, pref))
+  if (lo_isEqual(tempPref, pref))
     return;
   tempPref = pref;
   _isDirty = true;
@@ -39,7 +42,7 @@ function reset() {
 function commit() {
   prefStore.set(PREF_KEY, tempPref);
 
-  const copy = _.assign({}, tempPref);
+  const copy = lo_assign({}, tempPref);
   emitter.emit('update', copy);
 
   _isDirty = false;
@@ -50,7 +53,7 @@ function on(eventName, listener) {
 }
 
 const defaults = schemaDefaults(appPrefSchema);
-tempPref = _.assign(defaults, prefStore.get(PREF_KEY));
+tempPref = lo_assign(defaults, prefStore.get(PREF_KEY));
 
 module.exports = {
   get schema() {

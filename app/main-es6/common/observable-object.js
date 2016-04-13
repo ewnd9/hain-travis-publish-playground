@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require('events');
-const _ = require('lodash');
+const lo_get = require('lodash.get');
 
 class ObservableObject extends EventEmitter {
   constructor(obj) {
@@ -17,7 +17,7 @@ class ObservableObject extends EventEmitter {
   get(path) {
     if (path === undefined)
       return this.obj;
-    return _.get(this.obj, path);
+    return lo_get(this.obj, path);
   }
 }
 

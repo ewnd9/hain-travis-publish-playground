@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_isArray = require('lodash.isarray');
+const lo_isObject = require('lodash.isobject');
+const lo_orderBy = require('lodash.orderby');
 
 function fuzzyMatchFallback(elem, keyword, testStr, fuzzyScore) {
   let srcStr = keyword;
@@ -76,14 +78,14 @@ function search(elems, testStr, keywordGetter, matchFunc) {
   }
 
   const testStr_norm = testStr.toLowerCase();
-  if (_.isArray(elems)) {
+  if (lo_isArray(elems)) {
     // array
     for (let i = 0; i < elems.length; ++i) {
       const matchResult = matchFunc(elems[i], testStr_norm, keywordGetter);
       if (matchResult.score === 0) continue;
       results.push(matchResult);
     }
-  } else if (_.isObject(elems)) {
+  } else if (lo_isObject(elems)) {
     // object like { [], [], [], ... }
     for (const prop in elems) {
       const arr = elems[prop];
@@ -97,7 +99,7 @@ function search(elems, testStr, keywordGetter, matchFunc) {
     // can't process
     return results;
   }
-  return _.orderBy(results, ['score', 'length'], ['desc', 'asc']); // stable sort
+  return lo_orderBy(results, ['score', 'length'], ['desc', 'asc']); // stable sort
 }
 
 function fuzzy(elems, testStr, keywordGetter) {

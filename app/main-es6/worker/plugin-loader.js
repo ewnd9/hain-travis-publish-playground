@@ -1,6 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_isFunction = require('lodash.isfunction');
+const lo_assign = require('lodash.assign');
+
 const fs = require('fs');
 const fse = require('fs-extra');
 const path = require('path');
@@ -39,7 +41,7 @@ module.exports = (workerContext) => {
       logger.log(e.stack);
     }
 
-    if (!_.isFunction(PluginModule)) {
+    if (!lo_isFunction(PluginModule)) {
       logger.log(`plugin not function: ${pluginFile}`);
       return null;
     }
@@ -57,7 +59,7 @@ module.exports = (workerContext) => {
 
       const hainProps = packageJson.hain;
       if (hainProps) {
-        pluginConfig = _.assign(pluginConfig, hainProps);
+        pluginConfig = lo_assign(pluginConfig, hainProps);
         pluginConfig.usage = pluginConfig.usage || pluginConfig.prefix;
         pluginConfig.icon = iconFmt.parseIconUrl(pluginFile, pluginConfig.icon);
         pluginConfig.group = pluginConfig.group || pluginId;

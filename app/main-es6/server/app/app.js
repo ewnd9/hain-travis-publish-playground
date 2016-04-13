@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_includes = require('lodash.includes');
 const cp = require('child_process');
 
 const electron = require('electron');
@@ -26,8 +26,8 @@ function launch() {
   if (firstLaunch.isFirstLaunch)
     autolaunch.activate();
 
-  const isRestarted = (_.includes(process.argv, '--restarted'));
-  const silentLaunch = (_.includes(process.argv, '--silent'));
+  const isRestarted = (lo_includes(process.argv, '--restarted'));
+  const silentLaunch = (lo_includes(process.argv, '--silent'));
   const shouldQuit = electronApp.makeSingleInstance((cmdLine, workingDir) => {
     if (_isRestarting)
       return;
@@ -73,7 +73,7 @@ function restart() {
   shortcut.clearShortcut();
 
   const argv = [].concat(process.argv);
-  if (!_.includes(argv, '--restarted')) {
+  if (!lo_includes(argv, '--restarted')) {
     argv.push('--restarted');
   }
   if (!argv[0].startsWith('"')) {

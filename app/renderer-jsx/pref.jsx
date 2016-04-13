@@ -1,6 +1,7 @@
 'use strict';
 
-const _ = require('lodash');
+const lo_isEqual = require('lodash.isequal');
+const lo_cloneDeep = require('lodash.clonedeep');
 
 const React = require('react');
 const ReactDOM = require('react-dom');
@@ -31,9 +32,9 @@ class Preferences extends React.Component {
 
   onModelChange(newModel) {
     // Do not commit if nothing changed
-    if (_.isEqual(newModel, this.state.modelCopy))
+    if (lo_isEqual(newModel, this.state.modelCopy))
       return;
-    this.commitChanges(this.state.selectedPrefId, _.cloneDeep(newModel));
+    this.commitChanges(this.state.selectedPrefId, lo_cloneDeep(newModel));
   }
 
   commitChanges(prefId, model) {
@@ -45,7 +46,7 @@ class Preferences extends React.Component {
       });
       this.setState({
         model,
-        modelCopy: _.cloneDeep(model)
+        modelCopy: lo_cloneDeep(model)
       });
     }, 150);
   }
@@ -64,7 +65,7 @@ class Preferences extends React.Component {
         selectedPrefId: msg.prefId,
         schema: JSON.parse(msg.schema),
         model: msg.model,
-        modelCopy: _.cloneDeep(msg.model)
+        modelCopy: lo_cloneDeep(msg.model)
       });
     });
     rpc.send('getPrefItems');

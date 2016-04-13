@@ -1,7 +1,14 @@
 /* global process */
 'use strict';
 
-const _ = require('lodash');
+const lo_isNumber = require('lodash.isnumber');
+const lo_isArray = require('lodash.isarray');
+const lo_assign = require('lodash.assign');
+const lo_isPlainObject = require('lodash.isplainobject');
+const lo_isFunction = require('lodash.isfunction');
+const lo_reject = require('lodash.reject');
+const lo_keys = require('lodash.keys');
+
 const co = require('co');
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -22,7 +29,7 @@ function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
   return (x) => {
     const defaultScore = 0.5;
     let _score = x.score;
-    if (!_.isNumber(_score))
+    if (!lo_isNumber(_score))
       _score = defaultScore;
     _score = Math.max(0, Math.min(_score, 1)); // clamp01(x.score)
 
@@ -40,7 +47,7 @@ function createSanitizeSearchResultFunc(pluginId, pluginConfig) {
       group: _group || pluginConfig.group,
       preview: _preview || false
     };
-    return _.assign(x, sanitizedProps);
+    return lo_assign(x, sanitizedProps);
   };
 }
 
@@ -49,9 +56,9 @@ function createResponseObject(resFunc, pluginId, pluginConfig) {
   return {
     add: (result) => {
       let searchResults = [];
-      if (_.isArray(result)) {
+      if (lo_isArray(result)) {
         searchResults = result.map(sanitizeSearchResult);
-      } else if (_.isPlainObject(result)) {
+      } else if (lo_isPlainObject(result)) {
         searchResults = [sanitizeSearchResult(result)];
       } else {
         throw new Error('argument must be an array or an object');
@@ -135,12 +142,12 @@ module.exports = (workerContext) => {
     if (hasPreferences) {
       const defaults = schemaDefaults(pluginConfig.prefSchema);
       const saved = prefStore.get(pluginId) || {};
-      prefStore.set(pluginId, _.assign(defaults, saved));
+      prefStore.set(pluginId, lo_assign(defaults, saved));
 
       const initialPref = prefStore.get(pluginId);
       preferences = new ObservableObject(initialPref);
     }
-    return _.assign({}, pluginContextBase, { localStorage, preferences });
+    return lo_assign({}, pluginContextBase, { localStorage, preferences });
   }
 
   function _startup() {
@@ -148,7 +155,7 @@ module.exports = (workerContext) => {
     for (const prop in plugins) {
       logger.log(`startup: ${prop}`);
       const startupFunc = plugins[prop].startup;
-      if (!_.isFunction(startupFunc)) {
+      if (!lo_isFunction(startupFunc)) {
         logger.log(`${prop}: startup property should be a Function`);
         continue;
       }
@@ -210,7 +217,7 @@ module.exports = (workerContext) => {
     const ret = pluginLoader.loadPlugins(generatePluginContext);
     plugins = ret.plugins;
     pluginConfigs = ret.pluginConfigs;
-    pluginPrefIds = _.reject(_.keys(pluginConfigs), x => pluginConfigs[x].prefSchema === null);
+    pluginPrefIds = lo_reject(lo_keys(pluginConfigs), x => pluginConfigs[x].prefSchema === null);
 
     _startup();
   }
