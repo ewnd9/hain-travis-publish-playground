@@ -8,6 +8,8 @@ PluginContext is a object which has following properties:
 * `INTERNAL_PLUGIN_REPO` String
 * `__PLUGIN_PREINSTALL_DIR` String
 * `__PLUGIN_PREUNINSTALL_FILE` String
+* `CURRENT_API_VERSION` String
+* `COMPATIBLE_API_VERSIONS` Array&lt;String&gt;
 
 **Utility Objects:**
 * `app` [App](plugin-context-app.md) - Provides functions to control the app

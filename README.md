@@ -42,10 +42,7 @@ git clone https://github.com/appetizermonster/hain.git
 cd hain
 # Install dependencies
 npm install
-npm install -g --arch=ia32 electron-prebuilt
 ```
-
->**Note:** this project uses Electron 32bit version
 
 ### Run from Source
 

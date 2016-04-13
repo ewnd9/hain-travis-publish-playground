@@ -12,8 +12,8 @@ All plugin configurations must be located in package.json
   - `redirect` String - Query to redirect user input when user did select intro help (optional, default is `undefined`)
   - `group` String - Default result group name (optional, default is `name` value)
 
-and...
-* `keywords` Array\<String\> - Add a keyword `hain0` for sharing your plugin (**required**)
+**And...**
+* `keywords` Array\<String\> - Add Base API version `hain-0.1.0` for sharing your plugin (**required**)
 
 
 
@@ -23,7 +23,7 @@ and...
   "name": "hain-plugin-google",
   "version": "0.0.1",
   "keywords": [
-    "hain0"
+    "hain-0.1.0"
   ],
   "hain": {
     "prefix": "/g",

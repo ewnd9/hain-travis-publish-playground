@@ -9,6 +9,7 @@ SearchResult is a plain object which has a following format:
 * `icon` String - Icon URL, See [Icon URL Format](icon-url-format.md) (optional, default is `icon` of package.json)
 * `redirect` String - Redirection query (optional, default is `undefined`)
 * `group` String - Result group name (optional, default is `group` of package.json)
+* `preview` Boolean - whether it has HTML Preview (optional, default is `false`)
 
   
 SearchResult object is used as a argument for [Response](response.md) object.  
