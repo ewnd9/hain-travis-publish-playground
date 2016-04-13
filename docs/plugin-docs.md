@@ -21,6 +21,8 @@ Current API Version: `hain-0.1.0`
   * [hain-plugin-amzn](https://github.com/TheBuzzDee/hain-plugin-amzn)
   * [hain-plugin-buzzpics](https://github.com/TheBuzzDee/hain-plugin-buzzpics)
   * [hain-plugin-notes](https://github.com/jervant/hain-plugin-notes)
+  * [hain-plugin-steam](https://github.com/KennethWussmann/hain-plugin-steam)
+  * [hain-plugin-pc](https://github.com/KennethWussmann/hain-plugin-pc)
   * [hain-plugin-shortcut](https://github.com/e-/hain-plugin-shortcut)
   * [hain-plugin-reddit](https://github.com/sethxd/hain-plugin-reddit)
   * [hain-plugin-stocks](https://github.com/sethxd/hain-plugin-stocks)
