@@ -125,7 +125,6 @@ class AppContainer extends React.Component {
       }
 
       this.setState({ results, selectionIndex });
-      this.updatePreview();
     });
     rpc.on('on-render-preview', (evt, msg) => {
       const { ticket, html } = msg;
@@ -136,6 +135,10 @@ class AppContainer extends React.Component {
       this.setState({ previewHtml: html });
     });
     setInterval(this.processToast.bind(this), 200);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.updatePreview();
   }
 
   setInput(args) {
@@ -196,14 +199,21 @@ class AppContainer extends React.Component {
   updatePreview() {
     const selectionIndex = this.state.selectionIndex;
     const selectedResult = this.state.results[selectionIndex];
-    if (selectedResult === undefined || !selectedResult.preview)
+    if (selectedResult === undefined || !selectedResult.preview) {
+      this._renderedPreviewHash = null;
       return;
+    }
 
-    const ticket = previewTicket.newTicket();
     const pluginId = selectedResult.pluginId;
     const id = selectedResult.id;
     const payload = selectedResult.payload;
+    const previewHash = `${pluginId}.${id}`;
 
+    if (previewHash === this._renderedPreviewHash)
+      return;
+    this._renderedPreviewHash = previewHash;
+
+    const ticket = previewTicket.newTicket();
     rpc.send('renderPreview', { ticket, pluginId, id, payload });
   }
 
@@ -218,7 +228,6 @@ class AppContainer extends React.Component {
       return;
 
     this.setState({ selectionIndex: newSelectionIndex });
-    this.updatePreview();
     this.scrollTo(newSelectionIndex);
   }
 
@@ -272,7 +281,6 @@ class AppContainer extends React.Component {
 
   handleUpdateSelectionIndex(evt, index) {
     this.setState({ selectionIndex: index });
-    this.updatePreview();
   }
 
   handleItemClick(i, evt) {
