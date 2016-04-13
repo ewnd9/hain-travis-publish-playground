@@ -9,6 +9,8 @@ install:
   - npm install -g gulp
 
 test_script:
+  # run jest
+  - npm test
   - gulp build
 
 build: off
