@@ -2,9 +2,11 @@
   "name": "hain",
   "main": "app/main-es6/main.js",
   "scripts": {
+    "start": "electron .",
     "dev": "gulp && electron .",
     "build": "gulp build-all",
-    "test": "cd app && node ../node_modules/jest-cli/bin/jest"
+    "test": "cd app && node ../node_modules/jest-cli/bin/jest",
+    "postinstall": "npm install -g electron-prebuilt@0.37.2"
   },
   "author": "Heejin Lee <monster@teamappetizer.com>",
   "license": "MIT",
@@ -16,7 +18,7 @@
     "babel-preset-react": "^6.5.0",
     "del": "^2.2.0",
     "electron-packager": "^5.2.1",
-    "electron-prebuilt": "^0.37.2",
+    "electron-prebuilt": "0.37.2",
     "electron-winstaller": "^2.0.5",
     "eslint": "^2.3.0",
     "eslint-config-airbnb": "^6.1.0",

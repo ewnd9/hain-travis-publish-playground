@@ -12,6 +12,9 @@ const fs = require('fs');
 const del = require('del');
 const appPkg = require('./app/package.json');
 
+// Configuration
+const ARCH = 'x64';
+
 gulp.task('deps', () => {
   return gulp.src('./app/package.json')
     .pipe(install({ production: true }));
@@ -34,7 +37,7 @@ gulp.task('renderer', ['deps', 'clean:renderer'], () => {
 
 gulp.task('build', ['renderer', 'deps'], (done) => {
   packager({
-    arch: 'ia32',
+    arch: ARCH,
     dir: path.join(__dirname, 'app'),
     platform: 'win32',
     asar: true,
@@ -56,16 +59,16 @@ gulp.task('build', ['renderer', 'deps'], (done) => {
 });
 
 gulp.task('build-zip', ['build'], () => {
-  const filename = `Hain-ia32-v${appPkg.version}.zip`;
-  return gulp.src('./out/Hain-win32-ia32/**/*')
+  const filename = `Hain-${ARCH}-v${appPkg.version}.zip`;
+  return gulp.src(`./out/Hain-win32-${ARCH}/**/*`)
             .pipe(zip(filename))
             .pipe(gulp.dest('./out/'));
 });
 
 gulp.task('build-installer', ['build'], (done) => {
-  const filename = `HainSetup-ia32-v${appPkg.version}.exe`;
+  const filename = `HainSetup-${ARCH}-v${appPkg.version}.exe`;
   electronInstaller.createWindowsInstaller({
-    appDirectory: './out/Hain-win32-ia32',
+    appDirectory: `./out/Hain-win32-${ARCH}`,
     outputDirectory: './out',
     authors: 'Heejin Lee',
     title: 'Hain',
