@@ -2,11 +2,11 @@
 
 const _ = require('lodash');
 const co = require('co');
-const got = require('got');
 const path = require('path');
 const semver = require('semver');
 
 const Packman = require('./packman');
+const searchClient = require('./search-client');
 
 const COMMANDS_RE = / (install|update|uninstall|list)(\s+([^\s]+))?/i;
 const NAME = 'hain-package-manager (experimental)';
@@ -14,7 +14,6 @@ const PREFIX = '/hpm';
 
 const COMMANDS = [`${PREFIX} install `, `${PREFIX} update `, `${PREFIX} uninstall `, `${PREFIX} list `];
 const CACHE_DURATION_SEC = 5 * 60; // 5 mins
-const QUERY_LIMIT = 500;
 
 module.exports = (context) => {
   const packmanOpts = {
@@ -30,8 +29,8 @@ module.exports = (context) => {
   const shell = context.shell;
   const matchutil = context.matchutil;
   const app = context.app;
-  const PLUGIN_API_VERSION = context.PLUGIN_API_VERSION;
 
+  let isSearching = false;
   let currentStatus = null;
   let progressTimer = 0;
   let lastUpdatedTime = 0;
@@ -41,32 +40,18 @@ module.exports = (context) => {
     return context.preferences.get('backendUrl') || 'http://npmsearch.com';
   }
 
-  function* searchPackages(query) {
-    const backendUrl = getBackendUrl();
-    const query_enc = query;
-    const fields = 'name,rating,version,description,keywords,author';
-    const url = `${backendUrl}/query?q=name:${query_enc}&fields=${fields}&default_operator=AND&sort=rating:desc&size=${QUERY_LIMIT}`;
-    const res = yield got(url, { json: true });
-    const packages = _.filter(res.body.results, x => {
-      return (x.keywords && x.keywords.indexOf(PLUGIN_API_VERSION) >= 0);
-    });
-    return packages.map(x => {
-      return {
-        name: x.name[0],
-        version: x.version[0],
-        desc: x.description[0],
-        author: x.author[0] || ''
-      };
-    });
-  }
-
   function checkAvailablePackages() {
     const elapsed = (Date.now() - lastUpdatedTime) / 1000;
-    if (elapsed <= CACHE_DURATION_SEC)
+    if (elapsed <= CACHE_DURATION_SEC || isSearching)
       return;
-    lastUpdatedTime = Date.now();
-    return co(function* () {
-      availablePackages = yield searchPackages('hain-plugin');
+
+    isSearching = true;
+    searchClient.findCompatiblePackages(getBackendUrl(), context.COMPATIBLE_API_VERSIONS).then(ret => {
+      availablePackages = ret;
+      lastUpdatedTime = Date.now();
+      isSearching = false;
+    }, (err) => {
+      isSearching = false;
     });
   }
 

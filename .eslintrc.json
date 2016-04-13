@@ -16,5 +16,8 @@
     "curly": "off",
     "padded-blocks": "off",
     "no-use-before-define": "warn"
+   },
+   "env": {
+     "jest": true
    }
 }

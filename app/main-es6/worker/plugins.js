@@ -110,12 +110,13 @@ module.exports = (workerContext) => {
 
   const pluginContextBase = {
     // Plugin Configurations
-    PLUGIN_API_VERSION: 'hain0',
     MAIN_PLUGIN_REPO: conf.MAIN_PLUGIN_REPO,
     DEV_PLUGIN_REPO: conf.DEV_PLUGIN_REPO,
     INTERNAL_PLUGIN_REPO: conf.INTERNAL_PLUGIN_REPO,
     __PLUGIN_PREINSTALL_DIR: conf.__PLUGIN_PREINSTALL_DIR,
     __PLUGIN_PREUNINSTALL_FILE: conf.__PLUGIN_PREUNINSTALL_FILE,
+    CURRENT_API_VERSION: conf.CURRENT_API_VERSION,
+    COMPATIBLE_API_VERSIONS: conf.COMPATIBLE_API_VERSIONS,
     // Utilities
     app: workerContext.app,
     toast: workerContext.toast,
