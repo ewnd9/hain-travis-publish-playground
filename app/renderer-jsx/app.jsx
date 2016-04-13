@@ -330,6 +330,15 @@ class AppContainer extends React.Component {
       );
     }
 
+    // nothing yet
+    if (list.length === 0) {
+      list.push(
+        <ListItem primaryText="Sorry, No Results"
+                  secondaryText="It may takes some time to show results"
+                  leftAvatar={<Avatar icon={<FontIcon className="fa fa-heart" />} />} />
+      );
+    }
+
     const containerStyles = { overflowX: 'hidden', transition: 'width 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
                               overflowY: 'auto', width: '100%', height: '440px' };
     let previewBox = null;
