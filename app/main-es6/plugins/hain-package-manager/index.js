@@ -2,6 +2,8 @@
 
 const lo_find = require('lodash.find');
 const lo_assign = require('lodash.assign');
+const lo_reject = require('lodash.reject');
+const lo_orderBy = require('lodash.orderby');
 
 const co = require('co');
 const path = require('path');
@@ -49,7 +51,8 @@ module.exports = (context) => {
 
     isSearching = true;
     searchClient.findCompatiblePackages(getBackendUrl(), context.COMPATIBLE_API_VERSIONS).then(ret => {
-      availablePackages = ret;
+      availablePackages = ret || [];
+      availablePackages = lo_orderBy(availablePackages, 'downloads', ['desc']);
       lastUpdatedTime = Date.now();
       isSearching = false;
     }, (err) => {
@@ -91,7 +94,7 @@ module.exports = (context) => {
   }
 
   function _toSearchResult(cmdType, pkgInfo, customName, group) {
-    return {
+    const result = {
       id: pkgInfo.name,
       payload: cmdType,
       title: `${customName || pkgInfo.name} ` +
@@ -101,6 +104,13 @@ module.exports = (context) => {
       desc: `${pkgInfo.desc}`,
       group
     };
+    if (pkgInfo.downloads !== undefined && pkgInfo.modified !== undefined)
+      result.desc = `${pkgInfo.downloads} Downloads / ${pkgInfo.desc}`;
+    return result;
+  }
+
+  function _toSearchResults(cmdType, packages, group) {
+    return packages.map(x => _toSearchResult(cmdType, x, undefined, group));
   }
 
   function _fuzzy(cmdType, packages, keyword) {
@@ -130,7 +140,19 @@ module.exports = (context) => {
       const packages = availablePackages.filter(x => {
         return !pm.hasPackage(x.name);
       });
-      return _fuzzy('install', packages, arg);
+
+      // if there is a query, then return fuzzy matched results
+      if (arg.length > 0)
+        return _fuzzy('install', packages, arg);
+
+      // split packages into newest and popular
+      const newestPackages = lo_orderBy(packages, 'modified', ['desc']).slice(0, 3);
+      const newestPkgNames = newestPackages.map(x => x.name);
+      const popularPackages = lo_reject(packages, x => newestPkgNames.indexOf(x.name) >= 0);
+
+      const popularResults = _toSearchResults('install', popularPackages, 'Popular (Monthly)');
+      const newestResults = _toSearchResults('install', newestPackages, 'Newest');
+      return newestResults.concat(popularResults);
     }
     if (command === 'update') {
       const packages = availablePackages.filter(x => {
