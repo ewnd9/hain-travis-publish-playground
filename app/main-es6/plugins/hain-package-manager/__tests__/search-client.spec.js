@@ -23,6 +23,7 @@ function makeBackendContentsWith(packages, apiVersion) {
       name: [pkg.name],
       description: [pkg.desc],
       author: [pkg.author],
+      modified: [pkg.modified],
       keywords: [apiVersion]
     };
     _newArr.push(_wrap);
@@ -41,6 +42,7 @@ describe('search-client.js', () => {
           version: '0.0.1',
           name: 'hain-plugin-test',
           author: 'tester',
+          modified: '2016-04-16',
           desc: 'test desc'
         }
       ];

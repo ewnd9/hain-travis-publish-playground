@@ -50,7 +50,7 @@ module.exports = (context) => {
       return;
 
     isSearching = true;
-    searchClient.findCompatiblePackages(getBackendUrl(), context.COMPATIBLE_API_VERSIONS).then(ret => {
+    searchClient.findCompatiblePackagesWithDownloads(getBackendUrl(), context.COMPATIBLE_API_VERSIONS).then(ret => {
       availablePackages = ret || [];
       availablePackages = lo_orderBy(availablePackages, 'downloads', ['desc']);
       lastUpdatedTime = Date.now();

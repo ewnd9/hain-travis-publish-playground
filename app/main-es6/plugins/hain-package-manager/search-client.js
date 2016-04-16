@@ -14,7 +14,7 @@ function findCompatiblePackages(backendUrl, apiVersions) {
   return got(url, { json: true }).then(res => {
     const results = res.body.results;
     const compatibleResults = results.filter(x => util.hasCompatibleAPIKeywords(apiVersions, x.keywords));
-    const packageInfos = compatibleResults.map(x => {
+    return compatibleResults.map(x => {
       return {
         name: x.name[0],
         version: x.version[0],
@@ -23,16 +23,22 @@ function findCompatiblePackages(backendUrl, apiVersions) {
         author: x.author[0] || ''
       };
     });
-    const packageNames = packageInfos.map(x => x.name);
+  });
+}
+
+function findCompatiblePackagesWithDownloads(backendUrl, apiVersions) {
+  return findCompatiblePackages(backendUrl, apiVersions).then(pkgs => {
+    const pkgInfos = pkgs;
+    const packageNames = pkgInfos.map(x => x.name);
     return downloadsCount(packageNames).then((ret) => {
       for (const pkgName in ret) {
         const i = packageNames.indexOf(pkgName);
         const info = ret[pkgName];
-        packageInfos[i].downloads = info.downloads;
+        pkgInfos[i].downloads = info.downloads;
       }
-      return packageInfos;
+      return pkgInfos;
     });
   });
 }
 
-module.exports = { findCompatiblePackages };
+module.exports = { findCompatiblePackages, findCompatiblePackagesWithDownloads };
