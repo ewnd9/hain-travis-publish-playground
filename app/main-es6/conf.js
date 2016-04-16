@@ -19,6 +19,7 @@ const DEV_PLUGIN_REPO = path.resolve(`${HAIN_USER_PATH}/devplugins`);
 const CURRENT_API_VERSION = `hain-${pkgJson.version}`;
 const COMPATIBLE_API_VERSIONS = [
   'hain0',
+  'hain-0.1.0',
   CURRENT_API_VERSION
 ];
 
