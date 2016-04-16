@@ -1,10 +1,14 @@
 'use strict';
 
 const fs = require('original-fs');
-const readdir = require('./readdir');
 const co = require('co');
-
+const lo_reject = require('lodash.reject');
 const path = require('path');
+
+const readdir = require('./readdir');
+
+const RECENT_ITEM_COUNT = 100;
+const RECENT_ITEM_WEIGHT = 1.2;
 
 const matchFunc = (filePath, stats) => {
   const ext = path.extname(filePath).toLowerCase();
@@ -37,6 +41,9 @@ module.exports = (context) => {
   const shell = context.shell;
   const app = context.app;
   const initialPref = context.preferences.get();
+  const localStorage = context.localStorage;
+  const toast = context.toast;
+  let _recentUsedItems = [];
 
   const recursiveSearchDirs = injectEnvVariables(initialPref.recursiveFolders || []);
   const flatSearchDirs = injectEnvVariables(initialPref.flatFolders || []);
@@ -80,7 +87,31 @@ module.exports = (context) => {
     }
   }
 
+  function addRecentItem(item) {
+    const idx = _recentUsedItems.indexOf(item);
+    if (idx >= 0)
+      _recentUsedItems.splice(idx, 1);
+
+    if (fs.existsSync(item))
+      _recentUsedItems.unshift(item);
+
+    _recentUsedItems = _recentUsedItems.slice(0, RECENT_ITEM_COUNT);
+    localStorage.setItem('recentUsedItems', _recentUsedItems);
+  }
+
+  function updateRecentItems() {
+    const aliveItems = [];
+    for (const item of _recentUsedItems) {
+      if (fs.existsSync(item))
+        aliveItems.push(item);
+    }
+    _recentUsedItems = aliveItems;
+  }
+
   function startup() {
+    _recentUsedItems = localStorage.getItemSync('recentUsedItems') || [];
+    updateRecentItems();
+
     co(function* () {
       yield* refreshIndex(recursiveSearchDirs, true);
       yield* refreshIndex(flatSearchDirs, false);
@@ -105,28 +136,51 @@ module.exports = (context) => {
     return ratio;
   }
 
-  function search(query, res) {
-    const query_trim = query.replace(' ', '');
-    const searched = matchutil.fuzzy(db, query_trim, (x) => x);
-    const result = searched.slice(0, 10).map((x) => {
+  function _fuzzyResultToSearchResult(results, group, scoreWeight) {
+    const _group = group || 'Files & Folders';
+    const _scoreWeight = scoreWeight || 1;
+    return results.map(x => {
       const filePath = x.elem;
       const filePath_bold = matchutil.makeStringBoldHtml(filePath, x.matches);
       const filePath_base64 = new Buffer(filePath).toString('base64');
-      const score = x.score * computeRatio(filePath);
+      const score = x.score * computeRatio(filePath) * _scoreWeight;
       return {
         id: filePath,
         title: path.basename(filePath, path.extname(filePath)),
         desc: filePath_bold,
         icon: `icon://${filePath_base64}`,
-        group: 'Files & Folders',
+        group: _group,
         score
       };
     });
-    res.add(result);
+  }
+
+  function search(query, res) {
+    const query_trim = query.replace(' ', '');
+    const recentFuzzyResults = matchutil.fuzzy(_recentUsedItems, query_trim, x => x);
+    const selectedRecentItems = recentFuzzyResults.map(x => x.elem);
+    if (recentFuzzyResults.length > 0) {
+      const recentSearchResults = _fuzzyResultToSearchResult(recentFuzzyResults, 'Recent Items', RECENT_ITEM_WEIGHT);
+      res.add(recentSearchResults);
+    }
+
+    const fileFuzzyResults = matchutil.fuzzy(db, query_trim, x => x);
+    let fileSearchResults = _fuzzyResultToSearchResult(fileFuzzyResults.slice(0, 10));
+
+    // Reject if it is duplicated with recent items
+    fileSearchResults = lo_reject(fileSearchResults, x => selectedRecentItems.indexOf(x.id) >= 0);
+    res.add(fileSearchResults);
   }
 
   function execute(id, payload) {
-    logger.log(`${id} executed`);
+    // Update recent item, and it will be deleted if file don't exists
+    addRecentItem(id);
+
+    if (fs.existsSync(id) === false) {
+      toast.enqueue('Sorry, Could\'nt Find a File');
+      return;
+    }
+
     shell.openItem(id);
     app.close();
   }
