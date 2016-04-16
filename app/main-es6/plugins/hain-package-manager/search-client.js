@@ -20,6 +20,7 @@ function findCompatiblePackages(backendUrl, apiVersions) {
         version: x.version[0],
         desc: x.description[0],
         modified: x.modified[0].substring(0, 10),
+        __modified: x.modified[0],
         author: x.author[0] || ''
       };
     });

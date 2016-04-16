@@ -146,7 +146,7 @@ module.exports = (context) => {
         return _fuzzy('install', packages, arg);
 
       // split packages into newest and popular
-      const newestPackages = lo_orderBy(packages, 'modified', ['desc']).slice(0, 3);
+      const newestPackages = lo_orderBy(packages, '__modified', ['desc']).slice(0, 3);
       const newestPkgNames = newestPackages.map(x => x.name);
       const popularPackages = lo_reject(packages, x => newestPkgNames.indexOf(x.name) >= 0);
 
