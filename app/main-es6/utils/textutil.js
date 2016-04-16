@@ -9,7 +9,8 @@ function sanitize(text) {
   return sanitizeHtml(text, {
     allowedTags: ['b', 'i', 'u', 'em', 'strong', 'span'],
     allowedAttributes: {
-      'span': ['style']
+      'i': ['class'],
+      'span': ['class', 'style']
     }
   });
 }
