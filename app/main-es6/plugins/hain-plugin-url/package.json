@@ -1,6 +1,5 @@
 {
   "name": "hain-plugin-url",
-  "version": "0.0.1",
   "description": "a hain-plugin for parsing urls",
   "main": "index.js",
   "scripts": {},

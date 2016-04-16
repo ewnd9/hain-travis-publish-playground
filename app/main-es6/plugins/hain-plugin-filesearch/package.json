@@ -1,6 +1,5 @@
 {
   "name": "hain-plugin-filesearch",
-  "version": "0.0.1",
   "description": "a hain-plugin for searching executable files",
   "main": "index.js",
   "scripts": {},

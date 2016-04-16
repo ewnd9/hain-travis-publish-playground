@@ -98,7 +98,7 @@ module.exports = (context) => {
       id: pkgInfo.name,
       payload: cmdType,
       title: `${customName || pkgInfo.name} ` +
-             ` <span style='font-size: 9pt'>${pkgInfo.version}` +
+             ` <span style='font-size: 9pt'>${pkgInfo.internal ? 'internal' : pkgInfo.version}` +
              `${!pkgInfo.internal ? ` by <b>${pkgInfo.author}</b>` : ''}` +
              `</span>`,
       desc: `${pkgInfo.desc}`,

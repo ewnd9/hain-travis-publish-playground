@@ -1,6 +1,5 @@
 {
   "name": "hain-commands",
-  "version": "0.0.1",
   "description": "Hain operation commands",
   "main": "index.js",
   "scripts": {},
