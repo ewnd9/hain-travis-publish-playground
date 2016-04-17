@@ -69,6 +69,7 @@ class Preferences extends React.Component {
       });
     });
     rpc.send('getPrefItems');
+    document.getElementById('spinner').remove();
   }
 
   selectPref(prefId) {
