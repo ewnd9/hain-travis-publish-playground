@@ -1,18 +1,9 @@
 'use strict';
 
-let _got_body = {};
-const mockGot = () => {
-  if (_got_body === null)
-    return Promise.reject();
-  return Promise.resolve({
-    body: _got_body
-  });
-};
-
 jest.unmock('../search-client');
 jest.unmock('../util');
-jest.mock('got', () => mockGot);
 
+const mock_got = require('got');
 const searchClient = require('../search-client');
 
 function makeBackendContentsWith(packages, apiVersion) {
@@ -43,13 +34,16 @@ describe('search-client.js', () => {
           name: 'hain-plugin-test',
           author: 'tester',
           modified: '2016-04-16',
+          __modified: '2016-04-16',
           desc: 'test desc'
         }
       ];
 
-      _got_body = {
-        results: makeBackendContentsWith(packages, apiVersion)
-      };
+      mock_got.mockReturnValueOnce(Promise.resolve({
+        body: {
+          results: makeBackendContentsWith(packages, apiVersion)
+        }
+      }));
 
       return searchClient.findCompatiblePackages('fakeBackend', [apiVersion])
              .then(retPackages => {
@@ -58,7 +52,7 @@ describe('search-client.js', () => {
     });
 
     pit('should reject if `got` has rejected', (done) => {
-      _got_body = null; // to make mockGot reject promise
+      mock_got.mockReturnValueOnce(Promise.resolve(null));
 
       return searchClient.findCompatiblePackages('fakeBackend', [])
              .then((ret) => {
