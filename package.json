@@ -5,7 +5,8 @@
     "start": "electron .",
     "dev": "gulp && electron .",
     "build": "gulp build-all",
-    "test": "cd app && node ../node_modules/jest-cli/bin/jest",
+    "test": "cd app && jest",
+    "testwatch": "cd app && jest --watch",
     "postinstall": "npm install -g electron-prebuilt@0.37.2"
   },
   "author": "Heejin Lee <monster@teamappetizer.com>",
