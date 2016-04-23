@@ -227,7 +227,9 @@ class ArrayComponent extends React.Component {
       <div>
         {title}
         {description}
-        {childComponents}
+        <div key="childComponents">
+          {childComponents}
+        </div>
         &nbsp;
         <div style={{ textAlign: 'left' }}>
           <RaisedButton primary={true}
