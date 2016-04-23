@@ -50,13 +50,6 @@ class AppContainer extends React.Component {
     this.lastResultTicket = -1;
   }
 
-  clearState() {
-    this.refs.query.focus();
-    this.scrollTo(0);
-    this.setState({ query: '', selectionIndex: 0 });
-    this.search('');
-  }
-
   processToast() {
     if (this.toastQueue.length <= 0 ||
         this.state.toastOpen || !remote.getCurrentWindow().isVisible()) {
@@ -135,6 +128,7 @@ class AppContainer extends React.Component {
       this.setState({ previewHtml: html });
     });
     setInterval(this.processToast.bind(this), 200);
+    this.setQuery('');
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -399,7 +393,3 @@ class AppContainer extends React.Component {
 }
 
 const appContainer = ReactDOM.render(<AppContainer />, document.getElementById('app'));
-
-window.clearQuery = () => {
-  appContainer.clearState();
-};
