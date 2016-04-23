@@ -7,16 +7,20 @@ const dialog = electron.dialog;
 const pref = require('../pref');
 const mainWindow = require('./mainwindow');
 
-function _registerShortcut(shortcut) {
+function _registerShortcut(shortcut, query) {
   globalShortcut.register(shortcut, () => {
     if (mainWindow.isContentLoading())
       return;
     mainWindow.toggleWindow();
+
+    if (query !== undefined && mainWindow.isVisible())
+      mainWindow.setQuery(query);
   });
 }
 
-function registerShortcutByPref() {
-  const shortcut = pref.get().shortcut;
+function registerBasicToggleShortcut() {
+  const _pref = pref.get();
+  const shortcut = _pref.shortcut;
   try {
     _registerShortcut(shortcut);
   } catch (e) {
@@ -24,18 +28,33 @@ function registerShortcutByPref() {
   }
 }
 
+function registerCustomQueryShortcuts() {
+  const _pref = pref.get();
+  const customQueryShortcuts = _pref.customQueryShortcuts || [];
+  for (const shortcutInfo of customQueryShortcuts) {
+    const shortcut = shortcutInfo.shortcut;
+    const query = shortcutInfo.query;
+    try {
+      _registerShortcut(shortcut, query);
+    } catch (e) {
+      dialog.showErrorBox('Hain', `Failed to register shortcut: ${shortcut}`);
+    }
+  }
+}
+
 function clearShortcut() {
   globalShortcut.unregisterAll();
 }
 
-function onUpdatePreferences() {
+function updateShortcuts() {
   clearShortcut();
-  registerShortcutByPref();
+  registerBasicToggleShortcut();
+  registerCustomQueryShortcuts();
 }
 
 function initializeAndRegisterShortcut() {
-  registerShortcutByPref();
-  pref.on('update', onUpdatePreferences);
+  updateShortcuts();
+  pref.on('update', updateShortcuts);
 }
 
 module.exports = {

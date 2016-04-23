@@ -5,7 +5,7 @@ const shell = electron.shell;
 const BrowserWindow = electron.BrowserWindow;
 
 const platformUtil = require('../../../platform-util');
-const pref = require('../pref');
+const rpc = require('../rpc-server');
 
 let browserWindow = null;
 
@@ -79,8 +79,8 @@ function showWindowOnCenter() {
   browserWindow.show();
 }
 
-function clearQuery() {
-  browserWindow.webContents.executeJavaScript('clearQuery()');
+function setQuery(query) {
+  rpc.send('mainwindow', 'set-query', query);
 }
 
 function hideAndRefreshWindow(dontRestoreFocus) {
@@ -88,10 +88,6 @@ function hideAndRefreshWindow(dontRestoreFocus) {
     return;
 
   browserWindow.hide();
-
-  const doClearQuery = pref.get('clearQuery');
-  if (doClearQuery)
-    clearQuery();
 
   if (!dontRestoreFocus) {
     platformUtil.restoreFocus();
@@ -113,11 +109,16 @@ function isContentLoading() {
   return browserWindow.webContents.isLoading();
 }
 
+function isVisible() {
+  return browserWindow.isVisible();
+}
+
 module.exports = {
   createWindow,
   showWindowOnCenter,
-  clearQuery,
+  setQuery,
   hideAndRefreshWindow,
   toggleWindow,
-  isContentLoading
+  isContentLoading,
+  isVisible
 };

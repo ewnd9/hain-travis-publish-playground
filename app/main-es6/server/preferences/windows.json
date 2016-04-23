@@ -3,13 +3,25 @@
   "properties": {
     "shortcut": {
       "type": "string",
-      "title": "Quick-Open Shorcut",
+      "title": "Open-Close Toggle Shorcut",
       "default": "alt+space"
     },
-    "clearQuery": {
-      "type": "boolean",
-      "title": "Clear query after closing",
-      "default": true
+    "customQueryShortcuts": {
+      "type": "array",
+      "title": "Custom Query Shortcuts",
+      "items": {
+        "type": "object",
+        "properties": {
+          "shortcut": {
+            "type": "string",
+            "title": "Shortcut"
+          },
+          "query": {
+            "type": "string",
+            "title": "Base Query"
+          }
+        }
+      }
     },
     "proxy": {
       "type": "object",
