@@ -21,8 +21,9 @@ function _registerShortcut(shortcut, query) {
 function registerBasicToggleShortcut() {
   const _pref = pref.get();
   const shortcut = _pref.shortcut;
+  const query = _pref.clearQuery ? '' : undefined;
   try {
-    _registerShortcut(shortcut);
+    _registerShortcut(shortcut, query);
   } catch (e) {
     dialog.showErrorBox('Hain', `Failed to register shortcut: ${shortcut}`);
   }

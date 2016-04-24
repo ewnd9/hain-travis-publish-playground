@@ -9,6 +9,11 @@
       "minLength": 1,
       "errorMessages": "You must provide basic shortcut (e.g. 'alt+space')"
     },
+    "clearQuery": {
+      "type": "boolean",
+      "title": "Clear query after window has closed",
+      "default": true
+    },
     "customQueryShortcuts": {
       "type": "array",
       "title": "Custom Query Shortcuts",
