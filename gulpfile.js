@@ -10,7 +10,6 @@ const zip = require('gulp-zip');
 const electronInstaller = require('electron-winstaller');
 const fs = require('fs');
 const del = require('del');
-const mergeStream = require('merge-stream');
 const replace = require('gulp-replace');
 const appPkg = require('./app/package.json');
 
@@ -88,14 +87,11 @@ gulp.task('build', ['renderer', 'deps'], () => {
     .then(() => build('x64'));
 });
 
-gulp.task('build-zip', ['build'], () => {
-  return mergeStream(
-    buildZip('ia32'),
-    buildZip('x64')
-  );
-});
+gulp.task('build-zip-ia32', ['build'], () => buildZip('ia32'));
+gulp.task('build-zip-x64', ['build'], () => buildZip('x64'));
+gulp.task('build-zip', ['build-zip-ia32', 'build-zip-x64']);
 
-gulp.task('build-installer', ['build'], () => {
+gulp.task('build-installer', ['build', 'build-zip'], () => {
   return buildInstaller('ia32')
     .then(() => buildInstaller('x64'));
 });
