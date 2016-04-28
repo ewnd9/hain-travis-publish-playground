@@ -1,6 +1,7 @@
 language: node_js
 node_js:
   - '5'
+before_script: "cd app && npm install"
 before_deploy: "sh deploy-travis.sh"
 deploy:
   provider: releases
