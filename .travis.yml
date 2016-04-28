@@ -13,4 +13,5 @@ deploy:
     tags: true
 # or
   on:
+    all_branches: true
     branch: release
