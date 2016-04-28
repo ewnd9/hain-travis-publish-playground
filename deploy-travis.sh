@@ -2,5 +2,5 @@
 
 set -e
 
-node_modules/.bin/gulp build-debian
-mv **/*.deb hain-${TRAVIS_TAG}.deb
+# node_modules/.bin/gulp build-debian
+mv out/installers/*.deb hain-${TRAVIS_TAG}.deb
